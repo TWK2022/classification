@@ -1,0 +1,152 @@
+pipeline {
+  options { skipDefaultCheckout() }
+
+  agent none
+
+  parameters {
+    string (name: 'HUB_DOMAIN', defaultValue: 'swr.cn-north-4.myhuaweicloud.com', description: 'Image hub domain')
+    string (name: 'REST_TAG', defaultValue: '1.0.0', description: 'RESTFUL service version')
+    string (name: 'TERROR_CLS_VERSION', defaultValue: 'v_101', description: 'The version of terror multilabel classification model')
+    string (name: 'EROTICEXT_CLS_VERSION', defaultValue: 'v_101', description: 'The version of erotic extend multilabel classification model')
+  }
+
+  stages {
+
+    stage('Check on Controller') {
+      agent { label 'HOST' }
+
+      stages {
+        stage('Cleaning workspace') {
+            steps {
+                sh 'ls -l'
+                sh 'sudo rm -rf ./*'
+                }
+        }
+
+        stage('SCE Checkout') {
+            steps {
+                checkout scm
+                sh 'git submodule update --init --force --remote'
+            }
+        }
+
+        stage('Stash artifacts') {
+          steps {
+            stash name: 'source', includes: '**', excludes: '**/.git,**/.git/**'
+          }
+        }
+
+        stage('Build Image') {
+          environment {
+            HUB_DOMAIN = "${params.HUB_DOMAIN}"
+            REST_TAG = "${params.REST_TAG}"
+          }       
+          steps {
+            sh "sudo -E docker-compose build"
+            sh 'sudo -E docker-compose push image_cls_terror'
+            sh 'sudo -E docker image prune -f'
+          }
+        }
+      }
+    }
+
+    stage ('Build on Jumper') {
+      agent { label 'HUAWEI_JUMPER' }
+      stages {
+        stage('Cleaning workspace') {
+            steps {
+                sh 'ls -l'
+                sh 'sudo rm -rf ./*'
+            }
+        }   
+        stage('Unstash artifacts') {
+          steps {
+            unstash 'source'
+          }
+        }
+
+      }
+    }
+
+    stage ('Deploy on Dev') {
+      when { branch 'dev' }
+
+      agent { label 'HOST' }
+
+      stages {
+        stage ('Start dev pod') {
+          environment {
+            TERROR_CLS_VERSION = "${params.TERROR_CLS_VERSION}"
+            EROTICEXT_CLS_VERSION = "${params.EROTICEXT_CLS_VERSION}"
+            HUB_DOMAIN = "${params.HUB_DOMAIN}"
+            REST_IMAGE_TAG = "${params.REST_TAG}"
+            ETCD_HOST = "csd-rely"
+            SERVICE_HOST = "engine-image-classification"
+            ENV="dev"
+            REPLICAS=1
+          }
+          steps {
+            sh "ls -l"
+            sh "envsubst < k8s-service.yaml | kubectl apply -f -"
+            sh "envsubst < k8s-deployment.yaml | kubectl delete --ignore-not-found=true -f - "
+            sh "envsubst < k8s-deployment.yaml | kubectl apply -f -"
+          }
+        }
+      }
+    }
+
+    stage ('Deploy on prod-pod') {
+      when { branch 'master' }
+
+      agent { label 'HUAWEI_JUMPER' }
+
+      stages {
+        stage ('Start prod pod') {
+          environment {
+            TERROR_CLS_VERSION = "${params.TERROR_CLS_VERSION}"
+            EROTICEXT_CLS_VERSION = "${params.EROTICEXT_CLS_VERSION}"
+            HUB_DOMAIN = "${params.HUB_DOMAIN}"
+            REST_IMAGE_TAG = "${params.REST_TAG}"
+            ETCD_HOST = "csd-rely"
+            SERVICE_HOST = "engine-image-classification"
+            ENV="prod"
+            REPLICAS=2
+          }
+          steps {
+            sh "ls -l"
+            sh "envsubst < k8s-service.yaml | kubectl apply -f -"
+            sh "envsubst < k8s-deployment.yaml | kubectl delete --ignore-not-found=true -f - "
+            sh "envsubst < k8s-deployment.yaml | kubectl apply -f -"
+          }
+        }
+      }
+    }
+
+    // stage ('Deploy on Prod') {
+    //   when { branch 'master' }
+      
+    //   agent { label 'HUAWEI_JUMPER' }
+
+    //   stages {
+    //     stage ('Start dev service1') {
+    //       steps {
+    //         sh 'ssh -o StrictHostKeyChecking=accept-new -t ubuntu@10.28.0.186 \"mkdir -p engine_image_cls && exit\"'
+    //         sh "echo \'EROTICEXT_CLS_VERSION=${params.EROTICEXT_CLS_VERSION}\nTERROR_CLS_VERSION=${params.TERROR_CLS_VERSION}\nHUB_DOMAIN=${params.HUB_DOMAIN}\nREST_TAG=${params.REST_TAG}\nETCD_HOST=10.28.0.11\nSERVICE_HOST=10.28.0.186\' >> env.conf"
+    //         sh 'scp env.conf ubuntu@10.28.0.186:/home/ubuntu/engine_image_cls'
+    //         sh 'scp docker-compose.yaml ubuntu@10.28.0.186:/home/ubuntu/engine_image_cls'
+    //         sh 'ssh -t ubuntu@10.28.0.186 \"cd engine_image_cls && export $(grep -v \'^#\' env.conf | xargs -d \'\n\') && sudo -E docker-compose down && sudo docker volume create app_logs && sudo -E docker-compose pull && sudo -E docker-compose up -d\"'
+    //       }
+    //     }
+    //     stage ('Start dev service2') {
+    //       steps {
+    //         sh 'ssh -o StrictHostKeyChecking=accept-new -t ubuntu@10.28.0.246 \"mkdir -p engine_image_cls && exit\"'
+    //         sh "echo \'EROTICEXT_CLS_VERSION=${params.EROTICEXT_CLS_VERSION}\nTERROR_CLS_VERSION=${params.TERROR_CLS_VERSION}\nHUB_DOMAIN=${params.HUB_DOMAIN}\nREST_TAG=${params.REST_TAG}\nETCD_HOST=10.28.0.11\nSERVICE_HOST=10.28.0.246\' >> env.conf"
+    //         sh 'scp env.conf ubuntu@10.28.0.246:/home/ubuntu/engine_image_cls'
+    //         sh 'scp docker-compose.yaml ubuntu@10.28.0.246:/home/ubuntu/engine_image_cls'
+    //         sh 'ssh -t ubuntu@10.28.0.246 \"cd engine_image_cls && export $(grep -v \'^#\' env.conf | xargs -d \'\n\') && sudo -E docker-compose down && sudo docker volume create app_logs && sudo -E docker-compose pull && sudo -E docker-compose up -d\"'
+    //       }
+    //     }
+    //   }
+    // }
+  }
+}

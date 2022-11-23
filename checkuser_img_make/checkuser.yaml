@@ -1,0 +1,19 @@
+# ├── 数据集路径
+#     └── images：存放所有图片
+#     └── labels：存放所有标签txt
+#     └── train_images.txt：存放所有训练集图片名称
+#     └── val_images.txt：存放所有验证图片名称
+train: /TRAINING_CACHE/terror/dataset/train_images.txt  # 绝对路径
+val: /TRAINING_CACHE/terror/dataset/val_images.txt  # 绝对路径
+# test:
+nc: 8  # 总类别数
+names: [
+'刀等冷兵器',
+'军警制服',
+'军事武器',
+'枪等热武器',
+'特殊服饰',
+'保安制服',
+'恐怖组织人物',
+'恐怖组织标志',
+]  # 类别名称
