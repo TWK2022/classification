@@ -45,6 +45,7 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='')
     parser.add_argument('--model_type', default='s', type=str)
+    parser.add_argument('--batch', default=4, type=int)
     parser.add_argument('--input_size', default=160, type=int)
     parser.add_argument('--input_dim', default=3, type=int)
     args = parser.parse_args()
