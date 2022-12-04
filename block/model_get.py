@@ -14,8 +14,8 @@ def model_get(args):
             model = eval(choice_dict[args.model])
         model_dict = {}
         model_dict['model'] = model
-        model_dict['loss'] = 999
-        model_dict['m_ap'] = 0
+        model_dict['val_loss'] = 999
+        model_dict['val_m_ap'] = 0
         model_dict['class'] = pd.read_csv(args.data_path + '/' + 'class.csv', header=None).values
     model_dict['model'](torch.rand(args.batch, args.input_dim, args.input_size, args.input_size))  # 检查
     return model_dict
