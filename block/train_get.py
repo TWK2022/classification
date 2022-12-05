@@ -45,8 +45,9 @@ def train_get(args, dataset_dict, model_dict, loss):
                       .format(args.save_name.split('.')[0] + '.pt', val_loss, m_ap))
         # wandb
         if args.wandb:
-            args.wandb_run.log({'train_loss': train_loss, 'val_loss': val_loss, 'val_m_ap': m_ap,
-                                'val_accuracy': accuracy, 'val_precision': precision, 'val_recall': recall})
+            args.wandb_run.log({'metric/train_loss': train_loss, 'metric/val_loss': val_loss, 'metric/val_m_ap': m_ap,
+                                'metric/val_accuracy': accuracy, 'metric/val_precision': precision,
+                                'metric/val_recall': recall})
     return model_dict
 
 
