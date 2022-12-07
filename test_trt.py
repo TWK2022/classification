@@ -19,7 +19,7 @@ args = parser.parse_args()
 # -------------------------------------------------------------------------------------------------------------------- #
 # 初步检查
 assert os.path.exists(args.model_path), f'没有找到模型{args.model_path}'
-assert os.path.exists(args.image_path), f'没有找到图片/图片文件夹{args.image_path}'
+assert os.path.exists(args.image_path), f'没有找到图片文件夹{args.image_path}'
 
 
 # -------------------------------------------------------------------------------------------------------------------- #
