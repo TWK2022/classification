@@ -1,6 +1,7 @@
 onnx转trt，在命令终端输入:
-export_trt.exe --onnx=best.onnx --saveEngine=best.trt
+export_trt.exe --onnx=best.onnx --saveEngine=best.trt --useCudaGraph
 # -------------------------------------------------------------------------------------------------------------------- #
+# export_trt.exe：查看提示信息
 # --onnx=onnx模型位置
 # --saveEngine=trt模型保存位置
 # --noTF32：禁用float32精度
@@ -8,5 +9,5 @@ export_trt.exe --onnx=best.onnx --saveEngine=best.trt
 # --int8：启用int8精度
 # --best：开启所有精度(有的模型是混合精度的)
 # --device=0：使用的GPU号码，默认为0
-# --
-# 转换过程中有很多提示信息，可以解决大多数问题。转换后会进行速度测试
+# --useCudaGraph：尝试使用cuda图
+# 转换过程中有很多提示信息，可以解决大多数问题。转换后会进行速度测试。不指定输入形状时默认为单批量预测(推荐)

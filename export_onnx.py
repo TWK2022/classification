@@ -17,7 +17,7 @@ args.save_name = args.weight.split('.')[0] + '.onnx'
 args.device = 'cuda' if args.float16 else 'cpu'
 # -------------------------------------------------------------------------------------------------------------------- #
 # 初步检查
-assert os.path.exists(args.weight), '没有找到模型{}'.format(args.weight)
+assert os.path.exists(args.weight), f'没有找到模型{args.weight}'
 if args.float16:
     assert torch.cuda.is_available(), 'cuda不可用，因此无法转为float16'
 
