@@ -82,9 +82,7 @@ def forward(self, *inputs):
         idx = self.engine.get_binding_index(input_name)
         bindings[idx] = inputs[0].contiguous().data_ptr()  # 应当为inputs[i]，对应3个输入。但由于我们使用的是单张图片，所以将3个输入全设置为相同的图片。
 
-    self.context.execute_async(
-        batch_size, bindings, torch.cuda.current_stream().cuda_stream
-    )  # 执行推理
+    self.context.execute_async(batch_size, bindings, torch.cuda.current_stream().cuda_stream)  # 执行推理
 
     outputs = tuple(outputs)
     if len(outputs) == 1:
@@ -137,16 +135,15 @@ class torch_dataset(torch.utils.data.Dataset):
 
 logger = trt.Logger(trt.Logger.INFO)  # 忽略INFO信息
 with open(args.model_path, "rb") as f, trt.Runtime(logger) as runtime:
-    engine = runtime.deserialize_cuda_engine(f.read())  # 输入trt本地文件，返回ICudaEngine对象
-
-for idx in range(engine.num_bindings):  # 查看输入输出的名字，类型，大小
+    engine = runtime.deserialize_cuda_engine(f.read())  # 读取模型并构建一个对象
+for idx in range(engine.num_bindings):  # 查看输入输出的序号，名称，形状，类型
     is_input = engine.binding_is_input(idx)
     name = engine.get_binding_name(idx)
-    op_type = engine.get_binding_dtype(idx)
     shape = engine.get_binding_shape(idx)
+    op_type = engine.get_binding_dtype(idx)
     print('input id:', idx, ' is input: ', is_input, ' binding name:', name, ' shape:', shape, 'type: ', op_type)
 
-trt_model = TRTModule(engine, ["input.1", "input.4", "input.7"], ["499", "504", "516", "530"])
+trt_model = TRTModule(engine, ["input"], ["output"])
 
 start_time = time.time()
 image_dir = sorted(os.listdir(args.image_path))

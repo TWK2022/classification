@@ -35,7 +35,7 @@ parser.add_argument('--output_class', default=2, type=int, help='|输出分类�
 parser.add_argument('--epoch', default=25, type=int, help='|训练轮数|')
 parser.add_argument('--batch', default=16, type=int, help='|训练批量大小|')
 parser.add_argument('--loss', default='bce', type=str, help='|损失函数|')
-parser.add_argument('--lr', default=0.002, type=int, help='|初始学习率，训练中采用adam算法|')
+parser.add_argument('--lr', default=0.005, type=int, help='|初始学习率，训练中采用adam算法|')
 parser.add_argument('--device', default='cuda', type=str, help='|训练设备|')
 parser.add_argument('--latch', default=False, type=bool, help='|模型和数据是否为锁存，True为锁存|')
 parser.add_argument('--only_test', default=False, type=bool, help='|只测试模型|')
@@ -83,7 +83,7 @@ else:
 # -------------------------------------------------------------------------------------------------------------------- #
 # 程序
 if __name__ == '__main__':
-    # 数据(已预处理)
+    # 数据(只是图片路径和标签，读取和预处理在训练/验证中完成)
     dataset_dict = data_get(args)
     # 模型
     model_dict = model_get(args)
@@ -91,5 +91,5 @@ if __name__ == '__main__':
     loss = loss_get(args)
     print('| 训练集:{} | 验证集:{} | 模型:{} | 损失函数:{} |'
           .format(len(dataset_dict['train']), len(dataset_dict['val']), args.model, args.loss))
-    # 训练(包括训练、验证、保存模型)
+    # 训练(包括图片读取和预处理、训练、验证、保存模型)
     model_dict = train_get(args, dataset_dict, model_dict, loss)
