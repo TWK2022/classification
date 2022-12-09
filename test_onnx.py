@@ -70,6 +70,7 @@ def test_onnx():
         np.float16 if args.float16 else np.float32)
     for i in range(len(image_dir)):
         image = cv2.imread(args.image_path + '/' + image_dir[i])
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)  # 转为RGB通道
         image = resize(image)  # 变为输入形状
         image = processing(image)  # 归一化和减均值
         image_all[i] = image

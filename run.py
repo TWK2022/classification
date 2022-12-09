@@ -23,7 +23,7 @@ parser = argparse.ArgumentParser(description='分类任务')
 parser.add_argument('--data_path', default=r'D:\dataset\classification\mask', type=str, help='|数据根目录路径|')
 parser.add_argument('--weight', default='best.pt', type=str, help='|已有模型的位置，如果没找到模型则会创建新模型|')
 parser.add_argument('--save_name', default='best.pt', type=str, help='|保存模型的位置|')
-parser.add_argument('--wandb', default=True, type=bool, help='|是否使用wandb可视化|')
+parser.add_argument('--wandb', default=False, type=bool, help='|是否使用wandb可视化|')
 parser.add_argument('--wandb_project', default='mask', type=str, help='|wandb项目名称|')
 parser.add_argument('--wandb_name', default='train', type=str, help='|wandb项目中的训练名称|')
 parser.add_argument('--timm', default=False, type=bool, help='|是否使用timm模型|')
@@ -39,7 +39,8 @@ parser.add_argument('--lr', default=0.005, type=int, help='|初始学习率，�
 parser.add_argument('--device', default='cuda', type=str, help='|训练设备|')
 parser.add_argument('--latch', default=False, type=bool, help='|模型和数据是否为锁存，True为锁存|')
 parser.add_argument('--only_test', default=False, type=bool, help='|只测试模型|')
-parser.add_argument('--bgr_mean', default=(0.485, 0.456, 0.406), type=tuple, help='|图片预处理时BGR通道减去的均值|')
+parser.add_argument('--rgb_mean', default=(0.406, 0.456, 0.485), type=tuple, help='|图片预处理时RGB通道减去的均值|')
+parser.add_argument('--rgb_std', default=(0.225, 0.224, 0.229), type=tuple, help='|图片预处理时RGB通道除以的方差|')
 args = parser.parse_args()
 args.weight = args.weight.split('.')[0] + '.pt'
 args.save_name = args.save_name.split('.')[0] + '.pt'
