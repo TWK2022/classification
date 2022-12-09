@@ -28,6 +28,9 @@ def train_get(args, dataset_dict, model_dict, loss):
             loss_batch.backward()
             optimizer.step()
         train_loss = train_loss / (item + 1) / args.batch
+        # 清理显存空间
+        del train_batch, true_batch, pred_batch, loss_batch
+        torch.cuda.empty_cache()
         # 验证
         val_loss, accuracy, precision, recall, m_ap = val_get(args, dataset_dict, model, loss)
         # 保存

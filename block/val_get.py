@@ -8,7 +8,6 @@ from block.metric_get import metric
 def val_get(args, dataset_dict, model, loss):
     with torch.no_grad():
         model.eval().to(args.device, non_blocking=args.latch)
-        torch.cuda.empty_cache()
         val_dataloader = torch.utils.data.DataLoader(torch_dataset(args, dataset_dict['val']), batch_size=args.batch,
                                                      shuffle=False, drop_last=False, pin_memory=args.latch)
         val_pred = []
