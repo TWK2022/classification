@@ -28,6 +28,7 @@ def train_get(args, dataset_dict, model_dict, loss):
             loss_batch.backward()
             optimizer.step()
         train_loss = train_loss / (item + 1) / args.batch
+        print('\n| 训练集:{} | train_loss:{:.4f} |\n'.format(len(dataset_dict['train']), train_loss))
         # 清理显存空间
         del train_batch, true_batch, pred_batch, loss_batch
         torch.cuda.empty_cache()
@@ -62,6 +63,9 @@ class torch_dataset(torch.utils.data.Dataset):
     def __init__(self, args, dataset):
         self.args = args
         self.dataset = dataset
+        self.noise = albumentations.Compose([
+            albumentations.GaussianBlur(blur_limit=(5, 5), p=0.2),
+            albumentations.GaussNoise(var_limit=(10.0, 50.0), p=0.2)])
         self.transform = albumentations.Compose([
             albumentations.LongestMaxSize(320),
             albumentations.Normalize(max_pixel_value=255, mean=args.rgb_mean, std=args.rgb_std),
@@ -73,6 +77,8 @@ class torch_dataset(torch.utils.data.Dataset):
     def __getitem__(self, index):
         image = cv2.imread(self.dataset[index][0])  # 读取图片
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)  # 转为RGB通道
+        if self.args.noise:  # 使用数据加噪
+            image = self.noise(image=image)['image']
         image = self.transform(image=image)['image']  # 归一化、减均值、除以方差
         image = torch.tensor(image, dtype=torch.float32).permute(2, 0, 1)  # 转换为tensor
         label = torch.tensor(self.dataset[index][1], dtype=torch.float32)

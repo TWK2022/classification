@@ -20,7 +20,7 @@ def val_get(args, dataset_dict, model, loss):
         val_true = torch.stack(val_true, axis=0)
         val_loss = loss(val_pred, val_true) / len(val_pred)
         accuracy, precision, recall, m_ap = metric(val_pred, val_true)
-        print('\n| 验证集:{} | loss:{:.4f} | accuracy:{:.4f} | precision:{:.4f} | recall:{:.4f} | m_ap:{:.4f} |\n'
+        print('\n| 验证集:{} | val_loss:{:.4f} | accuracy:{:.4f} | precision:{:.4f} | recall:{:.4f} | m_ap:{:.4f} |\n'
               .format(len(dataset_dict['val']), val_loss, accuracy, precision, recall, m_ap))
     return val_loss, accuracy, precision, recall, m_ap
 
