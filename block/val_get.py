@@ -30,9 +30,10 @@ class torch_dataset(torch.utils.data.Dataset):
         self.args = args
         self.dataset = dataset
         self.transform = albumentations.Compose([
-            albumentations.LongestMaxSize(320),
+            albumentations.LongestMaxSize(args.input_size),
             albumentations.Normalize(max_pixel_value=255, mean=args.rgb_mean, std=args.rgb_std),
-            albumentations.PadIfNeeded(min_height=320, min_width=320, border_mode=cv2.BORDER_CONSTANT, value=0)])
+            albumentations.PadIfNeeded(min_height=args.input_size, min_width=args.input_size,
+                                       border_mode=cv2.BORDER_CONSTANT, value=(0, 0, 0))])
 
     def __len__(self):
         return len(self.dataset)

@@ -39,33 +39,33 @@ def test_pt():
     image_dir = sorted(os.listdir(args.image_path))
     start_time = time.time()
     with torch.no_grad():
-        dataloader = torch.utils.data.DataLoader(torch_dataset(args, image_dir), batch_size=args.batch,
+        dataloader = torch.utils.data.DataLoader(torch_dataset(image_dir), batch_size=args.batch,
                                                  shuffle=False, drop_last=False, pin_memory=False)
         pred = []
         for item, batch in enumerate(dataloader):
             batch = batch.to(args.device)
             pred.extend(model(batch).detach().cpu())
         pred = torch.stack(pred, axis=0)
-        result = [cls[torch.argmax(i)] for i in pred]
+        result = [cls[torch.argmax(i)][0] for i in pred]
         print(f'| 预测结果:{result} |')
     end_time = time.time()
     print('| 数据:{} 批量:{} 每张耗时:{:.4f} |'.format(len(image_dir), args.batch, (end_time - start_time) / len(image_dir)))
 
 
 class torch_dataset(torch.utils.data.Dataset):
-    def __init__(self, args, dataset):
-        self.args = args
-        self.dataset = dataset
+    def __init__(self, image_dir):
+        self.image_dir = image_dir
         self.transform = albumentations.Compose([
-            albumentations.LongestMaxSize(320),
+            albumentations.LongestMaxSize(args.input_size),
             albumentations.Normalize(max_pixel_value=255, mean=args.rgb_mean, std=args.rgb_std),
-            albumentations.PadIfNeeded(min_height=320, min_width=320, border_mode=cv2.BORDER_CONSTANT, value=0)])
+            albumentations.PadIfNeeded(min_height=args.input_size, min_width=args.input_size,
+                                       border_mode=cv2.BORDER_CONSTANT, value=(0, 0, 0))])
 
     def __len__(self):
-        return len(self.dataset)
+        return len(self.image_dir)
 
     def __getitem__(self, index):
-        image = cv2.imread(args.image_path + '/' + self.dataset[index])  # 读取图片
+        image = cv2.imread(args.image_path + '/' + self.image_dir[index])  # 读取图片
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)  # 转为RGB通道
         image = self.transform(image=image)['image']  # 归一化、减均值、除以方差
         image = torch.tensor(image, dtype=torch.float32).permute(2, 0, 1)  # 转换为tensor

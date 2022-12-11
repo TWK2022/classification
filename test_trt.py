@@ -13,7 +13,8 @@ parser.add_argument('--model_path', default='best.trt', type=str, help='|trt模�
 parser.add_argument('--image_path', default='image', type=str, help='|图片文件夹位置|')
 parser.add_argument('--input_size', default=160, type=int, help='|输入图片大小，trt模型构建时确定的|')
 parser.add_argument('--batch', default=1, type=int, help='|输入图片批量，trt模型构建时确定的，一般为1|')
-parser.add_argument('--bgr_mean', default=(0.485, 0.456, 0.406), type=tuple, help='|图片预处理时BGR通道减去的均值|')
+parser.add_argument('--rgb_mean', default=(0.406, 0.456, 0.485), type=tuple, help='|图片预处理时RGB通道减去的均值|')
+parser.add_argument('--rgb_std', default=(0.225, 0.224, 0.229), type=tuple, help='|图片预处理时RGB通道除以的方差|')
 parser.add_argument('--float16', default=False, type=bool, help='|推理数据类型，要与模型相对应，False时为float32|')
 args = parser.parse_args()
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -86,19 +87,19 @@ def forward(self, *inputs):
 
 
 class torch_dataset(torch.utils.data.Dataset):
-    def __init__(self, args, dataset):
-        self.args = args
-        self.dataset = dataset
+    def __init__(self, image_dir):
+        self.image_dir = image_dir
         self.transform = albumentations.Compose([
-            albumentations.LongestMaxSize(320),
+            albumentations.LongestMaxSize(args.input_size),
             albumentations.Normalize(max_pixel_value=255, mean=args.rgb_mean, std=args.rgb_std),
-            albumentations.PadIfNeeded(min_height=320, min_width=320, border_mode=cv2.BORDER_CONSTANT, value=0)])
+            albumentations.PadIfNeeded(min_height=args.input_size, min_width=args.input_size,
+                                       border_mode=cv2.BORDER_CONSTANT, value=(0, 0, 0))])
 
     def __len__(self):
-        return len(self.dataset)
+        return len(self.image_dir)
 
     def __getitem__(self, index):
-        image = cv2.imread(args.image_path + '/' + self.dataset[index])  # 读取图片
+        image = cv2.imread(args.image_path + '/' + self.image_dir[index])  # 读取图片
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)  # 转为RGB通道
         image = self.transform(image=image)['image']  # 归一化、减均值、除以方差
         image = torch.tensor(image, dtype=torch.float32).permute(2, 0, 1)  # 转换为tensor
@@ -109,7 +110,12 @@ logger = tensorrt.Logger(tensorrt.Logger.INFO)  # 忽略INFO信息
 with tensorrt.Runtime(logger) as runtime, open(args.model_path, "rb") as f:
     engine = runtime.deserialize_cuda_engine(f.read())  # 读取模型并构建一个对象
 context = engine.create_execution_context()
-context.execute_async(batch_size=1, bindings=to)
+
+for binding in engine:
+    is_input = engine.binding_is_input(binding)
+    shape = engine.get_binding_shape(binding)
+    op_type = engine.get_binding_dtype(binding)
+    1
 
 
 for idx in range(engine.num_bindings):  # 查看输入输出的序号，名称，形状，类型
@@ -118,14 +124,14 @@ for idx in range(engine.num_bindings):  # 查看输入输出的序号，名称�
     shape = engine.get_binding_shape(idx)
     op_type = engine.get_binding_dtype(idx)
     print('input id:', idx, ' is input: ', is_input, ' binding name:', name, ' shape:', shape, 'type: ', op_type)
-trt_model = TRTModule(engine, ["input"], ["output"])
+# trt_model = TRTModule(engine, ["input"], ["output"])
 start_time = time.time()
 image_dir = sorted(os.listdir(args.image_path))
 dataloader = torch.utils.data.DataLoader(torch_dataset(image_dir), batch_size=args.batch,
                                          shuffle=False, drop_last=False, pin_memory=False)
 for item, image in enumerate(dataloader):
     start_inference = time.time()
-    a = image
-    result_trt = trt_model(image)
+    pred = torch.zeros(1, 3, args.input_size, args.input_size)
+    context.execute_async(batch_size=1, bindings=pred)
     end_inference = time.time()
 1

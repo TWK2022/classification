@@ -32,7 +32,7 @@ parser.add_argument('--model_type', default='s', type=str, help='|模型型号�
 parser.add_argument('--input_size', default=160, type=int, help='|输入图片大小|')
 parser.add_argument('--input_dim', default=3, type=int, help='|输入图片维度|')
 parser.add_argument('--output_class', default=2, type=int, help='|输出分类类别数(独热编码)|')
-parser.add_argument('--epoch', default=25, type=int, help='|训练轮数|')
+parser.add_argument('--epoch', default=10, type=int, help='|训练轮数|')
 parser.add_argument('--batch', default=16, type=int, help='|训练批量大小|')
 parser.add_argument('--loss', default='bce', type=str, help='|损失函数|')
 parser.add_argument('--lr', default=0.005, type=int, help='|初始学习率，训练中采用adam算法|')
@@ -96,9 +96,9 @@ if __name__ == '__main__':
     model_dict = train_get(args, dataset_dict, model_dict, loss)
     # 显示结果
     try:
-        print('\n| 最佳结果 | train_loss:{:.4f} val_loss:{:.4f} | accuracy:{:.4f} | precision:{:.4f} | recall:{:.4f} |'
-              ' m_ap:{:.4f} |\n'
-              .format(model_dict['train_loss'], model_dict['val_loss'], model_dict['accuracy'],
-                      model_dict['precision'], model_dict['recall'], model_dict['m_ap']))
+        print('\n| 最佳结果 | train_loss:{:.4f} val_loss:{:.4f} | val_accuracy:{:.4f} | val_precision:{:.4f} |'
+              ' val_recall:{:.4f} | val_m_ap:{:.4f} |\n'
+              .format(model_dict['train_loss'], model_dict['val_loss'], model_dict['val_accuracy'],
+                      model_dict['val_precision'], model_dict['val_recall'], model_dict['val_m_ap']))
     except:
         print('\n| !由于指标太低没有保存任何结果! |\n')
