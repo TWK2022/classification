@@ -17,7 +17,7 @@ parser.add_argument('--batch', default=1, type=int, help='|输入图片批量，
 parser.add_argument('--device', default='cuda', type=str, help='|用CPU/GPU推理|')
 parser.add_argument('--rgb_mean', default=(0.406, 0.456, 0.485), type=tuple, help='|图片预处理时RGB通道减去的均值|')
 parser.add_argument('--rgb_std', default=(0.225, 0.224, 0.229), type=tuple, help='|图片预处理时RGB通道除以的方差|')
-parser.add_argument('--float16', default=False, type=bool, help='|推理数据类型，要与模型相对应，要使用cuda，False时为float32|')
+parser.add_argument('--float16', default=False, type=bool, help='|推理数据类型，与模型对应，要支持float16的GPU，False时为float32|')
 args = parser.parse_args()
 args.model_path = args.model_path.split('.')[0] + '.onnx'
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -76,6 +76,7 @@ def test_onnx():
     end_time = time.time()
     print('| 数据:{} 批量:{} 每张耗时:{:.4f} |'.format(len(image_all), args.batch, (end_time - start_time) / len(image_all)))
     print(f'| 预测结果:{result} |')
+
 
 if __name__ == '__main__':
     test_onnx()
