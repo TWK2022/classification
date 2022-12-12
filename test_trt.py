@@ -8,14 +8,13 @@ import albumentations
 
 # -------------------------------------------------------------------------------------------------------------------- #
 # 设置
-parser = argparse.ArgumentParser(description='')
+parser = argparse.ArgumentParser(description='tensorrt推理')
 parser.add_argument('--model_path', default='best.trt', type=str, help='|trt模型位置|')
 parser.add_argument('--image_path', default='image', type=str, help='|图片文件夹位置|')
 parser.add_argument('--input_size', default=160, type=int, help='|输入图片大小，trt模型构建时确定的|')
 parser.add_argument('--batch', default=1, type=int, help='|输入图片批量，trt模型构建时确定的，一般为1|')
 parser.add_argument('--rgb_mean', default=(0.406, 0.456, 0.485), type=tuple, help='|图片预处理时RGB通道减去的均值|')
 parser.add_argument('--rgb_std', default=(0.225, 0.224, 0.229), type=tuple, help='|图片预处理时RGB通道除以的方差|')
-parser.add_argument('--float16', default=False, type=bool, help='|推理数据类型，要与模型相对应，False时为float32|')
 args = parser.parse_args()
 # -------------------------------------------------------------------------------------------------------------------- #
 # 初步检查
