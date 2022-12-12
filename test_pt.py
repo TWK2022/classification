@@ -12,8 +12,8 @@ parser.add_argument('--model_path', default='best.pt', type=str, help='|pt模型
 parser.add_argument('--image_path', default='image', type=str, help='|图片文件夹位置|')
 parser.add_argument('--input_size', default=160, type=int, help='|模型输入图片大小|')
 parser.add_argument('--batch', default=1, type=int, help='|输入图片批量|')
-parser.add_argument('--device', default='cpu', type=str, help='|用CPU/GPU推理|')
-parser.add_argument('--float16', default=False, type=bool, help='|推理数据类型，要与模型相对应，False时为float32|')
+parser.add_argument('--device', default='cuda', type=str, help='|用CPU/GPU推理|')
+parser.add_argument('--float16', default=False, type=bool, help='|推理数据类型，要使用cuda，False时为float32|')
 args = parser.parse_args()
 args.model_path = args.model_path.split('.')[0] + '.pt'
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -21,7 +21,7 @@ args.model_path = args.model_path.split('.')[0] + '.pt'
 assert os.path.exists(args.model_path), f'没有找到模型{args.model_path}'
 assert os.path.exists(args.image_path), f'没有找到图片文件夹{args.image_path}'
 if args.float16:
-    assert torch.cuda.is_available(), 'cuda不可用，因此无法转为float16'
+    assert torch.cuda.is_available(), 'cuda不可用，因此无法使用float16'
 
 
 # -------------------------------------------------------------------------------------------------------------------- #

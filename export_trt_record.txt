@@ -1,6 +1,7 @@
 onnx转trt，在命令终端输入:
 export_trt.exe --onnx=best.onnx --saveEngine=best.trt --useCudaGraph
 # -------------------------------------------------------------------------------------------------------------------- #
+# 导出的模型只针对当前选用的GPU，不同的GPU要重新导出才能使用
 # export_trt.exe：查看提示信息
 # --onnx=onnx模型位置
 # --saveEngine=trt模型保存位置

@@ -114,16 +114,9 @@ context = engine.create_execution_context()
 for binding in engine:
     is_input = engine.binding_is_input(binding)
     shape = engine.get_binding_shape(binding)
-    op_type = engine.get_binding_dtype(binding)
+    op_type = tensorrt.nptype(engine.get_binding_dtype(binding))
     1
 
-
-for idx in range(engine.num_bindings):  # 查看输入输出的序号，名称，形状，类型
-    is_input = engine.binding_is_input(idx)
-    name = engine.get_binding_name(idx)
-    shape = engine.get_binding_shape(idx)
-    op_type = engine.get_binding_dtype(idx)
-    print('input id:', idx, ' is input: ', is_input, ' binding name:', name, ' shape:', shape, 'type: ', op_type)
 # trt_model = TRTModule(engine, ["input"], ["output"])
 start_time = time.time()
 image_dir = sorted(os.listdir(args.image_path))

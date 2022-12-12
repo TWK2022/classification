@@ -10,7 +10,7 @@ parser.add_argument('--weight', default='best.pt', type=str, help='|模型位置
 parser.add_argument('--input_size', default=160, type=int, help='|输入图片大小|')
 parser.add_argument('--batch', default=0, type=int, help='|输入图片批量，0为动态|')
 parser.add_argument('--sim', default=True, type=bool, help='|使用onnxsim压缩简化模型|')
-parser.add_argument('--float16', default=False, type=bool, help='|转换的onnx模型数据类型，float16需要GPU，False时为float32|')
+parser.add_argument('--float16', default=False, type=bool, help='|转换的onnx模型数据类型，需要GPU，False时为float32|')
 args = parser.parse_args()
 args.weight = args.weight.split('.')[0] + '.pt'
 args.save_name = args.weight.split('.')[0] + '.onnx'
@@ -19,7 +19,7 @@ args.device = 'cuda' if args.float16 else 'cpu'
 # 初步检查
 assert os.path.exists(args.weight), f'没有找到模型{args.weight}'
 if args.float16:
-    assert torch.cuda.is_available(), 'cuda不可用，因此无法转为float16'
+    assert torch.cuda.is_available(), 'cuda不可用，因此无法使用float16'
 
 
 # -------------------------------------------------------------------------------------------------------------------- #
