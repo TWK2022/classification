@@ -72,11 +72,10 @@ def test_onnx():
         batch = image_all
         pred = session.run([output_name], {input_name: batch})
         pred_all.extend(pred)
-    pred_all = [np.argmax(i) for i in pred_all]
-    print(pred_all)
+    result = [np.argmax(i) for i in pred_all]
     end_time = time.time()
     print('| 数据:{} 批量:{} 每张耗时:{:.4f} |'.format(len(image_all), args.batch, (end_time - start_time) / len(image_all)))
-
+    print(f'| 预测结果:{result} |')
 
 if __name__ == '__main__':
     test_onnx()

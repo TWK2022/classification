@@ -47,9 +47,9 @@ def test_pt():
             pred.extend(model(batch).detach().cpu())
         pred = torch.stack(pred, axis=0)
         result = [cls[torch.argmax(i)][0] for i in pred]
-        print(f'| 预测结果:{result} |')
     end_time = time.time()
     print('| 数据:{} 批量:{} 每张耗时:{:.4f} |'.format(len(image_dir), args.batch, (end_time - start_time) / len(image_dir)))
+    print(f'| 预测结果:{result} |')
 
 
 class torch_dataset(torch.utils.data.Dataset):
