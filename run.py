@@ -85,15 +85,15 @@ else:
 # 程序
 if __name__ == '__main__':
     # 数据(只是图片路径和标签，读取和预处理在训练/验证中完成)
-    dataset_dict = data_get(args)
+    data_dict = data_get(args)
     # 模型
     model_dict = model_get(args)
     # 损失
     loss = loss_get(args)
     print('| 训练集:{} | 验证集:{} | 模型:{} | 损失函数:{} |'
-          .format(len(dataset_dict['train']), len(dataset_dict['val']), args.model, args.loss))
+          .format(len(data_dict['train']), len(data_dict['val']), args.model, args.loss))
     # 训练(包括图片读取和预处理、训练、验证、保存模型)
-    model_dict = train_get(args, dataset_dict, model_dict, loss)
+    model_dict = train_get(args, data_dict, model_dict, loss)
     # 显示结果
     try:
         print('\n| 最佳结果 | train_loss:{:.4f} val_loss:{:.4f} | val_accuracy:{:.4f} | val_precision:{:.4f} |'

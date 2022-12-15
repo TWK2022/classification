@@ -4,8 +4,8 @@ import pandas as pd
 
 
 def data_get(args):
-    dataset_dict = data_prepare(args)._load()
-    return dataset_dict
+    data_dict = data_prepare(args)._load()
+    return data_dict
 
 
 class data_prepare(object):
@@ -13,11 +13,11 @@ class data_prepare(object):
         self.args = args
 
     def _load(self):
-        dataset_dict = {}
-        dataset_dict['train'] = self._load_train()
-        dataset_dict['val'] = self._load_val()
-        dataset_dict['class'] = self._load_class()
-        return dataset_dict
+        data_dict = {}
+        data_dict['train'] = self._load_train()
+        data_dict['val'] = self._load_val()
+        data_dict['class'] = self._load_class()
+        return data_dict
 
     def _load_train(self):
         train_values = pd.read_csv(self.args.data_path + '/' + 'train.csv', header=None).values  # 读取train.csv
@@ -57,4 +57,4 @@ if __name__ == '__main__':
     parser.add_argument('--data_path', default='../dataset/classification/mask', type=str)
     parser.add_argument('--input_size', default=640, type=int)
     args = parser.parse_args()
-    dataset_dict = data_get(args)
+    data_dict = data_get(args)
