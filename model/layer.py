@@ -44,7 +44,7 @@ class elan(torch.nn.Module):
         x1 = self.cbs1(x)
         x2 = self.sequential2(x1)
         x3 = self.sequential3(x2)
-        x = self.concat4([x0, x1, x2, x3], axis=1)
+        x = self.concat4([x0, x1, x2, x3], dim=1)
         x = self.cbs5(x)
         return x
 
@@ -63,7 +63,7 @@ class mp1(torch.nn.Module):
         x0 = self.cbs1(x0)
         x1 = self.cbs2(x)
         x1 = self.cbs3(x1)
-        x = self.concat4([x0, x1], axis=1)
+        x = self.concat4([x0, x1], dim=1)
         return x
 
 

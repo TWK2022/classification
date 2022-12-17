@@ -48,7 +48,7 @@ def train_get(args, data_dict, model_dict, loss):
                 model_dict['val_accuracy'] = accuracy
                 model_dict['val_precision'] = precision
                 model_dict['val_recall'] = recall
-                torch.save(model_dict, args.save_name.split('.')[0] + '.pt')
+                torch.save(model_dict, args.save_name)
                 print('\n| 保存模型:{} | val_loss:{:.4f} | m_ap:{:.4f} |\n'
                       .format(args.save_name.split('.')[0] + '.pt', val_loss, m_ap))
         # wandb
