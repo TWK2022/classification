@@ -15,9 +15,9 @@ def val_get(args, data_dict, model, loss):
         for item, (val_batch, true_batch) in enumerate(tqdm.tqdm(val_dataloader)):
             val_batch = val_batch.to(args.device, non_blocking=args.latch)
             val_pred.extend(model(val_batch).detach().cpu())
-            val_true.extend(true_batch)
-        val_pred = torch.stack(val_pred, axis=0)
-        val_true = torch.stack(val_true, axis=0)
+            val_true.extend(true_batch.detach().cpu())
+        val_pred = torch.stack(val_pred, dim=0)
+        val_true = torch.stack(val_true, dim=0)
         val_loss = loss(val_pred, val_true) / len(val_pred)
         accuracy, precision, recall, m_ap = metric(val_pred, val_true)
         print('\n| 验证集:{} | val_loss:{:.4f} | accuracy:{:.4f} | precision:{:.4f} | recall:{:.4f} | m_ap:{:.4f} |\n'
