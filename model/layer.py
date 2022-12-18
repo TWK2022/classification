@@ -68,7 +68,7 @@ class mp1(torch.nn.Module):
 
 
 class linear_head(torch.nn.Module):
-    def __init__(self, in_, output_class):
+    def __init__(self, in_, out_):
         super().__init__()
         self.avgpool0 = torch.nn.AdaptiveAvgPool2d(1)
         self.flatten1 = torch.nn.Flatten()
@@ -76,7 +76,7 @@ class linear_head(torch.nn.Module):
         self.linear3 = torch.nn.Linear(in_, in_ // 2)
         self.silu4 = torch.nn.SiLU()
         self.Dropout5 = torch.nn.Dropout(0.2)
-        self.linear6 = torch.nn.Linear(in_ // 2, output_class)
+        self.linear6 = torch.nn.Linear(in_ // 2, out_)
         self.sigoid7 = torch.nn.Softmax(dim=1)
 
     def forward(self, x):
