@@ -50,7 +50,7 @@ def train_get(args, data_dict, model_dict, loss):
                 model_dict['val_recall'] = recall
                 torch.save(model_dict, args.save_name)
                 print('\n| 保存模型:{} | val_loss:{:.4f} | m_ap:{:.4f} |\n'
-                      .format(args.save_name.split('.')[0] + '.pt', val_loss, m_ap))
+                      .format(args.save_name, val_loss, m_ap))
         # wandb
         if args.wandb:
             args.wandb_run.log({'metric/train_loss': train_loss, 'metric/val_loss': val_loss, 'metric/val_m_ap': m_ap,
@@ -82,5 +82,5 @@ class torch_dataset(torch.utils.data.Dataset):
             image = self.noise(image=image)['image']
         image = self.transform(image=image)['image']  # 归一化、减均值、除以方差
         image = torch.tensor(image, dtype=torch.float32).permute(2, 0, 1)  # 转换为tensor
-        label = torch.tensor(self.data[index][1], dtype=torch.float32)
+        label = torch.tensor(self.data[index][1], dtype=torch.float32)  # 转换为tensor
         return image, label

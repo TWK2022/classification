@@ -40,6 +40,7 @@ class cls(torch.nn.Module):
 
 if __name__ == '__main__':
     import argparse
+    from layer import cbs, elan, mp1, linear_head
 
     parser = argparse.ArgumentParser(description='')
     parser.add_argument('--model_type', default='s', type=str)

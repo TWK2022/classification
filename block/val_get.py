@@ -15,7 +15,7 @@ def val_get(args, data_dict, model, loss):
         for item, (val_batch, true_batch) in enumerate(tqdm.tqdm(val_dataloader)):
             val_batch = val_batch.to(args.device, non_blocking=args.latch)
             val_pred.extend(model(val_batch).detach().cpu())
-            val_true.extend(true_batch.detach().cpu())
+            val_true.extend(true_batch)
         val_pred = torch.stack(val_pred, axis=0)
         val_true = torch.stack(val_true, axis=0)
         val_loss = loss(val_pred, val_true) / len(val_pred)
@@ -43,5 +43,5 @@ class torch_dataset(torch.utils.data.Dataset):
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)  # 转为RGB通道
         image = self.transform(image=image)['image']  # 归一化、减均值、除以方差
         image = torch.tensor(image, dtype=torch.float32).permute(2, 0, 1)  # 转换为tensor
-        label = torch.tensor(self.data[index][1], dtype=torch.float32)
+        label = torch.tensor(self.data[index][1], dtype=torch.float32)  # 转换为tensor
         return image, label

@@ -75,7 +75,7 @@ elif args.timm:
     print('| 使用timm创建模型:{} |'.format(args.model))
 else:
     assert os.path.exists('model/' + args.model + '.py'), '没有此自定义模型'.format(args.model)
-    print('| 创建自定义模型:{} | 型号为:{}|'.format(args.model, args.model_type))
+    print('| 创建自定义模型:{} | 型号:{}|'.format(args.model, args.model_type))
 if args.device.lower() in ['cuda', 'gpu']:
     assert torch.cuda.is_available(), 'GPU不可用'
     args.device = 'cuda'
