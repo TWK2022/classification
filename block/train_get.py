@@ -27,7 +27,7 @@ def train_get(args, data_dict, model_dict, loss):
             optimizer.zero_grad()
             loss_batch.backward()
             optimizer.step()
-        train_loss = train_loss / (item + 1) / args.batch
+        train_loss = train_loss / (item + 1)
         print('\n| 训练集:{} | train_loss:{:.4f} |\n'.format(len(data_dict['train']), train_loss))
         # 清理显存空间
         del train_batch, true_batch, pred_batch, loss_batch
