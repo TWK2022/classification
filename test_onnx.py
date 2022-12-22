@@ -27,23 +27,16 @@ assert os.path.exists(args.image_path), f'没有找到图片文件夹{args.image
 if args.float16:
     assert torch.cuda.is_available(), 'cuda不可用，因此无法使用float16'
 
+
 # -------------------------------------------------------------------------------------------------------------------- #
 # 程序
-transform = albumentations.Compose([
-    albumentations.LongestMaxSize(args.input_size),
-    albumentations.Normalize(max_pixel_value=255, mean=args.rgb_mean, std=args.rgb_std),
-    albumentations.PadIfNeeded(min_height=args.input_size, min_width=args.input_size,
-                               border_mode=cv2.BORDER_CONSTANT, value=(0, 0, 0))])
-
-
 def test_onnx():
-    # 加载模型
-    provider = 'CUDAExecutionProvider' if args.device.lower() in ['gpu', 'cuda'] else 'CPUExecutionProvider'
-    session = onnxruntime.InferenceSession(args.model_path, providers=[provider])
-    input_name = session.get_inputs()[0].name
-    output_name = session.get_outputs()[0].name
-    print('| 模型加载成功:{} |'.format(args.model_path))
     # 加载数据
+    transform = albumentations.Compose([
+        albumentations.LongestMaxSize(args.input_size),
+        albumentations.Normalize(max_pixel_value=255, mean=args.rgb_mean, std=args.rgb_std),
+        albumentations.PadIfNeeded(min_height=args.input_size, min_width=args.input_size,
+                                   border_mode=cv2.BORDER_CONSTANT, value=(0, 0, 0))])
     start_time = time.time()
     image_dir = sorted(os.listdir(args.image_path))
     image_all = np.zeros((len(image_dir), 3, args.input_size, args.input_size)).astype(
@@ -55,24 +48,30 @@ def test_onnx():
         image_all[i] = image
     end_time = time.time()
     print('| 数据加载成功:{} 每张耗时:{:.4f} |'.format(len(image_all), (end_time - start_time) / len(image_all)))
+    # 加载模型
+    provider = 'CUDAExecutionProvider' if args.device.lower() in ['gpu', 'cuda'] else 'CPUExecutionProvider'
+    session = onnxruntime.InferenceSession(args.model_path, providers=[provider])
+    input_name = session.get_inputs()[0].name
+    output_name = session.get_outputs()[0].name
+    print('| 模型加载成功:{} |'.format(args.model_path))
     # 推理
     start_time = time.time()
     n = len(image_all) // args.batch
-    pred_all = []
+    pred_list = []
     if n != 0:
         for i in range(n):
             batch = image_all[i * args.batch:(i + 1) * args.batch]
             pred = session.run([output_name], {input_name: batch})
-            pred_all.extend(pred)
+            pred_list.extend(pred)
         if len(image_all) % args.batch > 0:
             batch = image_all[(i + 1) * args.batch:]
             pred = session.run([output_name], {input_name: batch})
-            pred_all.extend(pred)
+            pred_list.extend(pred)
     else:
         batch = image_all
         pred = session.run([output_name], {input_name: batch})
-        pred_all.extend(pred)
-    result = [np.argmax(i) for i in pred_all]
+        pred_list.extend(pred)
+    result = [np.argmax(_) for _ in pred_list]
     end_time = time.time()
     print('| 数据:{} 批量:{} 每张耗时:{:.4f} |'.format(len(image_all), args.batch, (end_time - start_time) / len(image_all)))
     print(f'| 预测结果:{result} |')
