@@ -1,9 +1,9 @@
 # 数据需准备成以下格式
 # ├── 数据集路径：data_path
 #     └── image：存放所有图片
-#     └── train.csv：存放训练图片的相对路径和类别号，如->image\mask\0.jpg,1
-#     └── val.csv：存放验证图片的类别和绝对路径
-#     └── class.csv：存放所有的类别名称
+#     └── train.txt：训练图片的绝对路径和类别号，如-->image\mask\0.jpg 0 2<--表示该图片类别为0和2，空类别图片算标签就填，不算就不填
+#     └── val.txt：验证图片的绝对路径和类别
+#     └── class.csv：所有的类别名称
 # class.csv内容如下:
 # 类别1
 # 类别2
@@ -31,7 +31,7 @@ parser.add_argument('--model', default='cls', type=str, help='|模型选择，ti
 parser.add_argument('--model_type', default='s', type=str, help='|模型型号参数，部分模型有|')
 parser.add_argument('--input_size', default=160, type=int, help='|输入图片大小|')
 parser.add_argument('--input_dim', default=3, type=int, help='|输入图片维度|')
-parser.add_argument('--output_class', default=2, type=int, help='|输出分类类别数(独热编码)|')
+parser.add_argument('--output_class', default=2, type=int, help='|输出的类别数|')
 parser.add_argument('--epoch', default=10, type=int, help='|训练轮数|')
 parser.add_argument('--batch', default=16, type=int, help='|训练批量大小|')
 parser.add_argument('--loss', default='bce', type=str, help='|损失函数|')

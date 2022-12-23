@@ -77,7 +77,10 @@ class linear_head(torch.nn.Module):
         self.silu4 = torch.nn.SiLU()
         self.Dropout5 = torch.nn.Dropout(0.2)
         self.linear6 = torch.nn.Linear(in_ // 2, out_)
-        self.sigoid7 = torch.nn.Softmax(dim=1)
+        if out_ == 1:
+            self.normalization7 = torch.nn.Sigmoid()
+        else:
+            self.normalization7 = torch.nn.Softmax(dim=1)
 
     def forward(self, x):
         x = self.avgpool0(x)
@@ -87,5 +90,5 @@ class linear_head(torch.nn.Module):
         x = self.silu4(x)
         x = self.Dropout5(x)
         x = self.linear6(x)
-        x = self.sigoid7(x)
+        x = self.normalization7(x)
         return x

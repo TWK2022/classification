@@ -1,13 +1,12 @@
 import os
 import cv2
 import time
-import torch
-import pycuda.autoinit
-import pycuda.driver as cuda
 import argparse
 import tensorrt
 import numpy as np
 import albumentations
+import pycuda.autoinit
+import pycuda.driver as cuda
 
 # -------------------------------------------------------------------------------------------------------------------- #
 # 设置
@@ -23,6 +22,7 @@ args = parser.parse_args()
 # 初步检查
 assert os.path.exists(args.model_path), f'没有找到模型{args.model_path}'
 assert os.path.exists(args.image_path), f'没有找到图片文件夹{args.image_path}'
+
 
 # -------------------------------------------------------------------------------------------------------------------- #
 # 程序
@@ -44,11 +44,12 @@ def test_tensorrt():
     end_time = time.time()
     print('| 数据加载成功:{} 每张耗时:{:.4f} |'.format(len(image_list), (end_time - start_time) / len(image_list)))
     # 加载模型
-    logger = tensorrt.Logger(tensorrt.Logger.WARNING)  # 创建日志记录信息 忽略INFO信息
+    logger = tensorrt.Logger(tensorrt.Logger.WARNING)  # 创建日志记录信息
     with tensorrt.Runtime(logger) as runtime, open(args.model_path, "rb") as f:
         model = runtime.deserialize_cuda_engine(f.read())  # 读取模型并构建一个对象
-    h_input = np.zeros(tensorrt.volume(model.get_tensor_shape('input')), dtype=np.float32)
-    h_output = np.zeros(tensorrt.volume(model.get_tensor_shape('output')), dtype=np.float32)
+    np_type = tensorrt.nptype(model.get_tensor_dtype('input'))
+    h_input = np.zeros(tensorrt.volume(model.get_tensor_shape('input')), dtype=np_type)
+    h_output = np.zeros(tensorrt.volume(model.get_tensor_shape('output')), dtype=np_type)
     d_input = cuda.mem_alloc(h_input.nbytes)
     d_output = cuda.mem_alloc(h_output.nbytes)
     stream = cuda.Stream()

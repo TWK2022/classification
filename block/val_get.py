@@ -8,11 +8,11 @@ from block.metric_get import metric
 def val_get(args, data_dict, model, loss):
     with torch.no_grad():
         model.eval().to(args.device, non_blocking=args.latch)
-        val_dataloader = torch.utils.data.DataLoader(torch_dataset(args, data_dict['val']), batch_size=args.batch,
-                                                     shuffle=False, drop_last=False, pin_memory=args.latch)
+        dataloader = torch.utils.data.DataLoader(torch_dataset(args, data_dict['val']), batch_size=args.batch,
+                                                 shuffle=False, drop_last=False, pin_memory=args.latch)
         val_pred = []
         val_true = []
-        for item, (val_batch, true_batch) in enumerate(tqdm.tqdm(val_dataloader)):
+        for item, (val_batch, true_batch) in enumerate(tqdm.tqdm(dataloader)):
             val_batch = val_batch.to(args.device, non_blocking=args.latch)
             val_pred.extend(model(val_batch).detach().cpu())
             val_true.extend(true_batch.detach().cpu())

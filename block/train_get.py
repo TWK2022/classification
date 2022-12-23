@@ -15,10 +15,10 @@ def train_get(args, data_dict, model_dict, loss):
               .format(epoch + 1, len(data_dict['train']), args.batch, optimizer.defaults['lr']))
         model.train().to(args.device, non_blocking=args.latch)
         train_loss = 0  # 记录训练损失
-        train_dataloader = torch.utils.data.DataLoader(torch_dataset(args, data_dict['train']),
-                                                       batch_size=args.batch, shuffle=True, drop_last=True,
-                                                       pin_memory=args.latch)
-        for item, (train_batch, true_batch) in enumerate(tqdm.tqdm(train_dataloader)):
+        dataloader = torch.utils.data.DataLoader(torch_dataset(args, data_dict['train']),
+                                                 batch_size=args.batch, shuffle=True, drop_last=True,
+                                                 pin_memory=args.latch)
+        for item, (train_batch, true_batch) in enumerate(tqdm.tqdm(dataloader)):
             train_batch = train_batch.to(args.device, non_blocking=args.latch)
             true_batch = true_batch.to(args.device, non_blocking=args.latch)
             pred_batch = model(train_batch)

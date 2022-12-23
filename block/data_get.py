@@ -20,30 +20,26 @@ class data_prepare(object):
         return data_dict
 
     def _load_train(self):
-        train_values = pd.read_csv(self.args.data_path + '/' + 'train.csv', header=None).values  # 读取train.csv
-        train_list = []
-        for i in range(len(train_values)):
-            image_path = self.args.data_path + '/' + train_values[i, 0]
-            if not os.path.exists(image_path):
-                print('| {}不存在train.csv中图片:{} |'.format(self.args.data_path, train_values[i, 0]))
-                continue
-            class_onehot = np.zeros(self.args.output_class, dtype=np.float32)  # 标签转为独热编码
-            class_onehot[train_values[i][1]] = 1
-            train_list.append([image_path, class_onehot])
-        return train_list
+        with open(self.args.data_path + '/' + 'train.txt')as f:
+            txt = [_.strip().split(' ') for _ in f.readlines()]
+        data_list = [[0, 0] for _ in range(len(txt))]
+        for i in range(len(txt)):
+            data_list[i][0] = txt[i][0]
+            data_list[i][1] = np.zeros(self.args.output_class, dtype=np.float32)
+            for j in txt[i][1:]:
+                data_list[i][1][int(j)] = 1
+        return data_list
 
     def _load_val(self):
-        val_values = pd.read_csv(self.args.data_path + '/' + 'val.csv', header=None).values  # 读取val.csv
-        val_list = []
-        for i in range(len(val_values)):
-            image_path = self.args.data_path + '/' + val_values[i, 0]
-            if not os.path.exists(image_path):
-                print('| {}不存在val.csv中图片:{} |'.format(self.args.data_path, val_values[i, 0]))
-                continue
-            class_onehot = np.zeros(self.args.output_class, dtype=np.float32)  # 标签转为独热编码
-            class_onehot[val_values[i][1]] = 1
-            val_list.append([image_path, class_onehot])
-        return val_list
+        with open(self.args.data_path + '/' + 'train.txt')as f:
+            txt = [_.strip().split(' ') for _ in f.readlines()]
+        data_list = [[0, 0] for _ in range(len(txt))]
+        for i in range(len(txt)):
+            data_list[i][0] = txt[i][0]
+            data_list[i][1] = np.zeros(self.args.output_class, dtype=np.float32)
+            for j in txt[i][1:]:
+                data_list[i][1][int(j)] = 1
+        return data_list
 
     def _load_class(self):
         cls = pd.read_csv(self.args.data_path + '/' + 'class.csv', header=None).values.tolist()
