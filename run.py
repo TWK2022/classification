@@ -1,7 +1,7 @@
 # 数据需准备成以下格式
 # ├── 数据集路径：data_path
 #     └── image：存放所有图片
-#     └── train.txt：训练图片的绝对路径和类别号，如-->image\mask\0.jpg 0 2<--表示该图片类别为0和2，空类别图片算标签就填，不算就不填
+#     └── train.txt：训练图片的绝对路径和类别号，如-->image\mask\0.jpg 0 2<--表示该图片类别为0和2，空类别图片标签为空
 #     └── val.txt：验证图片的绝对路径和类别
 #     └── class.csv：所有的类别名称
 # class.csv内容如下:
@@ -40,7 +40,7 @@ parser.add_argument('--device', default='cuda', type=str, help='|训练设备|')
 parser.add_argument('--latch', default=True, type=bool, help='|模型和数据是否为锁存，True为锁存|')
 parser.add_argument('--rgb_mean', default=(0.406, 0.456, 0.485), type=tuple, help='|图片预处理时RGB通道减去的均值|')
 parser.add_argument('--rgb_std', default=(0.225, 0.224, 0.229), type=tuple, help='|图片预处理时RGB通道除以的方差|')
-parser.add_argument('--noise', default=True, type=bool, help='|数据加噪|')
+parser.add_argument('--noise', default=True, type=bool, help='|训练数据加噪|')
 args = parser.parse_args()
 args.weight = args.weight.split('.')[0] + '.pt'
 args.save_name = args.save_name.split('.')[0] + '.pt'
