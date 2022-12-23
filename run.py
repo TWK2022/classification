@@ -31,9 +31,9 @@ parser.add_argument('--model', default='cls', type=str, help='|模型选择，ti
 parser.add_argument('--model_type', default='s', type=str, help='|模型型号参数，部分模型有|')
 parser.add_argument('--input_size', default=160, type=int, help='|输入图片大小|')
 parser.add_argument('--input_dim', default=3, type=int, help='|输入图片维度|')
-parser.add_argument('--output_class', default=2, type=int, help='|输出的类别数|')
+parser.add_argument('--output_class', default=1, type=int, help='|输出的类别数|')
 parser.add_argument('--epoch', default=10, type=int, help='|训练轮数|')
-parser.add_argument('--batch', default=16, type=int, help='|训练批量大小|')
+parser.add_argument('--batch', default=4, type=int, help='|训练批量大小|')
 parser.add_argument('--loss', default='bce', type=str, help='|损失函数|')
 parser.add_argument('--lr', default=0.005, type=int, help='|初始学习率，训练中采用adam算法|')
 parser.add_argument('--device', default='cuda', type=str, help='|训练设备|')
@@ -63,8 +63,8 @@ if args.wandb:
 # -------------------------------------------------------------------------------------------------------------------- #
 # 初步检查
 assert os.path.exists(args.data_path + '/' + 'image'), 'data_path中缺少image'
-assert os.path.exists(args.data_path + '/' + 'train.csv'), 'data_path中缺少train.csv'
-assert os.path.exists(args.data_path + '/' + 'val.csv'), 'data_path中缺少val.csv'
+assert os.path.exists(args.data_path + '/' + 'train.txt'), 'data_path中缺少train.csv'
+assert os.path.exists(args.data_path + '/' + 'val.txt'), 'data_path中缺少val.csv'
 assert os.path.exists(args.data_path + '/' + 'class.csv'), 'data_path中缺少class.csv'
 if os.path.exists(args.weight):
     print('| 加载已有模型:{} |'.format(args.weight))
