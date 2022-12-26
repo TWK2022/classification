@@ -13,8 +13,9 @@ import pycuda.driver as cuda
 parser = argparse.ArgumentParser(description='tensorrt推理')
 parser.add_argument('--model_path', default='best.trt', type=str, help='|trt模型位置|')
 parser.add_argument('--image_path', default='image', type=str, help='|图片文件夹位置|')
-parser.add_argument('--input_size', default=160, type=int, help='|输入图片大小，trt模型构建时确定的|')
-parser.add_argument('--batch', default=1, type=int, help='|输入图片批量，trt模型构建时确定的，一般为1|')
+parser.add_argument('--input_size', default=160, type=int, help='|输入图片大小，要与导出的模型对应|')
+parser.add_argument('--batch', default=1, type=int, help='|输入图片批量，要与导出的模型对应，一般为1|')
+parser.add_argument('--float16', default=True, type=bool, help='|推理数据类型，要与导出的模型对应，False时为float32|')
 parser.add_argument('--rgb_mean', default=(0.406, 0.456, 0.485), type=tuple, help='|图片预处理时RGB通道减去的均值|')
 parser.add_argument('--rgb_std', default=(0.225, 0.224, 0.229), type=tuple, help='|图片预处理时RGB通道除以的方差|')
 args = parser.parse_args()
@@ -27,22 +28,6 @@ assert os.path.exists(args.image_path), f'没有找到图片文件夹{args.image
 # -------------------------------------------------------------------------------------------------------------------- #
 # 程序
 def test_tensorrt():
-    # 加载数据
-    transform = albumentations.Compose([
-        albumentations.LongestMaxSize(args.input_size),
-        albumentations.Normalize(max_pixel_value=255, mean=args.rgb_mean, std=args.rgb_std),
-        albumentations.PadIfNeeded(min_height=args.input_size, min_width=args.input_size,
-                                   border_mode=cv2.BORDER_CONSTANT, value=(0, 0, 0))])
-    start_time = time.time()
-    image_dir = sorted(os.listdir(args.image_path))
-    image_list = [0 for _ in range(len(image_dir))]
-    for i in range(len(image_dir)):
-        image = cv2.imread(args.image_path + '/' + image_dir[i])
-        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)  # 转为RGB通道
-        image = transform(image=image)['image'].transpose(2, 0, 1).reshape(-1)
-        image_list[i] = image
-    end_time = time.time()
-    print('| 数据加载成功:{} 每张耗时:{:.4f} |'.format(len(image_list), (end_time - start_time) / len(image_list)))
     # 加载模型
     logger = tensorrt.Logger(tensorrt.Logger.WARNING)  # 创建日志记录信息
     with tensorrt.Runtime(logger) as runtime, open(args.model_path, "rb") as f:
@@ -55,6 +40,25 @@ def test_tensorrt():
     stream = cuda.Stream()
     context = model.create_execution_context()
     bindings = [int(d_input), int(d_output)]
+    print(f'| 加载模型成功:{args.model_path} |')
+    # 加载数据
+    transform = albumentations.Compose([
+        albumentations.LongestMaxSize(args.input_size),
+        albumentations.Normalize(max_pixel_value=255, mean=args.rgb_mean, std=args.rgb_std),
+        albumentations.PadIfNeeded(min_height=args.input_size, min_width=args.input_size,
+                                   border_mode=cv2.BORDER_CONSTANT, value=(0, 0, 0))])
+    start_time = time.time()
+    image_dir = sorted(os.listdir(args.image_path))
+    image_list = [0 for _ in range(len(image_dir))]
+    for i in range(len(image_dir)):
+        image = cv2.imread(args.image_path + '/' + image_dir[i])
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)  # 转为RGB通道
+        image = transform(image=image)['image'].transpose(2, 0, 1).reshape(-1).astype(
+            np.float16 if args.float16 else np.float32)
+        image_list[i] = image
+    end_time = time.time()
+    print('| 数据加载成功:{} 每张耗时:{:.4f} |'
+          .format(len(image_list), (end_time - start_time) / len(image_list)))
     # 推理
     start_time = time.time()
     pred_list = [0 for _ in range(len(image_list))]

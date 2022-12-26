@@ -13,7 +13,7 @@ parser.add_argument('--image_path', default='image', type=str, help='|图片文�
 parser.add_argument('--input_size', default=160, type=int, help='|模型输入图片大小|')
 parser.add_argument('--batch', default=1, type=int, help='|输入图片批量|')
 parser.add_argument('--device', default='cuda', type=str, help='|用CPU/GPU推理|')
-parser.add_argument('--float16', default=False, type=bool, help='|推理数据类型，要支持float16的GPU，False时为float32|')
+parser.add_argument('--float16', default=True, type=bool, help='|推理数据类型，要支持float16的GPU，False时为float32|')
 args = parser.parse_args()
 args.model_path = args.model_path.split('.')[0] + '.pt'
 # -------------------------------------------------------------------------------------------------------------------- #
