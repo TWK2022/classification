@@ -18,18 +18,16 @@ def train_get(args, data_dict, model_dict, loss):
         dataloader = torch.utils.data.DataLoader(torch_dataset(args, data_dict['train']),
                                                  batch_size=args.batch, shuffle=True, drop_last=True,
                                                  pin_memory=args.latch)
-        item = 0
-        for train_batch, true_batch in tqdm.tqdm(dataloader):
+        for item, (train_batch, true_batch) in enumerate(tqdm.tqdm(dataloader)):
             train_batch = train_batch.to(args.device, non_blocking=args.latch)
             true_batch = true_batch.to(args.device, non_blocking=args.latch)
             pred_batch = model(train_batch)
             loss_batch = loss(pred_batch, true_batch)
             train_loss += loss_batch.item()
-            item += 1
             optimizer.zero_grad()
             loss_batch.backward()
             optimizer.step()
-        train_loss = train_loss / item
+        train_loss = train_loss / (item + 1)
         print('\n| 训练集:{} | train_loss:{:.4f} |\n'.format(len(data_dict['train']), train_loss))
         # 清理显存空间
         del train_batch, true_batch, pred_batch, loss_batch

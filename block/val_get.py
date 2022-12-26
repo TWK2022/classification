@@ -12,7 +12,7 @@ def val_get(args, data_dict, model, loss):
                                                  shuffle=False, drop_last=False, pin_memory=args.latch)
         val_pred = []
         val_true = []
-        for val_batch, true_batch in tqdm.tqdm(dataloader):
+        for item, (val_batch, true_batch) in enumerate(tqdm.tqdm(dataloader)):
             val_batch = val_batch.to(args.device, non_blocking=args.latch)
             val_pred.extend(model(val_batch).detach().cpu())
             val_true.extend(true_batch.detach().cpu())
