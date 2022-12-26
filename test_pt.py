@@ -33,7 +33,6 @@ def test_pt():
     model.half().eval().to(args.device) if args.float16 else model.float().eval().to(args.device)
     args.rgb_mean = model_dict['rgb_mean']
     args.rgb_std = model_dict['rgb_std']
-    cls = model_dict['class']
     print('| 模型加载成功:{} |'.format(args.model_path))
     # 推理
     image_dir = sorted(os.listdir(args.image_path))
@@ -41,12 +40,11 @@ def test_pt():
     with torch.no_grad():
         dataloader = torch.utils.data.DataLoader(torch_dataset(image_dir), batch_size=args.batch,
                                                  shuffle=False, drop_last=False, pin_memory=False)
-        pred = []
+        pred_list = []
         for item, batch in enumerate(dataloader):
             batch = batch.to(args.device)
-            pred.extend(model(batch).detach().cpu())
-        pred = torch.stack(pred, axis=0)
-        result = [cls[torch.argmax(i)][0] for i in pred]
+            pred_list.extend(model(batch).detach().cpu().tolist())
+        result = pred_list
     end_time = time.time()
     print('| 数据:{} 批量:{} 每张耗时:{:.4f} |'.format(len(image_dir), args.batch, (end_time - start_time) / len(image_dir)))
     print(f'| 预测结果:{result} |')

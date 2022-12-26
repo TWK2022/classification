@@ -63,8 +63,8 @@ def test_tensorrt():
         context.execute_async_v2(bindings=bindings, stream_handle=stream.handle)
         cuda.memcpy_dtoh_async(h_output, d_output, stream)
         stream.synchronize()
-        pred_list[i] = h_output
-    result = [np.argmax(_) for _ in pred_list]
+        pred_list[i] = h_output.tolist()
+    result = pred_list
     end_time = time.time()
     print('| 数据:{} 批量:{} 每张耗时:{:.4f} |'.format(len(image_list), args.batch, (end_time - start_time) / len(image_list)))
     print(f'| 预测结果:{result} |')

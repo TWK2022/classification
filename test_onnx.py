@@ -1,7 +1,6 @@
 import os
 import cv2
 import time
-import torch
 import argparse
 import onnxruntime
 import numpy as np
@@ -24,8 +23,6 @@ args.model_path = args.model_path.split('.')[0] + '.onnx'
 # 初步检查
 assert os.path.exists(args.model_path), f'没有找到模型{args.model_path}'
 assert os.path.exists(args.image_path), f'没有找到图片文件夹{args.image_path}'
-if args.float16:
-    assert torch.cuda.is_available(), 'cuda不可用，因此无法使用float16'
 
 
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -62,16 +59,16 @@ def test_onnx():
         for i in range(n):
             batch = image_all[i * args.batch:(i + 1) * args.batch]
             pred = session.run([output_name], {input_name: batch})
-            pred_list.extend(pred)
+            pred_list.extend(pred.tolist())
         if len(image_all) % args.batch > 0:
             batch = image_all[(i + 1) * args.batch:]
             pred = session.run([output_name], {input_name: batch})
-            pred_list.extend(pred)
+            pred_list.extend(pred.tolist())
     else:
         batch = image_all
         pred = session.run([output_name], {input_name: batch})
-        pred_list.extend(pred)
-    result = [np.argmax(_) for _ in pred_list]
+        pred_list.extend(pred.tolist())
+    result = pred_list
     end_time = time.time()
     print('| 数据:{} 批量:{} 每张耗时:{:.4f} |'.format(len(image_all), args.batch, (end_time - start_time) / len(image_all)))
     print(f'| 预测结果:{result} |')
