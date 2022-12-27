@@ -1,4 +1,3 @@
-import os
 import numpy as np
 import pandas as pd
 
@@ -24,7 +23,7 @@ class data_prepare(object):
             txt = [_.strip().split(' ') for _ in f.readlines()]
         data_list = [[0, 0] for _ in range(len(txt))]
         for i in range(len(txt)):
-            data_list[i][0] = txt[i][0]
+            data_list[i][0] = self.args.data_path + '/image/' + txt[i][0].split('image/')[-1]
             data_list[i][1] = np.zeros(self.args.output_class, dtype=np.float32)
             for j in txt[i][1:]:
                 data_list[i][1][int(j)] = 1
@@ -35,7 +34,7 @@ class data_prepare(object):
             txt = [_.strip().split(' ') for _ in f.readlines()]
         data_list = [[0, 0] for _ in range(len(txt))]
         for i in range(len(txt)):
-            data_list[i][0] = txt[i][0]
+            data_list[i][0] = self.args.data_path + '/image/' + txt[i][0].split('image/')[-1]
             data_list[i][1] = np.zeros(self.args.output_class, dtype=np.float32)
             for j in txt[i][1:]:
                 data_list[i][1][int(j)] = 1
