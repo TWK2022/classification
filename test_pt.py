@@ -40,14 +40,16 @@ def test_pt():
     with torch.no_grad():
         dataloader = torch.utils.data.DataLoader(torch_dataset(image_dir), batch_size=args.batch,
                                                  shuffle=False, drop_last=False, pin_memory=False)
-        pred_list = []
+        result = []
         for item, batch in enumerate(dataloader):
             batch = batch.to(args.device)
-            pred_list.extend(model(batch).detach().cpu().tolist())
-        result = pred_list
+            pred_batch = model(batch).detach().cpu()
+            result.extend(pred_batch.tolist())
+        for i in range(len(result)):
+            result[i] = [round(_, 4) for _ in result[i]]
+            print(f'| {image_dir[i]}:{result[i]} |')
     end_time = time.time()
     print('| 数据:{} 批量:{} 每张耗时:{:.4f} |'.format(len(image_dir), args.batch, (end_time - start_time) / len(image_dir)))
-    print(f'| 预测结果:{result} |')
 
 
 class torch_dataset(torch.utils.data.Dataset):
@@ -66,7 +68,7 @@ class torch_dataset(torch.utils.data.Dataset):
         image = cv2.imread(args.image_path + '/' + self.image_dir[index])  # 读取图片
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)  # 转为RGB通道
         image = self.transform(image=image)['image']  # 归一化、减均值、除以方差
-        image = torch.tensor(image, dtype=torch.float32).permute(2, 0, 1)  # 转换为tensor
+        image = torch.tensor(image, dtype=torch.float16 if args.float16 else torch.float32).permute(2, 0, 1)  # 转为tensor
         return image
 
 

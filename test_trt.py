@@ -61,17 +61,16 @@ def test_tensorrt():
           .format(len(image_list), (end_time - start_time) / len(image_list)))
     # 推理
     start_time = time.time()
-    pred_list = [0 for _ in range(len(image_list))]
+    result = [0 for _ in range(len(image_list))]
     for i in range(len(image_list)):
         cuda.memcpy_htod_async(d_input, image_list[i], stream)
         context.execute_async_v2(bindings=bindings, stream_handle=stream.handle)
         cuda.memcpy_dtoh_async(h_output, d_output, stream)
         stream.synchronize()
-        pred_list[i] = h_output.tolist()
-    result = pred_list
+        result[i] = [round(_, 4) for _ in h_output.tolist()]
+        print(f'| {image_dir[i]}:{result[i]} |')
     end_time = time.time()
     print('| 数据:{} 批量:{} 每张耗时:{:.4f} |'.format(len(image_list), args.batch, (end_time - start_time) / len(image_list)))
-    print(f'| 预测结果:{result} |')
 
 
 if __name__ == '__main__':

@@ -1,7 +1,6 @@
 import os
 import torch
 import argparse
-import pandas as pd
 
 # -------------------------------------------------------------------------------------------------------------------- #
 # 设置
@@ -34,9 +33,6 @@ def export_onnx():
                       opset_version=12, input_names=['input'], output_names=['output'],
                       dynamic_axes={'input': {args.batch: 'batch_size'}, 'output': {args.batch: 'batch_size'}})
     print('| 转为onnx模型成功:{} |'.format(args.save_name))
-    cls = model_dict['class']
-    cls_df = pd.DataFrame(cls, columns=['class'])
-    cls_df.to_csv('class.csv', index=False, header=False)
     if args.sim:
         import onnx
         import onnxsim

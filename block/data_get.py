@@ -19,7 +19,7 @@ class data_prepare(object):
         return data_dict
 
     def _load_train(self):
-        with open(self.args.data_path + '/' + 'train.txt')as f:
+        with open(self.args.data_path + '/' + 'train.txt', encoding='utf-8')as f:
             txt = [_.strip().split(' ') for _ in f.readlines()]
         data_list = [[0, 0] for _ in range(len(txt))]
         for i in range(len(txt)):
@@ -30,7 +30,7 @@ class data_prepare(object):
         return data_list
 
     def _load_val(self):
-        with open(self.args.data_path + '/' + 'train.txt')as f:
+        with open(self.args.data_path + '/' + 'val.txt', encoding='utf-8')as f:
             txt = [_.strip().split(' ') for _ in f.readlines()]
         data_list = [[0, 0] for _ in range(len(txt))]
         for i in range(len(txt)):
@@ -41,8 +41,9 @@ class data_prepare(object):
         return data_list
 
     def _load_class(self):
-        cls = pd.read_csv(self.args.data_path + '/' + 'class.csv', header=None).values.tolist()
-        return cls
+        with open(self.args.data_path + '/' + 'class.txt', encoding='utf-8')as f:
+            txt = [_.strip() for _ in f.readlines()]
+        return txt
 
 
 if __name__ == '__main__':

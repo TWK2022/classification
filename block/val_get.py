@@ -14,8 +14,9 @@ def val_get(args, data_dict, model, loss):
         val_true = []
         for item, (val_batch, true_batch) in enumerate(tqdm.tqdm(dataloader)):
             val_batch = val_batch.to(args.device, non_blocking=args.latch)
-            val_pred.extend(model(val_batch).detach().cpu())
-            val_true.extend(true_batch.detach().cpu())
+            pred_batch = model(val_batch).detach().cpu()
+            val_pred.extend(pred_batch)
+            val_true.extend(true_batch)
         val_pred = torch.stack(val_pred, dim=0)
         val_true = torch.stack(val_true, dim=0)
         val_loss = loss(val_pred, val_true)

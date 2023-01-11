@@ -53,25 +53,26 @@ def test_onnx():
     print('| 数据加载成功:{} 每张耗时:{:.4f} |'.format(len(image_all), (end_time - start_time) / len(image_all)))
     # 推理
     start_time = time.time()
-    n = len(image_all) // args.batch
-    pred_list = []
-    if n != 0:
+    result = []
+    n = len(image_dir) // args.batch
+    if n > 0:  # 如果图片数量>=批量
         for i in range(n):
             batch = image_all[i * args.batch:(i + 1) * args.batch]
             pred = session.run([output_name], {input_name: batch})
-            pred_list.extend(pred)
-        if len(image_all) % args.batch > 0:
+            result.extend(pred)
+        if len(image_dir) % args.batch > 0:  # 如果图片数量没有刚好满足批量
             batch = image_all[(i + 1) * args.batch:]
             pred = session.run([output_name], {input_name: batch})
-            pred_list.extend(pred)
-    else:
+            result.extend(pred)
+    else:  # 如果图片数量<批量
         batch = image_all
         pred = session.run([output_name], {input_name: batch})
-        pred_list.extend(pred)
-    result = [_.tolist() for _ in pred_list]
+        result.extend(pred)
+    for i in range(len(result)):
+        result[i] = [round(_.item(), 4) for _ in result[i]]
+        print(f'| {image_dir[i]}:{result[i]} |')
     end_time = time.time()
     print('| 数据:{} 批量:{} 每张耗时:{:.4f} |'.format(len(image_all), args.batch, (end_time - start_time) / len(image_all)))
-    print(f'| 预测结果:{result} |')
 
 
 if __name__ == '__main__':

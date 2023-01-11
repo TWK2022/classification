@@ -3,7 +3,7 @@
 #     └── image：存放所有图片
 #     └── train.txt：训练图片的绝对路径(或相对data_path下路径)和类别号，如-->image/mask/0.jpg 0 2<--表示该图片类别为0和2，空类别图片无类别号
 #     └── val.txt：验证图片的绝对路径(或相对data_path下路径)和类别
-#     └── class.csv：所有的类别名称
+#     └── class.txt：所有的类别名称
 # class.csv内容如下:
 # 类别1
 # 类别2
@@ -32,7 +32,7 @@ parser.add_argument('--model_type', default='s', type=str, help='|模型型号�
 parser.add_argument('--input_size', default=160, type=int, help='|输入图片大小|')
 parser.add_argument('--input_dim', default=3, type=int, help='|输入图片维度|')
 parser.add_argument('--output_class', default=1, type=int, help='|输出的类别数|')
-parser.add_argument('--epoch', default=10, type=int, help='|训练轮数|')
+parser.add_argument('--epoch', default=20, type=int, help='|训练轮数|')
 parser.add_argument('--batch', default=4, type=int, help='|训练批量大小|')
 parser.add_argument('--loss', default='bce', type=str, help='|损失函数|')
 parser.add_argument('--lr', default=0.005, type=int, help='|初始学习率，训练中采用adam算法|')
@@ -63,9 +63,9 @@ if args.wandb:
 # -------------------------------------------------------------------------------------------------------------------- #
 # 初步检查
 assert os.path.exists(args.data_path + '/' + 'image'), 'data_path中缺少image'
-assert os.path.exists(args.data_path + '/' + 'train.txt'), 'data_path中缺少train.csv'
-assert os.path.exists(args.data_path + '/' + 'val.txt'), 'data_path中缺少val.csv'
-assert os.path.exists(args.data_path + '/' + 'class.csv'), 'data_path中缺少class.csv'
+assert os.path.exists(args.data_path + '/' + 'train.txt'), 'data_path中缺少train.txt'
+assert os.path.exists(args.data_path + '/' + 'val.txt'), 'data_path中缺少val.txt'
+assert os.path.exists(args.data_path + '/' + 'class.txt'), 'data_path中缺少class.txt'
 if os.path.exists(args.weight):
     print('| 加载已有模型:{} |'.format(args.weight))
 elif args.timm:
@@ -90,8 +90,8 @@ if __name__ == '__main__':
     model_dict = model_get(args)
     # 损失
     loss = loss_get(args)
-    print('| 训练集:{} | 验证集:{} | 模型:{} | 损失函数:{} |'
-          .format(len(data_dict['train']), len(data_dict['val']), args.model, args.loss))
+    print('| 训练集:{} | 验证集:{} | 模型:{} | 损失函数:{} | 初始学习率:{} |'
+          .format(len(data_dict['train']), len(data_dict['val']), args.model, args.loss, args.lr))
     # 训练(包括图片读取和预处理、训练、验证、保存模型)
     model_dict = train_get(args, data_dict, model_dict, loss)
     # 显示结果
