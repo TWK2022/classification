@@ -33,7 +33,7 @@ parser.add_argument('--input_size', default=160, type=int, help='|输入图片�
 parser.add_argument('--input_dim', default=3, type=int, help='|输入图片维度|')
 parser.add_argument('--output_class', default=1, type=int, help='|输出的类别数|')
 parser.add_argument('--epoch', default=20, type=int, help='|训练轮数|')
-parser.add_argument('--batch', default=4, type=int, help='|训练批量大小|')
+parser.add_argument('--batch', default=8, type=int, help='|训练批量大小|')
 parser.add_argument('--loss', default='bce', type=str, help='|损失函数|')
 parser.add_argument('--lr', default=0.005, type=int, help='|初始学习率，训练中采用adam算法|')
 parser.add_argument('--device', default='cuda', type=str, help='|训练设备|')
