@@ -1,7 +1,7 @@
 # 数据需准备成以下格式
 # ├── 数据集路径：data_path
 #     └── image：存放所有图片
-#     └── train.txt：训练图片的绝对路径(或相对data_path下路径)和类别号，如-->image/mask/0.jpg 0 2<--表示该图片类别为0和2，空类别图片标签为空
+#     └── train.txt：训练图片的绝对路径(或相对data_path下路径)和类别号，如-->image/mask/0.jpg 0 2<--表示该图片类别为0和2，空类别图片无类别号
 #     └── val.txt：验证图片的绝对路径(或相对data_path下路径)和类别
 #     └── class.csv：所有的类别名称
 # class.csv内容如下:
