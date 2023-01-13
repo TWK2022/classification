@@ -27,8 +27,8 @@ parser.add_argument('--wandb', default=False, type=bool, help='|是否使用wand
 parser.add_argument('--wandb_project', default='mask', type=str, help='|wandb项目名称|')
 parser.add_argument('--wandb_name', default='train', type=str, help='|wandb项目中的训练名称|')
 parser.add_argument('--timm', default=False, type=bool, help='|是否使用timm模型|')
-parser.add_argument('--model', default='cls', type=str, help='|模型选择，timm为True时为timm中的模型|')
-parser.add_argument('--model_type', default='s', type=str, help='|模型型号参数，部分模型有|')
+parser.add_argument('--model', default='cls', type=str, help='|自定义模型选择，timm为True时为timm中的模型|')
+parser.add_argument('--model_type', default='s', type=str, help='|自定义模型型号参数，部分模型有|')
 parser.add_argument('--input_size', default=160, type=int, help='|输入图片大小|')
 parser.add_argument('--input_dim', default=3, type=int, help='|输入图片维度|')
 parser.add_argument('--output_class', default=1, type=int, help='|输出的类别数|')
@@ -66,17 +66,17 @@ assert os.path.exists(args.data_path + '/' + 'image'), 'data_path中缺少image'
 assert os.path.exists(args.data_path + '/' + 'train.txt'), 'data_path中缺少train.txt'
 assert os.path.exists(args.data_path + '/' + 'val.txt'), 'data_path中缺少val.txt'
 assert os.path.exists(args.data_path + '/' + 'class.txt'), 'data_path中缺少class.txt'
-if os.path.exists(args.weight):
+if os.path.exists(args.weight):  # 优先加载已有模型args.weight继续训练
     print('| 加载已有模型:{} |'.format(args.weight))
-elif args.timm:
+elif args.timm:  # 创建timm库中模型args.timm
     import timm
 
     assert timm.list_models(args.model) != [], 'timm中没有此模型{}'.format(args.model)
-    print('| 使用timm创建模型:{} |'.format(args.model))
-else:
+    print('| 创建timm库中模型:{} |'.format(args.model))
+else:  # 创建自定义模型args.model
     assert os.path.exists('model/' + args.model + '.py'), '没有此自定义模型'.format(args.model)
     print('| 创建自定义模型:{} | 型号:{} |'.format(args.model, args.model_type))
-if args.device.lower() in ['cuda', 'gpu']:
+if args.device.lower() in ['cuda', 'gpu']:  # 检查训练设备
     assert torch.cuda.is_available(), 'GPU不可用'
     args.device = 'cuda'
 else:
