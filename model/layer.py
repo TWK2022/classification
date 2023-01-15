@@ -15,20 +15,6 @@ class cbs(torch.nn.Module):
         return x
 
 
-class residual(torch.nn.Module):
-    def __init__(self, in_):
-        super().__init__()
-        self.cbs0 = cbs(in_, in_ // 2, kernel_size=1, stride=1)
-        self.cbs1 = cbs(in_ // 2, in_ // 2, kernel_size=3, stride=1)
-        self.cbs2 = cbs(in_ // 2, in_, kernel_size=1, stride=1)
-
-    def forward(self, x):
-        x0 = self.cbs0(x)
-        x0 = self.cbs1(x0)
-        x0 = self.cbs2(x0)
-        return x + x0
-
-
 class elan(torch.nn.Module):
     def __init__(self, in_, n):
         super().__init__()
