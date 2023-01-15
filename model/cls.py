@@ -6,11 +6,10 @@ class cls(torch.nn.Module):
     def __init__(self, args):
         super().__init__()
         self.args = args
-        n_dict = {'s': 1, 'm': 2, 'l': 3}
         dim_dict = {'s': 8, 'm': 16, 'l': 32}
-        n = n_dict[args.model_type]
+        n_dict = {'s': 1, 'm': 2, 'l': 3}
         dim = dim_dict[args.model_type]
-        self.dim = dim
+        n = n_dict[args.model_type]
         self.l0 = cbs(args.input_dim, dim, 1, 1)
         self.l1 = cbs(dim, 2 * dim, 3, 2)  # input_size/2
         self.l2 = cbs(2 * dim, 2 * dim, 1, 1)
@@ -45,7 +44,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='')
     parser.add_argument('--model_type', default='s', type=str)
     parser.add_argument('--batch', default=4, type=int)
-    parser.add_argument('--input_size', default=320, type=int)
+    parser.add_argument('--input_size', default=640, type=int)
     parser.add_argument('--input_dim', default=3, type=int)
     args = parser.parse_args()
     model = cls(args)
