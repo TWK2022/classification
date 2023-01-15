@@ -20,8 +20,8 @@ class elan(torch.nn.Module):
         super().__init__()
         self.cbs0 = cbs(in_, in_ // 2, kernel_size=1, stride=1)
         self.cbs1 = cbs(in_, in_ // 2, kernel_size=1, stride=1)
-        self.sequential2 = torch.nn.Sequential(*(cbs(in_ // 2, in_ // 2, kernel_size=3, stride=1) for i in range(n)))
-        self.sequential3 = torch.nn.Sequential(*(cbs(in_ // 2, in_ // 2, kernel_size=3, stride=1) for i in range(n)))
+        self.sequential2 = torch.nn.Sequential(*(cbs(in_ // 2, in_ // 2, kernel_size=3, stride=1) for _ in range(n)))
+        self.sequential3 = torch.nn.Sequential(*(cbs(in_ // 2, in_ // 2, kernel_size=3, stride=1) for _ in range(n)))
         self.concat4 = torch.concat
         self.cbs5 = cbs(2 * in_, 2 * in_, kernel_size=1, stride=1)
 
