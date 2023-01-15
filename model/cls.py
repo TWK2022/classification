@@ -6,8 +6,8 @@ class cls(torch.nn.Module):
     def __init__(self, args):
         super().__init__()
         self.args = args
-        dim_dict = {'s': 8, 'm': 16, 'l': 32}
-        n_dict = {'s': 1, 'm': 2, 'l': 3}
+        dim_dict = {'n': 8, 's': 16, 'm': 32, 'l': 64}
+        n_dict = {'n': 1, 's': 1, 'm': 2, 'l': 3}
         dim = dim_dict[args.model_type]
         n = n_dict[args.model_type]
         self.l0 = cbs(args.input_dim, dim, 1, 1)
