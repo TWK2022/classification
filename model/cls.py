@@ -10,7 +10,7 @@ class cls(torch.nn.Module):
         n_dict = {'n': 1, 's': 1, 'm': 2, 'l': 3}
         dim = dim_dict[args.model_type]
         n = n_dict[args.model_type]
-        self.l0 = cbs(args.input_dim, dim, 1, 1)
+        self.l0 = cbs(3, dim, 1, 1)
         self.l1 = cbs(dim, 2 * dim, 3, 2)  # input_size/2
         self.l2 = cbs(2 * dim, 2 * dim, 1, 1)
         self.l3 = cbs(2 * dim, 4 * dim, 3, 2)  # input_size/4
@@ -45,10 +45,9 @@ if __name__ == '__main__':
     parser.add_argument('--model_type', default='s', type=str)
     parser.add_argument('--batch', default=4, type=int)
     parser.add_argument('--input_size', default=640, type=int)
-    parser.add_argument('--input_dim', default=3, type=int)
     args = parser.parse_args()
     model = cls(args)
     print(model)
-    tensor = torch.rand(2, args.input_dim, args.input_size, args.input_size, dtype=torch.float32)
+    tensor = torch.rand(2, 3, args.input_size, args.input_size, dtype=torch.float32)
     pred = model(tensor)
     print(pred.shape)

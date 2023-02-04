@@ -30,7 +30,6 @@ parser.add_argument('--timm', default=False, type=bool, help='|是否使用timm�
 parser.add_argument('--model', default='cls', type=str, help='|模型选择，timm为True时为timm库中的模型，否则为自定义模型|')
 parser.add_argument('--model_type', default='n', type=str, help='|自定义模型的型号参数，部分模型有|')
 parser.add_argument('--input_size', default=160, type=int, help='|输入图片大小|')
-parser.add_argument('--input_dim', default=3, type=int, help='|输入图片维度|')
 parser.add_argument('--output_class', default=1, type=int, help='|输出的类别数|')
 parser.add_argument('--epoch', default=20, type=int, help='|训练轮数|')
 parser.add_argument('--batch', default=8, type=int, help='|训练批量大小|')
