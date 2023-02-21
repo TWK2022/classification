@@ -37,8 +37,6 @@ parser.add_argument('--loss', default='bce', type=str, help='|损失函数|')
 parser.add_argument('--lr', default=0.005, type=int, help='|初始学习率，训练中采用adam算法|')
 parser.add_argument('--device', default='cuda', type=str, help='|训练设备|')
 parser.add_argument('--latch', default=True, type=bool, help='|模型和数据是否为锁存，True为锁存|')
-parser.add_argument('--rgb_mean', default=(0.406, 0.456, 0.485), type=tuple, help='|图片预处理时RGB通道减去的均值|')
-parser.add_argument('--rgb_std', default=(0.225, 0.224, 0.229), type=tuple, help='|图片预处理时RGB通道除以的方差|')
 parser.add_argument('--noise', default=True, type=bool, help='|训练数据加噪|')
 args = parser.parse_args()
 args.weight = args.weight.split('.')[0] + '.pt'

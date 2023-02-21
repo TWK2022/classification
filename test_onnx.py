@@ -15,8 +15,6 @@ parser.add_argument('--device', default='cuda', type=str, help='|用CPU/GPU推�
 parser.add_argument('--input_size', default=160, type=int, help='|模型输入图片大小，要与导出的模型对应|')
 parser.add_argument('--batch', default=1, type=int, help='|输入图片批量，要与导出的模型对应|')
 parser.add_argument('--float16', default=True, type=bool, help='|推理数据类型，要与导出的模型对应，False时为float32|')
-parser.add_argument('--rgb_mean', default=(0.406, 0.456, 0.485), type=tuple, help='|图片预处理时RGB通道减去的均值|')
-parser.add_argument('--rgb_std', default=(0.225, 0.224, 0.229), type=tuple, help='|图片预处理时RGB通道除以的方差|')
 args = parser.parse_args()
 args.model_path = args.model_path.split('.')[0] + '.onnx'
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -37,17 +35,16 @@ def test_onnx():
     # 加载数据
     transform = albumentations.Compose([
         albumentations.LongestMaxSize(args.input_size),
-        albumentations.Normalize(max_pixel_value=255, mean=args.rgb_mean, std=args.rgb_std),
         albumentations.PadIfNeeded(min_height=args.input_size, min_width=args.input_size,
                                    border_mode=cv2.BORDER_CONSTANT, value=(0, 0, 0))])
     start_time = time.time()
     image_dir = sorted(os.listdir(args.image_path))
-    image_all = np.zeros((len(image_dir), 3, args.input_size, args.input_size)).astype(
+    image_all = np.zeros((len(image_dir), args.input_size, args.input_size, 3)).astype(
         np.float16 if args.float16 else np.float32)
     for i in range(len(image_dir)):
         image = cv2.imread(args.image_path + '/' + image_dir[i])
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)  # 转为RGB通道
-        image = transform(image=image)['image'].transpose(2, 0, 1)
+        image = transform(image=image)['image']  # 缩放和填充图片(归一化、减均值、除以方差、调维度等在模型中完成)
         image_all[i] = image
     end_time = time.time()
     print('| 数据加载成功:{} 每张耗时:{:.4f} |'.format(len(image_all), (end_time - start_time) / len(image_all)))

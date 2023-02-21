@@ -16,8 +16,6 @@ parser.add_argument('--image_path', default='image', type=str, help='|图片文�
 parser.add_argument('--input_size', default=160, type=int, help='|输入图片大小，要与导出的模型对应|')
 parser.add_argument('--batch', default=1, type=int, help='|输入图片批量，要与导出的模型对应，一般为1|')
 parser.add_argument('--float16', default=True, type=bool, help='|推理数据类型，要与导出的模型对应，False时为float32|')
-parser.add_argument('--rgb_mean', default=(0.406, 0.456, 0.485), type=tuple, help='|图片预处理时RGB通道减去的均值|')
-parser.add_argument('--rgb_std', default=(0.225, 0.224, 0.229), type=tuple, help='|图片预处理时RGB通道除以的方差|')
 args = parser.parse_args()
 # -------------------------------------------------------------------------------------------------------------------- #
 # 初步检查
@@ -44,7 +42,6 @@ def test_tensorrt():
     # 加载数据
     transform = albumentations.Compose([
         albumentations.LongestMaxSize(args.input_size),
-        albumentations.Normalize(max_pixel_value=255, mean=args.rgb_mean, std=args.rgb_std),
         albumentations.PadIfNeeded(min_height=args.input_size, min_width=args.input_size,
                                    border_mode=cv2.BORDER_CONSTANT, value=(0, 0, 0))])
     start_time = time.time()
@@ -53,8 +50,8 @@ def test_tensorrt():
     for i in range(len(image_dir)):
         image = cv2.imread(args.image_path + '/' + image_dir[i])
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)  # 转为RGB通道
-        image = transform(image=image)['image'].transpose(2, 0, 1).reshape(-1).astype(
-            np.float16 if args.float16 else np.float32)
+        image = transform(image=image)['image'].reshape(-1).astype(
+            np.float16 if args.float16 else np.float32)  # 缩放和填充图片(归一化、减均值、除以方差、调维度等在模型中完成)
         image_list[i] = image
     end_time = time.time()
     print('| 数据加载成功:{} 每张耗时:{:.4f} |'

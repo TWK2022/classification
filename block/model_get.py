@@ -15,7 +15,7 @@ def model_get(args):
         model_dict['model'] = model
         model_dict['val_loss'] = 999
         model_dict['val_m_ap'] = 0
-    model_dict['model'](torch.rand(args.batch, 3, args.input_size, args.input_size))  # 检查
+    model_dict['model'](torch.rand(args.batch, args.input_size, args.input_size, 3))  # 检查
     return model_dict
 
 

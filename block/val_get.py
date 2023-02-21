@@ -32,7 +32,6 @@ class torch_dataset(torch.utils.data.Dataset):
         self.data = data
         self.transform = albumentations.Compose([
             albumentations.LongestMaxSize(args.input_size),
-            albumentations.Normalize(max_pixel_value=255, mean=args.rgb_mean, std=args.rgb_std),
             albumentations.PadIfNeeded(min_height=args.input_size, min_width=args.input_size,
                                        border_mode=cv2.BORDER_CONSTANT, value=(0, 0, 0))])
 
@@ -42,7 +41,7 @@ class torch_dataset(torch.utils.data.Dataset):
     def __getitem__(self, index):
         image = cv2.imread(self.data[index][0])  # 读取图片
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)  # 转为RGB通道
-        image = self.transform(image=image)['image']  # 归一化、减均值、除以方差
-        image = torch.tensor(image, dtype=torch.float32).permute(2, 0, 1)  # 转换为tensor
+        image = self.transform(image=image)['image']  # 缩放和填充图片
+        image = torch.tensor(image, dtype=torch.float32)  # 转换为tensor(归一化、减均值、除以方差、调维度等在模型中完成)
         label = torch.tensor(self.data[index][1], dtype=torch.float32)  # 转换为tensor
         return image, label

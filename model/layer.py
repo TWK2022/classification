@@ -1,6 +1,20 @@
 import torch
 
 
+class image_processing(torch.nn.Module):  # 归一化、减均值、除以方差
+    def __init__(self):
+        super().__init__()
+        self.rgb_mean = (0.406, 0.456, 0.485)
+        self.rgb_std = (0.225, 0.224, 0.229)
+
+    def forward(self, x):
+        x[..., 0] = (x[..., 0] / 255 - self.rgb_mean[0]) / self.rgb_std[0]
+        x[..., 1] = (x[..., 1] / 255 - self.rgb_mean[1]) / self.rgb_std[1]
+        x[..., 2] = (x[..., 2] / 255 - self.rgb_mean[2]) / self.rgb_std[2]
+        x = x.permute(0, 3, 1, 2)
+        return x
+
+
 class cbs(torch.nn.Module):
     def __init__(self, in_, out_, kernel_size, stride):
         super().__init__()
