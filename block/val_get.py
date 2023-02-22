@@ -20,9 +20,10 @@ def val_get(args, data_dict, model, loss):
         val_pred = torch.stack(val_pred, dim=0)
         val_true = torch.stack(val_true, dim=0)
         val_loss = loss(val_pred, val_true)
-        accuracy, precision, recall, m_ap = metric(val_pred, val_true)
-        print('\n| 验证集:{} | val_loss:{:.4f} | val_accuracy:{:.4f} | val_precision:{:.4f} | val_recall:{:.4f} |'
-              ' val_m_ap:{:.4f} |\n'.format(len(data_dict['val']), val_loss, accuracy, precision, recall, m_ap))
+        accuracy, precision, recall, m_ap = metric(val_pred, val_true, args.class_threshold)
+        print('\n| 验证集:{} | val_loss:{:.4f} | 阈值:{:.2f} | val_accuracy:{:.4f} | val_precision:{:.4f} |'
+              ' val_recall:{:.4f} | val_m_ap:{:.4f} |\n'
+              .format(len(data_dict['val']), val_loss, args.class_threshold, accuracy, precision, recall, m_ap))
     return val_loss, accuracy, precision, recall, m_ap
 
 
