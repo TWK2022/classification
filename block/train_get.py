@@ -42,10 +42,10 @@ def train_get(args, data_dict, model_dict, loss):
                 model_dict['epoch'] = epoch
                 model_dict['train_loss'] = train_loss
                 model_dict['val_loss'] = val_loss
-                model_dict['val_m_ap'] = m_ap
                 model_dict['val_accuracy'] = accuracy
                 model_dict['val_precision'] = precision
                 model_dict['val_recall'] = recall
+                model_dict['val_m_ap'] = m_ap
                 torch.save(model_dict, args.save_name)
                 print('\n| 保存模型:{} | val_loss:{:.4f} | val_m_ap:{:.4f} |\n'
                       .format(args.save_name, val_loss, m_ap))
