@@ -10,21 +10,21 @@ def val_get(args, data_dict, model, loss):
         model.eval().to(args.device, non_blocking=args.latch)
         dataloader = torch.utils.data.DataLoader(torch_dataset(args, data_dict['val']), batch_size=args.batch,
                                                  shuffle=False, drop_last=False, pin_memory=args.latch)
-        val_pred = []
-        val_true = []
-        for item, (val_batch, true_batch) in enumerate(tqdm.tqdm(dataloader)):
-            val_batch = val_batch.to(args.device, non_blocking=args.latch)
-            pred_batch = model(val_batch).detach().cpu()
-            val_pred.extend(pred_batch)
-            val_true.extend(true_batch)
-        val_pred = torch.stack(val_pred, dim=0)
-        val_true = torch.stack(val_true, dim=0)
-        val_loss = loss(val_pred, val_true)
-        accuracy, precision, recall, m_ap = metric(val_pred, val_true, args.class_threshold)
+        pred_all = []  # 记录所有预测
+        true_all = []  # 记录所有标签
+        for item, (image_batch, true_batch) in enumerate(tqdm.tqdm(dataloader)):
+            image_batch = image_batch.to(args.device, non_blocking=args.latch)
+            pred_batch = model(image_batch).detach().cpu()
+            pred_all.extend(pred_batch)
+            true_all.extend(true_batch)
+        pred_all = torch.stack(pred_all, dim=0)
+        true_all = torch.stack(true_all, dim=0)
+        loss_all = loss(pred_all, true_all)
+        accuracy, precision, recall, m_ap = metric(pred_all, true_all, args.class_threshold)
         print('\n| 验证集:{} | val_loss:{:.4f} | 阈值:{:.2f} | val_accuracy:{:.4f} | val_precision:{:.4f} |'
               ' val_recall:{:.4f} | val_m_ap:{:.4f} |\n'
-              .format(len(data_dict['val']), val_loss, args.class_threshold, accuracy, precision, recall, m_ap))
-    return val_loss, accuracy, precision, recall, m_ap
+              .format(len(data_dict['val']), loss_all, args.class_threshold, accuracy, precision, recall, m_ap))
+    return loss_all, accuracy, precision, recall, m_ap
 
 
 class torch_dataset(torch.utils.data.Dataset):

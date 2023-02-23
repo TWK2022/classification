@@ -18,10 +18,10 @@ def train_get(args, data_dict, model_dict, loss):
         dataloader = torch.utils.data.DataLoader(torch_dataset(args, data_dict['train']),
                                                  batch_size=args.batch, shuffle=True, drop_last=True,
                                                  pin_memory=args.latch)
-        for item, (train_batch, true_batch) in enumerate(tqdm.tqdm(dataloader)):
-            train_batch = train_batch.to(args.device, non_blocking=args.latch)
+        for item, (image_batch, true_batch) in enumerate(tqdm.tqdm(dataloader)):
+            image_batch = image_batch.to(args.device, non_blocking=args.latch)
             true_batch = true_batch.to(args.device, non_blocking=args.latch)
-            pred_batch = model(train_batch)
+            pred_batch = model(image_batch)
             loss_batch = loss(pred_batch, true_batch)
             train_loss += loss_batch.item()
             optimizer.zero_grad()
@@ -30,7 +30,7 @@ def train_get(args, data_dict, model_dict, loss):
         train_loss = train_loss / (item + 1)
         print('\n| 训练集:{} | train_loss:{:.4f} |\n'.format(len(data_dict['train']), train_loss))
         # 清理显存空间
-        del train_batch, true_batch, pred_batch, loss_batch
+        del image_batch, true_batch, pred_batch, loss_batch
         torch.cuda.empty_cache()
         # 验证
         val_loss, accuracy, precision, recall, m_ap = val_get(args, data_dict, model, loss)
@@ -39,8 +39,6 @@ def train_get(args, data_dict, model_dict, loss):
             if m_ap > model_dict['val_m_ap'] or m_ap == model_dict['val_m_ap'] and val_loss < model_dict['val_loss']:
                 model_dict['model'] = model
                 model_dict['class'] = data_dict['class']
-                model_dict['rgb_mean'] = args.rgb_mean
-                model_dict['rgb_std'] = args.rgb_std
                 model_dict['epoch'] = epoch
                 model_dict['train_loss'] = train_loss
                 model_dict['val_loss'] = val_loss
