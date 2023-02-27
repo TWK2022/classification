@@ -10,7 +10,7 @@ import albumentations
 parser = argparse.ArgumentParser(description='pt模型推理')
 parser.add_argument('--model_path', default='best.pt', type=str, help='|pt模型位置|')
 parser.add_argument('--image_path', default='image', type=str, help='|图片文件夹位置|')
-parser.add_argument('--input_size', default=160, type=int, help='|模型输入图片大小|')
+parser.add_argument('--input_size', default=640, type=int, help='|模型输入图片大小|')
 parser.add_argument('--batch', default=1, type=int, help='|输入图片批量|')
 parser.add_argument('--device', default='cuda', type=str, help='|用CPU/GPU推理|')
 parser.add_argument('--float16', default=True, type=bool, help='|推理数据类型，要支持float16的GPU，False时为float32|')
@@ -31,8 +31,6 @@ def test_pt():
     model_dict = torch.load(args.model_path, map_location='cpu')
     model = model_dict['model']
     model.half().eval().to(args.device) if args.float16 else model.float().eval().to(args.device)
-    args.rgb_mean = model_dict['rgb_mean']
-    args.rgb_std = model_dict['rgb_std']
     print('| 模型加载成功:{} |'.format(args.model_path))
     # 推理
     image_dir = sorted(os.listdir(args.image_path))
