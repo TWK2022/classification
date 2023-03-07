@@ -94,7 +94,7 @@ if __name__ == '__main__':
     model_dict = train_get(args, data_dict, model_dict, loss)
     # 显示结果
     try:
-        print('\n| 最佳结果 | train_loss:{:.4f} val_loss:{:.4f} | val_accuracy:{:.4f} | val_precision:{:.4f} |'
+        print('\n| 最佳结果 | train_loss:{:.4f} | val_loss:{:.4f} | val_accuracy:{:.4f} | val_precision:{:.4f} |'
               ' val_recall:{:.4f} | val_m_ap:{:.4f} |\n'
               .format(model_dict['train_loss'], model_dict['val_loss'], model_dict['val_accuracy'],
                       model_dict['val_precision'], model_dict['val_recall'], model_dict['val_m_ap']))
