@@ -47,8 +47,7 @@ def train_get(args, data_dict, model_dict, loss):
                 model_dict['val_recall'] = recall
                 model_dict['val_m_ap'] = m_ap
                 torch.save(model_dict, args.save_name)
-                print('\n| 保存模型:{} | val_loss:{:.4f} | val_m_ap:{:.4f} |\n'
-                      .format(args.save_name, val_loss, m_ap))
+                print('\n| 保存模型:{} | m_ap:{:.4f} |\n'.format(args.save_name, m_ap))
         # wandb
         if args.wandb:
             args.wandb_run.log({'metric/train_loss': train_loss, 'metric/val_loss': val_loss, 'metric/val_m_ap': m_ap,
