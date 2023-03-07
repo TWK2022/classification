@@ -56,7 +56,7 @@ class torch_dataset(torch.utils.data.Dataset):
         self.transform = albumentations.Compose([
             albumentations.LongestMaxSize(args.input_size),
             albumentations.PadIfNeeded(min_height=args.input_size, min_width=args.input_size,
-                                       border_mode=cv2.BORDER_CONSTANT, value=(0, 0, 0))])
+                                       border_mode=cv2.BORDER_CONSTANT, value=(127, 127, 127))])
 
     def __len__(self):
         return len(self.image_dir)
