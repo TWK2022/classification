@@ -34,7 +34,7 @@ parser.add_argument('--output_class', default=1, type=int, help='|输出的类�
 parser.add_argument('--epoch', default=20, type=int, help='|训练轮数|')
 parser.add_argument('--batch', default=8, type=int, help='|训练批量大小|')
 parser.add_argument('--loss', default='bce', type=str, help='|损失函数|')
-parser.add_argument('--lr', default=0.005, type=int, help='|初始学习率，训练中采用adam算法|')
+parser.add_argument('--lr', default=0.002, type=int, help='|初始学习率，训练中采用adam算法|')
 parser.add_argument('--device', default='cuda', type=str, help='|训练设备|')
 parser.add_argument('--latch', default=True, type=bool, help='|模型和数据是否为锁存，True为锁存|')
 parser.add_argument('--noise', default=True, type=bool, help='|训练数据加噪|')
