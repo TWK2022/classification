@@ -17,6 +17,7 @@ def val_get(args, data_dict, model, loss):
             pred_batch = model(image_batch).detach().cpu()
             pred_all.extend(pred_batch)
             true_all.extend(true_batch)
+        # 计算指标
         pred_all = torch.stack(pred_all, dim=0)
         true_all = torch.stack(true_all, dim=0)
         loss_all = loss(pred_all, true_all)
