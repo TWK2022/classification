@@ -15,16 +15,6 @@ class image_deal(torch.nn.Module):  # 归一化、减均值、除以方差
         return x
 
 
-class concat(torch.nn.Module):
-    def __init__(self):
-        super().__init__()
-        self.concat = torch.concat
-
-    def forward(self, x):
-        x = self.concat(x, dim=1)
-        return x
-
-
 class cbs(torch.nn.Module):
     def __init__(self, in_, out_, kernel_size, stride):
         super().__init__()
@@ -66,14 +56,25 @@ class mp1(torch.nn.Module):
         self.cbs1 = cbs(in_, in_ // 2, 1, 1)
         self.cbs2 = cbs(in_, in_ // 2, 1, 1)
         self.cbs3 = cbs(in_ // 2, in_ // 2, 3, 2)
-        self.concat4 = torch.concat
+        self.concat4 = concat(dim=1)
 
     def forward(self, x):
         x0 = self.maxpool0(x)
         x0 = self.cbs1(x0)
         x1 = self.cbs2(x)
         x1 = self.cbs3(x1)
-        x = self.concat4([x0, x1], dim=1)
+        x = self.concat4([x0, x1])
+        return x
+
+
+class concat(torch.nn.Module):
+    def __init__(self, dim):
+        super().__init__()
+        self.concat = torch.concat
+        self.dim = dim
+
+    def forward(self, x):
+        x = self.concat(x, dim=self.dim)
         return x
 
 
