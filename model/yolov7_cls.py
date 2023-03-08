@@ -1,5 +1,5 @@
 import torch
-from model.layer import image_deal, cbs, elan, mp1, sppcspc, linear_head
+from model.layer import image_deal, cbs, elan, mp, sppcspc, linear_head
 
 
 class yolov7_cls(torch.nn.Module):
@@ -18,11 +18,11 @@ class yolov7_cls(torch.nn.Module):
         self.l2 = cbs(2 * dim, 2 * dim, 1, 1)
         self.l3 = cbs(2 * dim, 4 * dim, 3, 2)  # input_size/4
         self.l4 = elan(4 * dim, 8 * dim, n)
-        self.l5 = mp1(8 * dim)  # input_size/8
+        self.l5 = mp(8 * dim, 8 * dim)  # input_size/8
         self.l6 = elan(8 * dim, 16 * dim, n)
-        self.l7 = mp1(16 * dim)  # input_size/16
+        self.l7 = mp(16 * dim, 16 * dim)  # input_size/16
         self.l8 = elan(16 * dim, 32 * dim, n)
-        self.l9 = mp1(32 * dim)  # input_size/32
+        self.l9 = mp(32 * dim, 32 * dim)  # input_size/32
         self.l10 = elan(32 * dim, 32 * dim, n)
         self.l11 = sppcspc(32 * dim, 16 * dim)
         self.l12 = cbs(16 * dim, 8 * dim, 1, 1)
@@ -49,7 +49,7 @@ class yolov7_cls(torch.nn.Module):
 
 if __name__ == '__main__':
     import argparse
-    from layer import image_deal, cbs, elan, mp1, linear_head
+    from layer import image_deal, cbs, elan, mp, linear_head
 
     parser = argparse.ArgumentParser(description='')
     parser.add_argument('--model_type', default='n', type=str)

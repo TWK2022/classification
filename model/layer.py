@@ -60,13 +60,13 @@ class elan(torch.nn.Module):  # in_->out_，len->len
         return x
 
 
-class mp1(torch.nn.Module):  # in_->in_，len->len//2
-    def __init__(self, in_):
+class mp(torch.nn.Module):  # in_->out_，len->len//2
+    def __init__(self, in_, out_):
         super().__init__()
         self.maxpool0 = torch.nn.MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1)
-        self.cbs1 = cbs(in_, in_ // 2, 1, 1)
-        self.cbs2 = cbs(in_, in_ // 2, 1, 1)
-        self.cbs3 = cbs(in_ // 2, in_ // 2, 3, 2)
+        self.cbs1 = cbs(in_, out_ // 2, 1, 1)
+        self.cbs2 = cbs(in_, out_ // 2, 1, 1)
+        self.cbs3 = cbs(out_ // 2, out_ // 2, 3, 2)
         self.concat4 = concat(dim=1)
 
     def forward(self, x):
