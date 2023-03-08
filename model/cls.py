@@ -46,7 +46,7 @@ if __name__ == '__main__':
     from layer import image_deal, cbs, elan, mp1, linear_head
 
     parser = argparse.ArgumentParser(description='')
-    parser.add_argument('--model_type', default='m', type=str)
+    parser.add_argument('--model_type', default='n', type=str)
     parser.add_argument('--input_size', default=640, type=int)
     parser.add_argument('--output_class', default=2, type=int)
     args = parser.parse_args()
