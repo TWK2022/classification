@@ -40,7 +40,7 @@ class cbs(torch.nn.Module):
         return x
 
 
-class elan(torch.nn.Module):
+class elan(torch.nn.Module):  # in_->out_，len->len
     def __init__(self, in_, out_, n):
         super().__init__()
         self.cbs0 = cbs(in_, out_ // 4, kernel_size=1, stride=1)
@@ -60,7 +60,7 @@ class elan(torch.nn.Module):
         return x
 
 
-class mp1(torch.nn.Module):
+class mp1(torch.nn.Module):  # in_->in_，len->len//2
     def __init__(self, in_):
         super().__init__()
         self.maxpool0 = torch.nn.MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1)
@@ -78,8 +78,8 @@ class mp1(torch.nn.Module):
         return x
 
 
-class sppcspc(torch.nn.Module):
-    def __init__(self, in_):
+class sppcspc(torch.nn.Module):  # in_->out_，len->len
+    def __init__(self, in_, out_):
         super().__init__()
         self.cbs0 = cbs(in_, in_ // 2, kernel_size=1, stride=1)
         self.cbs1 = cbs(in_, in_ // 2, kernel_size=1, stride=1)
@@ -92,7 +92,7 @@ class sppcspc(torch.nn.Module):
         self.cbs8 = cbs(2 * in_, in_ // 2, kernel_size=1, stride=1)
         self.cbs9 = cbs(in_ // 2, in_ // 2, kernel_size=3, stride=1)
         self.concat10 = concat(dim=1)
-        self.cbs11 = cbs(in_, in_ // 2, kernel_size=1, stride=1)
+        self.cbs11 = cbs(in_, out_, kernel_size=1, stride=1)
 
     def forward(self, x):
         x0 = self.cbs0(x)
@@ -108,6 +108,7 @@ class sppcspc(torch.nn.Module):
         x = self.concat10([x, x0])
         x = self.cbs11(x)
         return x
+
 
 
 class linear_head(torch.nn.Module):
