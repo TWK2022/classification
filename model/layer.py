@@ -15,6 +15,16 @@ class image_deal(torch.nn.Module):  # 归一化、减均值、除以方差
         return x
 
 
+class concat(torch.nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.concat = torch.concat
+
+    def forward(self, x):
+        x = self.concat(x, dim=1)
+        return x
+
+
 class cbs(torch.nn.Module):
     def __init__(self, in_, out_, kernel_size, stride):
         super().__init__()
@@ -36,7 +46,7 @@ class elan(torch.nn.Module):
         self.cbs1 = cbs(in_, in_ // 2, kernel_size=1, stride=1)
         self.sequential2 = torch.nn.Sequential(*(cbs(in_ // 2, in_ // 2, kernel_size=3, stride=1) for _ in range(n)))
         self.sequential3 = torch.nn.Sequential(*(cbs(in_ // 2, in_ // 2, kernel_size=3, stride=1) for _ in range(n)))
-        self.concat4 = torch.concat
+        self.concat4 = concat()
         self.cbs5 = cbs(2 * in_, 2 * in_, kernel_size=1, stride=1)
 
     def forward(self, x):
@@ -44,7 +54,7 @@ class elan(torch.nn.Module):
         x1 = self.cbs1(x)
         x2 = self.sequential2(x1)
         x3 = self.sequential3(x2)
-        x = self.concat4([x0, x1, x2, x3], dim=1)
+        x = self.concat4([x0, x1, x2, x3])
         x = self.cbs5(x)
         return x
 
