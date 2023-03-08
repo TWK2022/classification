@@ -10,9 +10,9 @@ def train_get(args, data_dict, model_dict, loss):
     optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
     for epoch in range(args.epoch):
         # 训练
-        print('\n-----------------------------------------------')
-        print('| 第{}轮 | 训练集:{} | 批量:{} |\n'
-              .format(epoch + 1, len(data_dict['train']), args.batch))
+        print(f'\n-----------------------第{epoch + 1}轮-----------------------')
+        print('| 训练集:{} | 批量:{} |\n'
+              .format(len(data_dict['train']), args.batch))
         model.train().to(args.device, non_blocking=args.latch)
         train_loss = 0  # 记录训练损失
         dataloader = torch.utils.data.DataLoader(torch_dataset(args, data_dict['train']),
