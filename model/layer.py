@@ -15,6 +15,17 @@ class image_deal(torch.nn.Module):  # 归一化、减均值、除以方差
         return x
 
 
+class concat(torch.nn.Module):
+    def __init__(self, dim=1):
+        super().__init__()
+        self.concat = torch.concat
+        self.dim = dim
+
+    def forward(self, x):
+        x = self.concat(x, dim=self.dim)
+        return x
+
+
 class cbs(torch.nn.Module):
     def __init__(self, in_, out_, kernel_size, stride):
         super().__init__()
@@ -30,14 +41,14 @@ class cbs(torch.nn.Module):
 
 
 class elan(torch.nn.Module):
-    def __init__(self, in_, n):
+    def __init__(self, in_, out_, n):
         super().__init__()
-        self.cbs0 = cbs(in_, in_ // 2, kernel_size=1, stride=1)
-        self.cbs1 = cbs(in_, in_ // 2, kernel_size=1, stride=1)
-        self.sequential2 = torch.nn.Sequential(*(cbs(in_ // 2, in_ // 2, kernel_size=3, stride=1) for _ in range(n)))
-        self.sequential3 = torch.nn.Sequential(*(cbs(in_ // 2, in_ // 2, kernel_size=3, stride=1) for _ in range(n)))
+        self.cbs0 = cbs(in_, out_ // 4, kernel_size=1, stride=1)
+        self.cbs1 = cbs(in_, out_ // 4, kernel_size=1, stride=1)
+        self.sequential2 = torch.nn.Sequential(*(cbs(out_ // 4, out_ // 4, kernel_size=3, stride=1) for _ in range(n)))
+        self.sequential3 = torch.nn.Sequential(*(cbs(out_ // 4, out_ // 4, kernel_size=3, stride=1) for _ in range(n)))
         self.concat4 = concat()
-        self.cbs5 = cbs(2 * in_, 2 * in_, kernel_size=1, stride=1)
+        self.cbs5 = cbs(out_, out_, kernel_size=1, stride=1)
 
     def forward(self, x):
         x0 = self.cbs0(x)
@@ -67,14 +78,35 @@ class mp1(torch.nn.Module):
         return x
 
 
-class concat(torch.nn.Module):
-    def __init__(self, dim=1):
+class sppcspc(torch.nn.Module):
+    def __init__(self, in_):
         super().__init__()
-        self.concat = torch.concat
-        self.dim = dim
+        self.cbs0 = cbs(in_, in_ // 2, kernel_size=1, stride=1)
+        self.cbs1 = cbs(in_, in_ // 2, kernel_size=1, stride=1)
+        self.cbs2 = cbs(in_ // 2, in_ // 2, kernel_size=3, stride=1)
+        self.cbs3 = cbs(in_ // 2, in_ // 2, kernel_size=1, stride=1)
+        self.MaxPool2d4 = torch.nn.MaxPool2d(kernel_size=5, stride=1, padding=2, dilation=1)
+        self.MaxPool2d5 = torch.nn.MaxPool2d(kernel_size=9, stride=1, padding=4, dilation=1)
+        self.MaxPool2d6 = torch.nn.MaxPool2d(kernel_size=13, stride=1, padding=6, dilation=1)
+        self.concat7 = concat(dim=1)
+        self.cbs8 = cbs(2 * in_, in_ // 2, kernel_size=1, stride=1)
+        self.cbs9 = cbs(in_ // 2, in_ // 2, kernel_size=3, stride=1)
+        self.concat10 = concat(dim=1)
+        self.cbs11 = cbs(in_, in_ // 2, kernel_size=1, stride=1)
 
     def forward(self, x):
-        x = self.concat(x, dim=self.dim)
+        x0 = self.cbs0(x)
+        x1 = self.cbs1(x)
+        x1 = self.cbs2(x1)
+        x1 = self.cbs3(x1)
+        x4 = self.MaxPool2d4(x1)
+        x5 = self.MaxPool2d5(x1)
+        x6 = self.MaxPool2d6(x1)
+        x = self.concat7([x1, x4, x5, x6])
+        x = self.cbs8(x)
+        x = self.cbs9(x)
+        x = self.concat10([x, x0])
+        x = self.cbs11(x)
         return x
 
 

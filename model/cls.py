@@ -1,5 +1,5 @@
 import torch
-from model.layer import image_deal, cbs, elan, mp1, linear_head
+from model.layer import image_deal, cbs, elan, mp1, sppcspc, linear_head
 
 
 class cls(torch.nn.Module):
@@ -17,13 +17,15 @@ class cls(torch.nn.Module):
         self.l1 = cbs(dim, 2 * dim, 3, 2)  # input_size/2
         self.l2 = cbs(2 * dim, 2 * dim, 1, 1)
         self.l3 = cbs(2 * dim, 4 * dim, 3, 2)  # input_size/4
-        self.l4 = elan(4 * dim, n)
+        self.l4 = elan(4 * dim, 8 * dim, n)
         self.l5 = mp1(8 * dim)  # input_size/8
-        self.l6 = elan(8 * dim, n)
+        self.l6 = elan(8 * dim, 16 * dim, n)
         self.l7 = mp1(16 * dim)  # input_size/16
-        self.l8 = elan(16 * dim, n)
+        self.l8 = elan(16 * dim, 32 * dim, n)
         self.l9 = mp1(32 * dim)  # input_size/32
-        self.l10 = linear_head(32 * dim, self.output_class)
+        self.l10 = elan(32 * dim, 32 * dim, n)
+        self.l11 = sppcspc(32 * dim)
+        self.l12 = linear_head(16 * dim, self.output_class)
 
     def forward(self, x):
         x = self.image_deal(x)
@@ -38,6 +40,8 @@ class cls(torch.nn.Module):
         x = self.l8(x)
         x = self.l9(x)
         x = self.l10(x)
+        x = self.l11(x)
+        x = self.l12(x)
         return x
 
 
