@@ -23,7 +23,7 @@ def val_get(args, data_dict, model, loss):
         loss_all = loss(pred_all, true_all)
         accuracy, precision, recall, m_ap = metric(pred_all, true_all, args.class_threshold)
         print('\n| 验证集:{} | val_loss:{:.4f} | 阈值:{:.2f} | val_accuracy:{:.4f} | val_precision:{:.4f} |'
-              ' val_recall:{:.4f} | val_m_ap:{:.4f} |\n'
+              ' val_recall:{:.4f} | val_m_ap:{:.4f} |'
               .format(len(data_dict['val']), loss_all, args.class_threshold, accuracy, precision, recall, m_ap))
     return loss_all, accuracy, precision, recall, m_ap
 
