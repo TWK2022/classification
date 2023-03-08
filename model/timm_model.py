@@ -1,19 +1,19 @@
 import timm
 import torch
-from model.layer import image_processing, linear_head
+from model.layer import image_deal, linear_head
 
 
 class timm_model(torch.nn.Module):
     def __init__(self, args):
         super().__init__()
         self.args = args
-        self.image_processing = image_processing()
+        self.image_deal = image_deal()
         self.backbone = timm.create_model(args.model, in_chans=3, features_only=True, exportable=True)
         out_dim = self.backbone.feature_info.channels()[-1]  # backbone输出有多个，接最后一个输出，并得到其通道数
         self.linear_head = linear_head(out_dim, args.output_class)
 
     def forward(self, x):
-        x = self.image_processing(x)
+        x = self.image_deal(x)
         x = self.backbone(x)
         x = self.linear_head(x[-1])
         return x
@@ -21,7 +21,7 @@ class timm_model(torch.nn.Module):
 
 if __name__ == '__main__':
     import argparse
-    from layer import image_processing, linear_head
+    from layer import image_deal, linear_head
 
     parser = argparse.ArgumentParser(description='')
     parser.add_argument('--model', default='efficientnetv2_s', type=str)

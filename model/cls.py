@@ -1,5 +1,5 @@
 import torch
-from model.layer import image_processing, cbs, elan, mp1, linear_head
+from model.layer import image_deal, cbs, elan, mp1, linear_head
 
 
 class cls(torch.nn.Module):
@@ -12,7 +12,7 @@ class cls(torch.nn.Module):
         dim = dim_dict[args.model_type]
         n = n_dict[args.model_type]
         # 网络结构
-        self.image_processing = image_processing()
+        self.image_deal = image_deal()
         self.l0 = cbs(3, dim, 1, 1)
         self.l1 = cbs(dim, 2 * dim, 3, 2)  # input_size/2
         self.l2 = cbs(2 * dim, 2 * dim, 1, 1)
@@ -26,7 +26,7 @@ class cls(torch.nn.Module):
         self.l10 = linear_head(32 * dim, self.output_class)
 
     def forward(self, x):
-        x = self.image_processing(x)
+        x = self.image_deal(x)
         x = self.l0(x)
         x = self.l1(x)
         x = self.l2(x)
@@ -43,7 +43,7 @@ class cls(torch.nn.Module):
 
 if __name__ == '__main__':
     import argparse
-    from layer import image_processing, cbs, elan, mp1, linear_head
+    from layer import image_deal, cbs, elan, mp1, linear_head
 
     parser = argparse.ArgumentParser(description='')
     parser.add_argument('--model_type', default='s', type=str)

@@ -1,7 +1,7 @@
 import torch
 
 
-class image_processing(torch.nn.Module):  # 归一化、减均值、除以方差
+class image_deal(torch.nn.Module):  # 归一化、减均值、除以方差
     def __init__(self):
         super().__init__()
         self.rgb_mean = (0.406, 0.456, 0.485)
