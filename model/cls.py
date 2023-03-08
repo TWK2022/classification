@@ -25,7 +25,8 @@ class cls(torch.nn.Module):
         self.l9 = mp1(32 * dim)  # input_size/32
         self.l10 = elan(32 * dim, 32 * dim, n)
         self.l11 = sppcspc(32 * dim)
-        self.l12 = linear_head(16 * dim, self.output_class)
+        self.l12 = cbs(16 * dim, 8 * dim, 1, 1)
+        self.l13 = linear_head(8 * dim, self.output_class)
 
     def forward(self, x):
         x = self.image_deal(x)
@@ -42,6 +43,7 @@ class cls(torch.nn.Module):
         x = self.l10(x)
         x = self.l11(x)
         x = self.l12(x)
+        x = self.l13(x)
         return x
 
 
