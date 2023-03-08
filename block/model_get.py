@@ -9,7 +9,7 @@ def model_get(args):
         if args.timm:
             model = model_prepare(args)._timm_model()
         else:
-            choice_dict = {'cls': 'model_prepare(args)._cls()'}
+            choice_dict = {'yolov7_cls': 'model_prepare(args)._yolov7_cls()'}
             model = eval(choice_dict[args.model])
         model_dict = {}
         model_dict['model'] = model
@@ -29,9 +29,9 @@ class model_prepare(object):
         model = timm_model(self.args)
         return model
 
-    def _cls(self):
-        from model.cls import cls
-        model = cls(self.args)
+    def _yolov7_cls(self):
+        from model.yolov7_cls import yolov7_cls
+        model = yolov7_cls(self.args)
         return model
 
 

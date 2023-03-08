@@ -27,7 +27,7 @@ parser.add_argument('--wandb_name', default='train', type=str, help='|wandb项�
 parser.add_argument('--save_name', default='best.pt', type=str, help='|保存模型的位置|')
 parser.add_argument('--weight', default='best.pt', type=str, help='|已有模型的位置，如果没找到模型则会创建新模型|')
 parser.add_argument('--timm', default=False, type=bool, help='|是否使用timm模型|')
-parser.add_argument('--model', default='cls', type=str, help='|模型选择，timm为True时为timm库中的模型，否则为自定义模型|')
+parser.add_argument('--model', default='yolov7_cls', type=str, help='|模型选择，timm为True时为timm库中的模型，否则为自定义模型|')
 parser.add_argument('--model_type', default='n', type=str, help='|自定义模型的型号参数，部分模型有|')
 parser.add_argument('--input_size', default=640, type=int, help='|输入图片大小|')
 parser.add_argument('--output_class', default=1, type=int, help='|输出的类别数|')
