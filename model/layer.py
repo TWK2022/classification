@@ -19,7 +19,7 @@ class cbs(torch.nn.Module):
     def __init__(self, in_, out_, kernel_size, stride):
         super().__init__()
         self.conv = torch.nn.Conv2d(in_, out_, kernel_size=kernel_size, stride=stride, padding=(kernel_size - 1) // 2)
-        self.bn = torch.nn.BatchNorm2d(out_)
+        self.bn = torch.nn.BatchNorm2d(out_, eps=0.001, momentum=0.03)
         self.silu = torch.nn.SiLU()
 
     def forward(self, x):
