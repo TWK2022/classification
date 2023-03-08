@@ -68,7 +68,7 @@ class mp1(torch.nn.Module):
 
 
 class concat(torch.nn.Module):
-    def __init__(self, dim):
+    def __init__(self, dim=1):
         super().__init__()
         self.concat = torch.concat
         self.dim = dim
