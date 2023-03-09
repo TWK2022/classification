@@ -42,7 +42,6 @@ parser.add_argument('--class_threshold', default=0.5, type=float, help='|计算�
 args = parser.parse_args()
 args.weight = args.weight.split('.')[0] + '.pt'
 args.save_name = args.save_name.split('.')[0] + '.pt'
-print('| args:{} |'.format(args))
 # 为CPU设置随机种子
 torch.manual_seed(999)
 # 为所有GPU设置随机种子
@@ -79,6 +78,7 @@ if args.device.lower() in ['cuda', 'gpu']:  # 检查训练设备
     args.device = 'cuda'
 else:
     args.device = 'cpu'
+print('| args:{} |'.format(args))
 # -------------------------------------------------------------------------------------------------------------------- #
 # 程序
 if __name__ == '__main__':
