@@ -4,7 +4,7 @@
 >在argparse中可以选择使用wandb，能在wandb网站中生成可视化的训练过程  
 >输入模型的图片要为固定大小、RGB通道(如batch,640,640,3)，图片四周的填充值为(127,127,127)  
 >归一化、减均值、除以方差、维度变换会在模型中会自动完成  
->github链接:https://github.com/TWK2022/classification  
+>github链接:https://github.com/TWK2022/classification
 ### 数据格式如下  
 >├── 数据集路径：data_path  
 >&emsp; &emsp; └── image：存放所有图片  
