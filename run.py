@@ -41,8 +41,6 @@ parser.add_argument('--num_worker', default=0, type=int, help='|CPU在处理数�
 parser.add_argument('--noise', default=True, type=bool, help='|训练数据加噪|')
 parser.add_argument('--class_threshold', default=0.5, type=float, help='|计算指标时，大于阈值判定为图片有该类别|')
 args = parser.parse_args()
-args.weight = args.weight.split('.')[0] + '.pt'
-args.save_name = args.save_name.split('.')[0] + '.pt'
 # 为CPU设置随机种子
 torch.manual_seed(999)
 # 为所有GPU设置随机种子
