@@ -5,15 +5,12 @@ import albumentations
 from block.metric_get import metric
 
 
-def val_get(args, data_dict, model, loss):
+def val_get(args, val_dataloader, model, loss):
     with torch.no_grad():
-        model.eval().to(args.device, non_blocking=args.latch)
-        dataloader = torch.utils.data.DataLoader(torch_dataset(args, data_dict['val']), batch_size=args.batch,
-                                                 shuffle=False, drop_last=False, pin_memory=args.latch,
-                                                 num_workers=args.num_worker)
+        model.eval()
         pred_all = []  # 记录所有预测
         true_all = []  # 记录所有标签
-        for item, (image_batch, true_batch) in enumerate(tqdm.tqdm(dataloader)):
+        for item, (image_batch, true_batch) in enumerate(tqdm.tqdm(val_dataloader)):
             image_batch = image_batch.to(args.device, non_blocking=args.latch)
             pred_batch = model(image_batch).detach().cpu()
             pred_all.extend(pred_batch)
@@ -23,9 +20,9 @@ def val_get(args, data_dict, model, loss):
         true_all = torch.stack(true_all, dim=0)
         loss_all = loss(pred_all, true_all)
         accuracy, precision, recall, m_ap = metric(pred_all, true_all, args.class_threshold)
-        print('\n| 验证集:{} | val_loss:{:.4f} | 阈值:{:.2f} | val_accuracy:{:.4f} | val_precision:{:.4f} |'
+        print('\n| val_loss:{:.4f} | 阈值:{:.2f} | val_accuracy:{:.4f} | val_precision:{:.4f} |'
               ' val_recall:{:.4f} | val_m_ap:{:.4f} |'
-              .format(len(data_dict['val']), loss_all, args.class_threshold, accuracy, precision, recall, m_ap))
+              .format(loss_all, args.class_threshold, accuracy, precision, recall, m_ap))
     return loss_all, accuracy, precision, recall, m_ap
 
 

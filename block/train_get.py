@@ -1,6 +1,8 @@
 import cv2
 import tqdm
+import wandb
 import torch
+import numpy as np
 import albumentations
 from block.val_get import val_get
 
@@ -8,15 +10,19 @@ from block.val_get import val_get
 def train_get(args, data_dict, model_dict, loss):
     model = model_dict['model']
     optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
+    train_dataloader = torch.utils.data.DataLoader(torch_dataset(args, 'train', data_dict['train'], data_dict['class']),
+                                                   batch_size=args.batch, shuffle=True, drop_last=True,
+                                                   pin_memory=args.latch, num_workers=args.num_worker)
+    val_dataloader = torch.utils.data.DataLoader(torch_dataset(args, 'val', data_dict['val'], data_dict['class']),
+                                                 batch_size=args.batch, shuffle=False, drop_last=False,
+                                                 pin_memory=args.latch, num_workers=args.num_worker)
     for epoch in range(args.epoch):
         # 训练
         print(f'\n-----------------------第{epoch + 1}轮-----------------------')
-        model.train().to(args.device, non_blocking=args.latch)
+        model.train()
         train_loss = 0  # 记录训练损失
-        dataloader = torch.utils.data.DataLoader(torch_dataset(args, data_dict['train']),
-                                                 batch_size=args.batch, shuffle=True, drop_last=True,
-                                                 pin_memory=args.latch, num_workers=args.num_worker)
-        for item, (image_batch, true_batch) in enumerate(tqdm.tqdm(dataloader)):
+
+        for item, (image_batch, true_batch) in enumerate(tqdm.tqdm(train_dataloader)):
             image_batch = image_batch.to(args.device, non_blocking=args.latch)
             true_batch = true_batch.to(args.device, non_blocking=args.latch)
             pred_batch = model(image_batch)
@@ -31,7 +37,7 @@ def train_get(args, data_dict, model_dict, loss):
         del image_batch, true_batch, pred_batch, loss_batch
         torch.cuda.empty_cache()
         # 验证
-        val_loss, accuracy, precision, recall, m_ap = val_get(args, data_dict, model, loss)
+        val_loss, accuracy, precision, recall, m_ap = val_get(args, val_dataloader, model, loss)
         # 保存
         if m_ap > 0.8:
             if m_ap > model_dict['val_m_ap'] or m_ap == model_dict['val_m_ap'] and val_loss < model_dict['val_loss']:
@@ -55,9 +61,11 @@ def train_get(args, data_dict, model_dict, loss):
 
 
 class torch_dataset(torch.utils.data.Dataset):
-    def __init__(self, args, data):
-        self.args = args
+    def __init__(self, args, tag, data, class_name):
+        self.tag = tag
         self.data = data
+        self.class_name = class_name
+        self.use_noise = args.noise
         self.noise = albumentations.Compose([
             albumentations.GaussianBlur(blur_limit=(5, 5), p=0.2),
             albumentations.GaussNoise(var_limit=(10.0, 30.0), p=0.2)])
@@ -65,6 +73,12 @@ class torch_dataset(torch.utils.data.Dataset):
             albumentations.LongestMaxSize(args.input_size),
             albumentations.PadIfNeeded(min_height=args.input_size, min_width=args.input_size,
                                        border_mode=cv2.BORDER_CONSTANT, value=(127, 127, 127))])
+        # wandb可视化部分
+        if args.wandb:
+            self.class_name = class_name
+            self.wandb = args.wandb
+            self.wandb_run = args.wandb_run
+            self.wandb_num = 0  # 用于限制添加的图片数量(最多添加20张)
 
     def __len__(self):
         return len(self.data)
@@ -72,9 +86,20 @@ class torch_dataset(torch.utils.data.Dataset):
     def __getitem__(self, index):
         image = cv2.imread(self.data[index][0])  # 读取图片
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)  # 转为RGB通道
-        if self.args.noise:  # 使用数据加噪
+        if self.tag == 'train' and self.use_noise:  # 使用数据加噪
             image = self.noise(image=image)['image']
         image = self.transform(image=image)['image']  # 缩放和填充图片
         image = torch.tensor(image, dtype=torch.float32)  # 转换为tensor(归一化、减均值、除以方差、调维度等在模型中完成)
         label = torch.tensor(self.data[index][1], dtype=torch.float32)  # 转换为tensor
+        # 使用wandb添加图片
+        if self.wandb and self.wandb_num < 20:
+            text = ''
+            for i in range(len(label)):
+                text += str(int(label[i].item())) + '-'
+            text = text[:-1]
+            wandb_image = np.array(image, dtype=np.uint8)
+            cv2.putText(wandb_image, text, (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+            wandb_image = wandb.Image(wandb_image)
+            self.wandb_run.log({f'image/{self.tag}_image': wandb_image})
+            self.wandb_num += 1
         return image, label
