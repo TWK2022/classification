@@ -22,7 +22,7 @@ from block.train_get import train_get
 # 设置
 parser = argparse.ArgumentParser(description='分类任务')
 parser.add_argument('--data_path', default=r'D:\dataset\classification\mask', type=str, help='|数据根目录路径|')
-parser.add_argument('--wandb', default=True, type=bool, help='|是否使用wandb可视化|')
+parser.add_argument('--wandb', default=False, type=bool, help='|是否使用wandb可视化|')
 parser.add_argument('--wandb_project', default='test', type=str, help='|wandb项目名称|')
 parser.add_argument('--wandb_name', default='train', type=str, help='|wandb项目中的训练名称|')
 parser.add_argument('--save_name', default='best.pt', type=str, help='|保存模型的位置|')
