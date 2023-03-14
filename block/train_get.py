@@ -74,9 +74,9 @@ class torch_dataset(torch.utils.data.Dataset):
             albumentations.PadIfNeeded(min_height=args.input_size, min_width=args.input_size,
                                        border_mode=cv2.BORDER_CONSTANT, value=(127, 127, 127))])
         # wandb可视化部分
-        if args.wandb:
+        self.wandb = args.wandb
+        if self.wandb:
             self.class_name = class_name
-            self.wandb = args.wandb
             self.wandb_run = args.wandb_run
             self.wandb_num = 0  # 用于限制添加的图片数量(最多添加20张)
 
