@@ -26,7 +26,7 @@ if args.float16:
 def export_onnx():
     model_dict = torch.load(args.weight, map_location='cpu')
     model = model_dict['model']
-    model.half().eval().to(args.device) if args.float16 else model.float().eval().to(args.device)
+    model.eval().half().to(args.device) if args.float16 else model.eval().float().to(args.device)
     input_shape = torch.zeros(1, args.input_size, args.input_size, 3,
                               dtype=torch.float16 if args.float16 else torch.float32).to(args.device)
     torch.onnx.export(model, input_shape, args.save_name,
