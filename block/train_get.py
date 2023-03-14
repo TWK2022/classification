@@ -54,8 +54,11 @@ def train_get(args, data_dict, model_dict, loss):
                 print('\n| 保存模型:{} | m_ap:{:.4f} |\n'.format(args.save_name, m_ap))
         # wandb
         if args.wandb:
-            args.wandb_run.log({'metric/train_loss': train_loss, 'metric/val_loss': val_loss, 'metric/val_m_ap': m_ap,
-                                'metric/val_accuracy': accuracy, 'metric/val_precision': precision,
+            args.wandb_run.log({'metric/train_loss': train_loss,
+                                'metric/val_loss': val_loss,
+                                'metric/val_m_ap': m_ap,
+                                'metric/val_accuracy': accuracy,
+                                'metric/val_precision': precision,
                                 'metric/val_recall': recall})
     return model_dict
 
