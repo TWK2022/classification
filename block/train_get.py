@@ -28,9 +28,15 @@ def train_get(args, data_dict, model_dict, loss):
             pred_batch = model(image_batch)
             loss_batch = loss(pred_batch, true_batch)
             train_loss += loss_batch.item()
+            # 更新参数
             optimizer.zero_grad()
-            loss_batch.backward()
-            optimizer.step()
+            if args.scaler:
+                args.scaler.scale(loss_batch).backward()
+                args.scaler.step(optimizer)
+                args.scaler.update()
+            else:
+                loss_batch.backward()
+                optimizer.step()
         train_loss = train_loss / (item + 1)
         print('\n| 训练集:{} | train_loss:{:.4f} |\n'.format(len(data_dict['train']), train_loss))
         # 清理显存空间
