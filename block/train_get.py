@@ -21,22 +21,25 @@ def train_get(args, data_dict, model_dict, loss):
         print(f'\n-----------------------第{epoch + 1}轮-----------------------')
         model.train()
         train_loss = 0  # 记录训练损失
-
         for item, (image_batch, true_batch) in enumerate(tqdm.tqdm(train_dataloader)):
             image_batch = image_batch.to(args.device, non_blocking=args.latch)
             true_batch = true_batch.to(args.device, non_blocking=args.latch)
-            pred_batch = model(image_batch)
-            loss_batch = loss(pred_batch, true_batch)
-            train_loss += loss_batch.item()
-            # 更新参数
-            optimizer.zero_grad()
             if args.scaler:
-                args.scaler.scale(loss_batch).backward()
-                args.scaler.step(optimizer)
-                args.scaler.update()
+                with torch.cuda.amp.autocast():
+                    pred_batch = model(image_batch)
+                    loss_batch = loss(pred_batch, true_batch)
+                    optimizer.zero_grad()
+                    args.scaler.scale(loss_batch).backward()
+                    args.scaler.step(optimizer)
+                    args.scaler.update()
             else:
+                pred_batch = model(image_batch)
+                loss_batch = loss(pred_batch, true_batch)
+                optimizer.zero_grad()
                 loss_batch.backward()
                 optimizer.step()
+            # 记录损失
+            train_loss += loss_batch.item()
         train_loss = train_loss / (item + 1)
         print('\n| 训练集:{} | train_loss:{:.4f} |\n'.format(len(data_dict['train']), train_loss))
         # 清理显存空间
@@ -87,7 +90,8 @@ class torch_dataset(torch.utils.data.Dataset):
         if self.wandb:
             self.class_name = class_name
             self.wandb_run = args.wandb_run
-            self.wandb_num = 0  # 用于限制添加的图片数量(最多添加20张)
+            self.wandb_num = 0  # 用于限制添加的图片数量(最多添加args.wandb_image_num张)
+            self.wandb_image_num = args.wandb_image_num
 
     def __len__(self):
         return len(self.data)
@@ -101,7 +105,7 @@ class torch_dataset(torch.utils.data.Dataset):
         image = torch.tensor(image, dtype=torch.float32)  # 转换为tensor(归一化、减均值、除以方差、调维度等在模型中完成)
         label = torch.tensor(self.data[index][1], dtype=torch.float32)  # 转换为tensor
         # 使用wandb添加图片
-        if self.wandb and self.wandb_num < 20:
+        if self.wandb and self.wandb_num < self.wandb_image_num:
             text = ''
             for i in range(len(label)):
                 text += str(int(label[i].item())) + '-'
