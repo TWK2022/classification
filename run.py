@@ -103,4 +103,4 @@ if __name__ == '__main__':
               .format(model_dict['train_loss'], model_dict['val_loss'], model_dict['val_accuracy'],
                       model_dict['val_precision'], model_dict['val_recall'], model_dict['val_m_ap']))
     except:
-        print('\n| !由于指标太低没有保存任何结果! |\n')
+        print('\n| !由于指标太低没有保存最佳模型! |\n')
