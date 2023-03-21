@@ -91,7 +91,7 @@ class torch_dataset(torch.utils.data.Dataset):
             self.wandb_run = args.wandb_run
             self.wandb_count = 0  # 用于限制添加的图片数量(最多添加args.wandb_image_num张)
             self.wandb_image_num = args.wandb_image_num
-            self.wandb_image = []
+            self.wandb_image = []  # 记录所有的image最后一起添加
             self.class_name = class_name
 
     def __len__(self):
