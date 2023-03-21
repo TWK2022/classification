@@ -22,7 +22,7 @@ from block.train_get import train_get
 # 设置
 parser = argparse.ArgumentParser(description='分类任务')
 parser.add_argument('--data_path', default=r'D:\dataset\classification\mask', type=str, help='|数据根目录路径|')
-parser.add_argument('--wandb', default=False, type=bool, help='|是否使用wandb可视化|')
+parser.add_argument('--wandb', default=True, type=bool, help='|是否使用wandb可视化|')
 parser.add_argument('--wandb_project', default='test', type=str, help='|wandb项目名称|')
 parser.add_argument('--wandb_name', default='train', type=str, help='|wandb项目中的训练名称|')
 parser.add_argument('--wandb_image_num', default=10, type=int, help='|wandb保存图片的数量|')
@@ -31,7 +31,7 @@ parser.add_argument('--weight', default='best.pt', type=str, help='|已有模型
 parser.add_argument('--timm', default=False, type=bool, help='|是否使用timm模型|')
 parser.add_argument('--model', default='yolov7_cls', type=str, help='|模型选择，timm为True时为timm库中的模型，否则为自定义模型|')
 parser.add_argument('--model_type', default='n', type=str, help='|自定义模型的型号参数，部分模型有|')
-parser.add_argument('--input_size', default=160, type=int, help='|输入图片大小|')
+parser.add_argument('--input_size', default=320, type=int, help='|输入图片大小|')
 parser.add_argument('--output_class', default=1, type=int, help='|输出的类别数|')
 parser.add_argument('--epoch', default=20, type=int, help='|训练轮数|')
 parser.add_argument('--batch', default=8, type=int, help='|训练批量大小|')

@@ -11,7 +11,7 @@ import albumentations
 parser = argparse.ArgumentParser(description='onnx推理')
 parser.add_argument('--model_path', default='best.onnx', type=str, help='|onnx模型位置|')
 parser.add_argument('--image_path', default='image', type=str, help='|图片文件夹位置|')
-parser.add_argument('--input_size', default=640, type=int, help='|模型输入图片大小，要与导出的模型对应|')
+parser.add_argument('--input_size', default=320, type=int, help='|模型输入图片大小，要与导出的模型对应|')
 parser.add_argument('--batch', default=1, type=int, help='|输入图片批量，要与导出的模型对应|')
 parser.add_argument('--device', default='cuda', type=str, help='|用CPU/GPU推理|')
 parser.add_argument('--float16', default=True, type=bool, help='|推理数据类型，要与导出的模型对应，False时为float32|')

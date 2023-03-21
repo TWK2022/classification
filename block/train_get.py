@@ -88,10 +88,11 @@ class torch_dataset(torch.utils.data.Dataset):
         # wandb可视化部分
         self.wandb = args.wandb
         if self.wandb:
-            self.class_name = class_name
             self.wandb_run = args.wandb_run
-            self.wandb_num = 0  # 用于限制添加的图片数量(最多添加args.wandb_image_num张)
+            self.wandb_count = 0  # 用于限制添加的图片数量(最多添加args.wandb_image_num张)
             self.wandb_image_num = args.wandb_image_num
+            self.wandb_image = []
+            self.class_name = class_name
 
     def __len__(self):
         return len(self.data)
@@ -105,7 +106,8 @@ class torch_dataset(torch.utils.data.Dataset):
         image = torch.tensor(image, dtype=torch.float32)  # 转换为tensor(归一化、减均值、除以方差、调维度等在模型中完成)
         label = torch.tensor(self.data[index][1], dtype=torch.float32)  # 转换为tensor
         # 使用wandb添加图片
-        if self.wandb and self.wandb_num < self.wandb_image_num:
+        if self.wandb and self.wandb_count < self.wandb_image_num:
+            self.wandb_count += 1
             text = ''
             for i in range(len(label)):
                 text += str(int(label[i].item())) + '-'
@@ -113,6 +115,7 @@ class torch_dataset(torch.utils.data.Dataset):
             wandb_image = np.array(image, dtype=np.uint8)
             cv2.putText(wandb_image, text, (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
             wandb_image = wandb.Image(wandb_image)
-            self.wandb_run.log({f'image/{self.tag}_image': wandb_image})
-            self.wandb_num += 1
+            self.wandb_image.append(wandb_image)
+            if self.wandb_count == self.wandb_image_num:
+                self.wandb_run.log({f'image/{self.tag}_image': self.wandb_image})
         return image, label
