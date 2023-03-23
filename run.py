@@ -71,7 +71,7 @@ if os.path.exists(args.weight):  # 优先加载已有模型args.weight继续训�
 elif args.timm:  # 创建timm库中模型args.timm
     import timm
 
-    assert timm.list_models(args.model) != [], 'timm中没有此模型{}'.format(args.model)
+    assert timm.list_models(args.model), 'timm中没有此模型{}'.format(args.model)
     print('| 创建timm库中模型:{} |'.format(args.model))
 else:  # 创建自定义模型args.model
     assert os.path.exists('model/' + args.model + '.py'), '没有此自定义模型'.format(args.model)
