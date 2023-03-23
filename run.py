@@ -40,7 +40,7 @@ parser.add_argument('--lr', default=0.001, type=int, help='|初始学习率，�
 parser.add_argument('--device', default='cuda', type=str, help='|训练设备|')
 parser.add_argument('--latch', default=True, type=bool, help='|模型和数据是否为锁存，True为锁存|')
 parser.add_argument('--num_worker', default=0, type=int, help='|CPU在处理数据时使用的进程数，0表示只有一个主进程，一般为0、2、4、8|')
-parser.add_argument('--scaler', default=False, type=bool, help='|混合float16精度训练|')
+parser.add_argument('--scaler', default=True, type=bool, help='|混合float16精度训练|')
 parser.add_argument('--noise', default=True, type=bool, help='|训练数据加噪|')
 parser.add_argument('--class_threshold', default=0.5, type=float, help='|计算指标时，大于阈值判定为图片有该类别|')
 args = parser.parse_args()

@@ -107,16 +107,22 @@ class torch_dataset(torch.utils.data.Dataset):
             albumentations.LongestMaxSize(args.input_size),
             albumentations.PadIfNeeded(min_height=args.input_size, min_width=args.input_size,
                                        border_mode=cv2.BORDER_CONSTANT, value=(127, 127, 127))])
+        self.rgb_mean = (0.406, 0.456, 0.485)
+        self.rgb_std = (0.225, 0.224, 0.229)
 
     def __len__(self):
         return len(self.data)
 
     def __getitem__(self, index):
         image = cv2.imread(self.data[index][0])  # 读取图片
-        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)  # 转为RGB通道
         if self.tag == 'train' and self.use_noise:  # 使用数据加噪
             image = self.noise(image=image)['image']
         image = self.transform(image=image)['image']  # 缩放和填充图片
-        image = torch.tensor(image, dtype=torch.float32)  # 转换为tensor(归一化、减均值、除以方差、调维度等在模型中完成)
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)  # 转为RGB通道
+        image = self._image_deal(image)  # 归一化、转换为tensor、调维度
         label = torch.tensor(self.data[index][1], dtype=torch.float32)  # 转换为tensor
         return image, label
+
+    def _image_deal(self, image):  # 归一化、转换为tensor、调维度
+        image = torch.tensor(image / 255, dtype=torch.float32).permute(2, 0, 1)
+        return image

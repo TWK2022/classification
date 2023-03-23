@@ -1,20 +1,6 @@
 import torch
 
 
-class image_deal(torch.nn.Module):  # 归一化、减均值、除以方差
-    def __init__(self):
-        super().__init__()
-        self.rgb_mean = (0.406, 0.456, 0.485)
-        self.rgb_std = (0.225, 0.224, 0.229)
-
-    def forward(self, x):
-        x[..., 0] = (x[..., 0] / 255 - self.rgb_mean[0]) / self.rgb_std[0]
-        x[..., 1] = (x[..., 1] / 255 - self.rgb_mean[1]) / self.rgb_std[1]
-        x[..., 2] = (x[..., 2] / 255 - self.rgb_mean[2]) / self.rgb_std[2]
-        x = x.permute(0, 3, 1, 2)
-        return x
-
-
 class concat(torch.nn.Module):
     def __init__(self, dim=1):
         super().__init__()
@@ -110,7 +96,6 @@ class sppcspc(torch.nn.Module):  # in_->out_，len->len
         return x
 
 
-
 class linear_head(torch.nn.Module):
     def __init__(self, in_, out_):
         super().__init__()
@@ -121,10 +106,6 @@ class linear_head(torch.nn.Module):
         self.silu4 = torch.nn.SiLU()
         self.Dropout5 = torch.nn.Dropout(0.2)
         self.linear6 = torch.nn.Linear(in_ // 2, out_)
-        if out_ == 1:
-            self.normalization7 = torch.nn.Sigmoid()
-        else:
-            self.normalization7 = torch.nn.Softmax(dim=1)
 
     def forward(self, x):
         x = self.avgpool0(x)
@@ -134,5 +115,28 @@ class linear_head(torch.nn.Module):
         x = self.silu4(x)
         x = self.Dropout5(x)
         x = self.linear6(x)
-        x = self.normalization7(x)
+        return x
+
+
+class image_deal(torch.nn.Module):  # 归一化
+    def __init__(self):
+        super().__init__()
+
+    def forward(self, x):
+        x = x / 255
+        x = x.permute(0, 3, 1, 2)
+        return x
+
+
+class deploy(torch.nn.Module):
+    def __init__(self, model):
+        super().__init__()
+        self.image_deal = image_deal()
+        self.model = model
+        self.normalization = torch.nn.Sigmoid()
+
+    def forward(self, x):
+        x = self.image_deal(x)
+        x = self.model(x)
+        x = self.normalization(x)
         return x

@@ -1,5 +1,5 @@
 import torch
-from model.layer import image_deal, cbs, elan, mp, sppcspc, linear_head
+from model.layer import cbs, elan, mp, sppcspc, linear_head
 
 
 class yolov7_cls(torch.nn.Module):
@@ -12,7 +12,6 @@ class yolov7_cls(torch.nn.Module):
         dim = dim_dict[args.model_type]
         n = n_dict[args.model_type]
         # 网络结构
-        self.image_deal = image_deal()
         self.l0 = cbs(3, dim, 1, 1)
         self.l1 = cbs(dim, 2 * dim, 3, 2)  # input_size/2
         self.l2 = cbs(2 * dim, 2 * dim, 1, 1)
@@ -26,10 +25,9 @@ class yolov7_cls(torch.nn.Module):
         self.l10 = elan(32 * dim, 32 * dim, n)
         self.l11 = sppcspc(32 * dim, 16 * dim)
         self.l12 = cbs(16 * dim, 8 * dim, 1, 1)
-        self.l13 = linear_head(8 * dim, self.output_class)
+        self.linear_head = linear_head(8 * dim, self.output_class)
 
     def forward(self, x):
-        x = self.image_deal(x)
         x = self.l0(x)
         x = self.l1(x)
         x = self.l2(x)
@@ -43,13 +41,13 @@ class yolov7_cls(torch.nn.Module):
         x = self.l10(x)
         x = self.l11(x)
         x = self.l12(x)
-        x = self.l13(x)
+        x = self.linear_head(x)
         return x
 
 
 if __name__ == '__main__':
     import argparse
-    from layer import image_deal, cbs, elan, mp, linear_head
+    from layer import cbs, elan, mp, linear_head
 
     parser = argparse.ArgumentParser(description='')
     parser.add_argument('--model_type', default='n', type=str)
@@ -58,6 +56,6 @@ if __name__ == '__main__':
     args = parser.parse_args()
     model = yolov7_cls(args)
     print(model)
-    tensor = torch.rand(2, args.input_size, args.input_size, 3, dtype=torch.float32)
+    tensor = torch.rand(2, 3, args.input_size, args.input_size, dtype=torch.float32)
     pred = model(tensor)
     print(pred.shape)

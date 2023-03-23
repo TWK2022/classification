@@ -4,6 +4,7 @@ import time
 import torch
 import argparse
 import albumentations
+from model.layer import deploy
 
 # -------------------------------------------------------------------------------------------------------------------- #
 # 设置
@@ -31,6 +32,7 @@ def test_pt():
     # 加载模型
     model_dict = torch.load(args.model_path, map_location='cpu')
     model = model_dict['model']
+    model = deploy(model)
     model.half().eval().to(args.device) if args.float16 else model.float().eval().to(args.device)
     print('| 模型加载成功:{} |'.format(args.model_path))
     # 推理
@@ -66,7 +68,7 @@ class torch_dataset(torch.utils.data.Dataset):
     def __getitem__(self, index):
         image = cv2.imread(args.image_path + '/' + self.image_dir[index])  # 读取图片
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)  # 转为RGB通道
-        image = self.transform(image=image)['image']  # 缩放和填充图片(归一化、减均值、除以方差、调维度等在模型中完成)
+        image = self.transform(image=image)['image']  # 缩放和填充图片(归一化、调维度在模型中完成)
         image = torch.tensor(image, dtype=torch.float16 if args.float16 else torch.float32)
         return image
 
