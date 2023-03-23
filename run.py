@@ -22,7 +22,7 @@ from block.train_get import train_get
 # 设置
 parser = argparse.ArgumentParser(description='分类任务')
 parser.add_argument('--data_path', default=r'D:\dataset\classification\mask', type=str, help='|数据根目录路径|')
-parser.add_argument('--wandb', default=True, type=bool, help='|是否使用wandb可视化|')
+parser.add_argument('--wandb', default=False, type=bool, help='|是否使用wandb可视化|')
 parser.add_argument('--wandb_project', default='test', type=str, help='|wandb项目名称|')
 parser.add_argument('--wandb_name', default='train', type=str, help='|wandb项目中的训练名称|')
 parser.add_argument('--wandb_image_num', default=16, type=int, help='|wandb保存图片的数量|')
@@ -92,8 +92,8 @@ if __name__ == '__main__':
     # 损失
     loss = loss_get(args)
     # 摘要
-    print('| 训练集:{} | 验证集:{} | 模型:{} | 损失函数:{} | 初始学习率:{} |'
-          .format(len(data_dict['train']), len(data_dict['val']), args.model, args.loss, args.lr))
+    print('| 训练集:{} | 验证集:{} | 模型:{} | 输入尺寸:{} | 损失函数:{} | 初始学习率:{} |'
+          .format(len(data_dict['train']), len(data_dict['val']), args.model, args.input_size, args.loss, args.lr))
     # 训练(包括图片读取和预处理、训练、验证、保存模型)
     model_dict = train_get(args, data_dict, model_dict, loss)
     # 显示结果
