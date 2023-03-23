@@ -46,7 +46,7 @@ def train_get(args, data_dict, model_dict, loss):
             # 记录损失
             train_loss += loss_batch.item()
             # wandb
-            if args.wandb and len(wandb_image_list) < args.wandb_image_num:
+            if args.wandb and epoch == 0 and len(wandb_image_list) < args.wandb_image_num:
                 cls = true_batch.cpu().numpy().tolist()
                 for i in range(len(wandb_image_batch)):  # 遍历每一张图片
                     image = wandb_image_batch[i]
@@ -56,7 +56,6 @@ def train_get(args, data_dict, model_dict, loss):
                     wandb_image = wandb.Image(image)
                     wandb_image_list.append(wandb_image)
                     if len(wandb_image_list) == args.wandb_image_num:
-                        args.wandb_run.log({f'image/train_image': wandb_image_list})
                         break
         train_loss = train_loss / (item + 1)
         print('\n| 训练集:{} | train_loss:{:.4f} |\n'.format(len(data_dict['train']), train_loss))
@@ -82,12 +81,16 @@ def train_get(args, data_dict, model_dict, loss):
             print('\n| 保存最佳模型:{} | val_m_ap:{:.4f} |\n'.format(args.save_name, m_ap))
         # wandb
         if args.wandb:
-            args.wandb_run.log({'metric/train_loss': train_loss,
-                                'metric/val_loss': val_loss,
-                                'metric/val_m_ap': m_ap,
-                                'metric/val_accuracy': accuracy,
-                                'metric/val_precision': precision,
-                                'metric/val_recall': recall})
+            wandb_log = {}
+            if epoch == 0:
+                wandb_log.update({f'image/train_image': wandb_image_list})
+            wandb_log.update({'metric/train_loss': train_loss,
+                              'metric/val_loss': val_loss,
+                              'metric/val_m_ap': m_ap,
+                              'metric/val_accuracy': accuracy,
+                              'metric/val_precision': precision,
+                              'metric/val_recall': recall})
+            args.wandb_run.log(wandb_log)
     return model_dict
 
 
