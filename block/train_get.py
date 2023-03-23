@@ -99,7 +99,7 @@ class torch_dataset(torch.utils.data.Dataset):
         self.tag = tag
         self.data = data
         self.class_name = class_name
-        self.use_noise = args.noise
+        self.noise_probability = args.noise
         self.noise = albumentations.Compose([
             albumentations.GaussianBlur(blur_limit=(5, 5), p=0.2),
             albumentations.GaussNoise(var_limit=(10.0, 30.0), p=0.2)])
@@ -115,7 +115,7 @@ class torch_dataset(torch.utils.data.Dataset):
 
     def __getitem__(self, index):
         image = cv2.imread(self.data[index][0])  # 读取图片
-        if self.tag == 'train' and self.use_noise:  # 使用数据加噪
+        if self.tag == 'train' and torch.rand(1) < self.noise_probability:  # 使用数据加噪
             image = self.noise(image=image)['image']
         image = self.transform(image=image)['image']  # 缩放和填充图片
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)  # 转为RGB通道
