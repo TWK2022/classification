@@ -33,10 +33,10 @@ def train_get(args, data_dict, model_dict, loss):
                 with torch.cuda.amp.autocast():
                     pred_batch = model(image_batch)
                     loss_batch = loss(pred_batch, true_batch)
-                    optimizer.zero_grad()
-                    args.scaler.scale(loss_batch).backward()
-                    args.scaler.step(optimizer)
-                    args.scaler.update()
+                optimizer.zero_grad()
+                args.scaler.scale(loss_batch).backward()
+                args.scaler.step(optimizer)
+                args.scaler.update()
             else:
                 pred_batch = model(image_batch)
                 loss_batch = loss(pred_batch, true_batch)
