@@ -8,7 +8,7 @@ from block.val_get import val_get
 
 
 def train_get(args, data_dict, model_dict, loss):
-    model = model_dict['model'].to(args.device)
+    model = model_dict['model'].to(args.device, non_blocking=args.latch)
     optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
     train_dataloader = torch.utils.data.DataLoader(torch_dataset(args, 'train', data_dict['train'], data_dict['class']),
                                                    batch_size=args.batch, shuffle=True, drop_last=True,
