@@ -48,7 +48,8 @@ def train_get(args, data_dict, model_dict, loss):
                 optimizer.zero_grad()
                 loss_batch.backward()
                 optimizer.step()
-            ema.update(model) if args.ema else None  # 调整参数，ema.updates会自动+1
+            # 调整参数，ema.updates会自动+1
+            ema.update(model) if args.ema else None
             # 记录损失
             train_loss += loss_batch.item()
             # wandb
