@@ -30,7 +30,7 @@ def export_onnx():
     model = deploy(model)
     model.eval().half().to(args.device) if args.float16 else model.eval().float().to(args.device)
     input_shape = torch.rand(1, args.input_size, args.input_size, 3,
-                              dtype=torch.float16 if args.float16 else torch.float32).to(args.device)
+                             dtype=torch.float16 if args.float16 else torch.float32).to(args.device)
     torch.onnx.export(model, input_shape, args.save_name,
                       opset_version=12, input_names=['input'], output_names=['output'],
                       dynamic_axes={'input': {args.batch: 'batch_size'}, 'output': {args.batch: 'batch_size'}})
