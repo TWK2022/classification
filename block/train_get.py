@@ -5,11 +5,16 @@ import torch
 import numpy as np
 import albumentations
 from block.val_get import val_get
+from block.ModelEMA import ModelEMA
 
 
 def train_get(args, data_dict, model_dict, loss):
     model = model_dict['model'].to(args.device, non_blocking=args.latch)
+    ema = ModelEMA(model) if args.ema else None  # 使用平均指数移动(EMA)调整参数，不能将ema放到args中，否则会导致模型保存出错
+    if args.ema:
+        ema.updates = model_dict['ema_updates']
     optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
+    optimizer.load_state_dict(model_dict['optimizer_state_dict']) if model_dict['optimizer_state_dict'] else None
     train_dataloader = torch.utils.data.DataLoader(torch_dataset(args, 'train', data_dict['train'], data_dict['class']),
                                                    batch_size=args.batch, shuffle=True, drop_last=True,
                                                    pin_memory=args.latch, num_workers=args.num_worker)
@@ -43,6 +48,7 @@ def train_get(args, data_dict, model_dict, loss):
                 optimizer.zero_grad()
                 loss_batch.backward()
                 optimizer.step()
+            ema.update(model) if args.ema else None  # 调整参数，ema.updates会自动+1
             # 记录损失
             train_loss += loss_batch.item()
             # wandb
@@ -63,11 +69,12 @@ def train_get(args, data_dict, model_dict, loss):
         del image_batch, true_batch, pred_batch, loss_batch
         torch.cuda.empty_cache()
         # 验证
-        val_loss, accuracy, precision, recall, m_ap = val_get(args, val_dataloader, model, loss)
+        val_loss, accuracy, precision, recall, m_ap = val_get(args, val_dataloader, model, loss, ema)
         # 保存
-        standard = model_dict['val_m_ap']
-        model_dict['model'] = model
-        model_dict['epoch'] = epoch
+        model_dict['model'] = model.eval()
+        model_dict['epoch'] += 1
+        model_dict['optimizer_state_dict'] = optimizer.state_dict()
+        model_dict['ema_updates'] = ema.updates if args.ema else 0
         model_dict['class'] = data_dict['class']
         model_dict['train_loss'] = train_loss
         model_dict['val_loss'] = val_loss
@@ -76,9 +83,13 @@ def train_get(args, data_dict, model_dict, loss):
         model_dict['val_recall'] = recall
         model_dict['val_m_ap'] = m_ap
         torch.save(model_dict, 'last.pt')  # 保存最后一次训练的模型
-        if m_ap > 0.5 and m_ap > standard:
+        if m_ap > 0.5 and m_ap > model_dict['standard']:
+            model_dict['standard'] = m_ap
             torch.save(model_dict, args.save_name)  # 保存最佳模型
             print('\n| 保存最佳模型:{} | val_m_ap:{:.4f} |\n'.format(args.save_name, m_ap))
+        if m_ap == 1:
+            print('| 模型m_ap已达100%，暂停训练 |')
+            break
         # wandb
         if args.wandb:
             wandb_log = {}
