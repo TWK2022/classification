@@ -17,7 +17,6 @@ parser.add_argument('--device', default='cuda', type=str, help='|用CPU/GPU推�
 parser.add_argument('--num_worker', default=0, type=int, help='|CPU在处理数据时使用的进程数，0表示只有一个主进程，一般为0、2、4、8|')
 parser.add_argument('--float16', default=True, type=bool, help='|推理数据类型，要支持float16的GPU，False时为float32|')
 args = parser.parse_args()
-args.model_path = args.model_path.split('.')[0] + '.pt'
 # -------------------------------------------------------------------------------------------------------------------- #
 # 初步检查
 assert os.path.exists(args.model_path), f'没有找到模型{args.model_path}'
