@@ -54,16 +54,16 @@ def test_onnx():
     if n > 0:  # 如果图片数量>=批量(分批预测)
         for i in range(n):
             batch = image_all[i * args.batch:(i + 1) * args.batch]
-            pred = session.run([output_name], {input_name: batch})
-            result.extend(pred)
+            pred_batch = session.run([output_name], {input_name: batch})
+            result.extend(pred_batch)
         if len(image_dir) % args.batch > 0:  # 如果图片数量没有刚好满足批量
             batch = image_all[(i + 1) * args.batch:]
-            pred = session.run([output_name], {input_name: batch})
-            result.extend(pred)
+            pred_batch = session.run([output_name], {input_name: batch})
+            result.extend(pred_batch)
     else:  # 如果图片数量<批量(直接预测)
         batch = image_all
-        pred = session.run([output_name], {input_name: batch})
-        result.extend(pred)
+        pred_batch = session.run([output_name], {input_name: batch})
+        result.extend(pred_batch)
     for i in range(len(result)):
         result[i] = [round(_.item(), 4) for _ in result[i]]
         print(f'| {image_dir[i]}:{result[i]} |')
