@@ -1,3 +1,4 @@
+# 根据yolov7改编:https://github.com/WongKinYiu/yolov7
 import torch
 from model.layer import cbs, elan, mp, sppcspc, linear_head
 
