@@ -40,11 +40,11 @@ def test_tensorrt():
     context = model.create_execution_context()  # 创建模型推理器
     print(f'| 加载模型成功:{args.model_path} |')
     # 加载数据
+    start_time = time.time()
     transform = albumentations.Compose([
         albumentations.LongestMaxSize(args.input_size),
         albumentations.PadIfNeeded(min_height=args.input_size, min_width=args.input_size,
                                    border_mode=cv2.BORDER_CONSTANT, value=(127, 127, 127))])
-    start_time = time.time()
     image_dir = sorted(os.listdir(args.image_path))
     image_list = [0 for _ in range(len(image_dir))]
     for i in range(len(image_dir)):

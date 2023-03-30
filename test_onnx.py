@@ -32,11 +32,11 @@ def test_onnx():
     output_name = session.get_outputs()[0].name  # 获取输出名称
     print(f'| 模型加载成功:{args.model_path} |')
     # 加载数据
+    start_time = time.time()
     transform = albumentations.Compose([
         albumentations.LongestMaxSize(args.input_size),
         albumentations.PadIfNeeded(min_height=args.input_size, min_width=args.input_size,
                                    border_mode=cv2.BORDER_CONSTANT, value=(127, 127, 127))])
-    start_time = time.time()
     image_dir = sorted(os.listdir(args.image_path))
     image_all = np.zeros((len(image_dir), args.input_size, args.input_size, 3)).astype(
         np.float16 if args.float16 else np.float32)
