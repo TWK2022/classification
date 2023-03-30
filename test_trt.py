@@ -54,8 +54,7 @@ def test_tensorrt():
             np.float16 if args.float16 else np.float32)  # 缩放和填充图片(归一化、减均值、除以方差、调维度等在模型中完成)
         image_list[i] = image
     end_time = time.time()
-    print('| 数据加载成功:{} 每张耗时:{:.4f} |'
-          .format(len(image_list), (end_time - start_time) / len(image_list)))
+    print('| 数据加载成功:{} 每张耗时:{:.4f} |'.format(len(image_list), (end_time - start_time) / len(image_list)))
     # 推理
     start_time = time.time()
     result = [0 for _ in range(len(image_list))]
