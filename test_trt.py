@@ -30,14 +30,14 @@ def test_tensorrt():
     logger = tensorrt.Logger(tensorrt.Logger.WARNING)  # 创建日志记录信息
     with tensorrt.Runtime(logger) as runtime, open(args.model_path, "rb") as f:
         model = runtime.deserialize_cuda_engine(f.read())  # 读取模型并构建一个对象
-    np_type = tensorrt.nptype(model.get_tensor_dtype('input'))
-    h_input = np.zeros(tensorrt.volume(model.get_tensor_shape('input')), dtype=np_type)
-    h_output = np.zeros(tensorrt.volume(model.get_tensor_shape('output')), dtype=np_type)
-    d_input = cuda.mem_alloc(h_input.nbytes)
-    d_output = cuda.mem_alloc(h_output.nbytes)
-    stream = cuda.Stream()
-    context = model.create_execution_context()
-    bindings = [int(d_input), int(d_output)]
+    np_type = tensorrt.nptype(model.get_tensor_dtype('input'))  # 获取接口的数据类型并转为np的字符串格式
+    h_input = np.zeros(tensorrt.volume(model.get_tensor_shape('input')), dtype=np_type)  # 获取输入的形状(一维)
+    h_output = np.zeros(tensorrt.volume(model.get_tensor_shape('output')), dtype=np_type)  # 获取输出的形状(一维)
+    d_input = cuda.mem_alloc(h_input.nbytes)  # 分配显存空间
+    d_output = cuda.mem_alloc(h_output.nbytes)  # 分配显存空间
+    bindings = [int(d_input), int(d_output)]  # 绑定显存输入输出
+    stream = cuda.Stream()  # 创建cuda流
+    context = model.create_execution_context()  # 创建模型推理器
     print(f'| 加载模型成功:{args.model_path} |')
     # 加载数据
     transform = albumentations.Compose([
@@ -60,10 +60,10 @@ def test_tensorrt():
     start_time = time.time()
     result = [0 for _ in range(len(image_list))]
     for i in range(len(image_list)):
-        cuda.memcpy_htod_async(d_input, image_list[i], stream)
-        context.execute_async_v2(bindings=bindings, stream_handle=stream.handle)
-        cuda.memcpy_dtoh_async(h_output, d_output, stream)
-        stream.synchronize()
+        cuda.memcpy_htod_async(d_input, image_list[i], stream)  # 将输入数据从CPU锁存复制到GPU显存
+        context.execute_async_v2(bindings=bindings, stream_handle=stream.handle)  # 执行推理
+        cuda.memcpy_dtoh_async(h_output, d_output, stream)  # 将输出数据从GPU显存复制到CPU锁存
+        stream.synchronize()  # 同步线程
         result[i] = [round(_, 4) for _ in h_output.tolist()]
         print(f'| {image_dir[i]}:{result[i]} |')
     end_time = time.time()

@@ -27,9 +27,9 @@ assert os.path.exists(args.image_path), f'没有找到图片文件夹{args.image
 def test_onnx():
     # 加载模型
     provider = 'CUDAExecutionProvider' if args.device.lower() in ['gpu', 'cuda'] else 'CPUExecutionProvider'
-    session = onnxruntime.InferenceSession(args.model_path, providers=[provider])
-    input_name = session.get_inputs()[0].name
-    output_name = session.get_outputs()[0].name
+    session = onnxruntime.InferenceSession(args.model_path, providers=[provider])  # 加载模型和框架
+    input_name = session.get_inputs()[0].name  # 获取输入名称
+    output_name = session.get_outputs()[0].name  # 获取输出名称
     print(f'| 模型加载成功:{args.model_path} |')
     # 加载数据
     transform = albumentations.Compose([
