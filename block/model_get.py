@@ -17,8 +17,6 @@ def model_get(args):
         model_dict['optimizer_state_dict'] = None
         model_dict['ema_updates'] = 0
         model_dict['standard'] = 0
-        model_dict['val_loss'] = 999
-        model_dict['val_m_ap'] = 0
     return model_dict
 
 
