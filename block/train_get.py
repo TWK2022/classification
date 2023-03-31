@@ -65,7 +65,7 @@ def train_get(args, data_dict, model_dict, loss):
                     if len(wandb_image_list) == args.wandb_image_num:
                         break
         train_loss = train_loss / (item + 1)
-        print('\n| 训练集:{} | train_loss:{:.4f} |\n'.format(len(data_dict['train']), train_loss))
+        print('\n| train_loss:{:.4f} |\n'.format(train_loss))
         # 清理显存空间
         del image_batch, true_batch, pred_batch, loss_batch
         torch.cuda.empty_cache()
