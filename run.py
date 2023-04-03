@@ -9,6 +9,11 @@
 # 类别2
 # ...
 # -------------------------------------------------------------------------------------------------------------------- #
+# 分布式训练:
+# python -m torch.distributed.launch --master_port 9999 --nproc_per_node n run.py --distributed True
+# master_port为GPU之间的通讯端口，空闲的即可
+# n为GPU数量
+# -------------------------------------------------------------------------------------------------------------------- #
 import os
 import wandb
 import torch
@@ -44,6 +49,8 @@ parser.add_argument('--ema', default=True, type=bool, help='|使用平均指数�
 parser.add_argument('--scaler', default=True, type=bool, help='|混合float16精度训练|')
 parser.add_argument('--noise', default=0.2, type=float, help='|训练数据加噪概率|')
 parser.add_argument('--class_threshold', default=0.5, type=float, help='|计算指标时，大于阈值判定为图片有该类别|')
+parser.add_argument('--distributed', default=False, type=bool, help='|单机多卡分布式训练|')
+parser.add_argument('--local_rank', default=0, type=int, help='|分布式训练使用命令后会自动传入的参数|')
 args = parser.parse_args()
 # 为CPU设置随机种子
 torch.manual_seed(999)
@@ -56,11 +63,15 @@ torch.backends.cudnn.enabled = True
 # 训练前cuDNN会先搜寻每个卷积层最适合实现它的卷积算法，加速运行；但对于复杂变化的输入数据，可能会有过长的搜寻时间，对于训练比较快的网络建议设为False
 torch.backends.cudnn.benchmark = False
 # wandb可视化:https://wandb.ai
-if args.wandb:
+if args.wandb and args.local_rank == 0:  # 分布式时只记录一次wandb
     args.wandb_run = wandb.init(project=args.wandb_project, name=args.wandb_name, config=args)
 # 混合float16精度训练
 if args.scaler:
     args.scaler = torch.cuda.amp.GradScaler()
+# 分布式训练
+if args.distributed:
+    torch.distributed.init_process_group(backend="nccl")
+    args.device = torch.device("cuda", args.local_rank)
 # -------------------------------------------------------------------------------------------------------------------- #
 # 初步检查
 assert os.path.exists(args.data_path + '/' + 'image'), 'data_path中缺少image'
@@ -72,16 +83,11 @@ if os.path.exists(args.weight):  # 优先加载已有模型args.weight继续训�
 elif args.timm:  # 创建timm库中模型args.timm
     import timm
 
-    assert timm.list_models(args.model), 'timm中没有此模型{}'.format(args.model)
+    assert timm.list_models(args.model), f'timm中没有此模型{args.model}，使用timm.list_models()查看所有模型'
     print('| 创建timm库中模型:{} |'.format(args.model))
 else:  # 创建自定义模型args.model
-    assert os.path.exists('model/' + args.model + '.py'), '没有此自定义模型'.format(args.model)
+    assert os.path.exists('model/' + args.model + '.py'), f'没有此自定义模型{args.model}'
     print('| 创建自定义模型:{} | 型号:{} |'.format(args.model, args.model_type))
-if args.device.lower() in ['cuda', 'gpu']:  # 检查训练设备
-    assert torch.cuda.is_available(), 'GPU不可用'
-    args.device = 'cuda'
-else:
-    args.device = 'cpu'
 print('| args:{} |'.format(args))
 # -------------------------------------------------------------------------------------------------------------------- #
 # 程序
@@ -96,12 +102,4 @@ if __name__ == '__main__':
     print('| 训练集:{} | 验证集:{} | 模型:{} | 输入尺寸:{} | 损失函数:{} | 初始学习率:{} |'
           .format(len(data_dict['train']), len(data_dict['val']), args.model, args.input_size, args.loss, args.lr))
     # 训练(包括图片读取和预处理、训练、验证、保存模型)
-    model_dict = train_get(args, data_dict, model_dict, loss)
-    # 显示结果
-    try:
-        print('\n| 最佳结果 | train_loss:{:.4f} | val_loss:{:.4f} | val_accuracy:{:.4f} | val_precision:{:.4f} |'
-              ' val_recall:{:.4f} | val_m_ap:{:.4f} |\n'
-              .format(model_dict['train_loss'], model_dict['val_loss'], model_dict['val_accuracy'],
-                      model_dict['val_precision'], model_dict['val_recall'], model_dict['val_m_ap']))
-    except:
-        print('\n| !由于指标太低没有保存最佳模型! |\n')
+    train_get(args, data_dict, model_dict, loss)

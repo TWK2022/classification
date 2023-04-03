@@ -23,7 +23,7 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='')
     parser.add_argument('--model', default='efficientnetv2_s', type=str)
-    parser.add_argument('--input_size', default=640, type=int)
+    parser.add_argument('--input_size', default=320, type=int)
     parser.add_argument('--output_class', default=2, type=int)
     args = parser.parse_args()
     model = timm_model(args)
