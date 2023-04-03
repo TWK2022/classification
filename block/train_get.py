@@ -43,7 +43,7 @@ def train_get(args, data_dict, model_dict, loss):
         model.train()
         train_loss = 0  # 记录训练损失
         tqdm_show = tqdm.tqdm(total=len(data_dict['train']) // args.batch // args.gpu_number * args.gpu_number,
-                              postfix=dict, mininterval=0.5) if args.local_rank == 0 else None  # tqdm
+                              postfix=dict, mininterval=0.2) if args.local_rank == 0 else None  # tqdm
         for item, (image_batch, true_batch) in enumerate(train_dataloader):
             wandb_image_batch = image_batch.cpu().numpy().astype(np.uint8) \
                 if args.wandb and len(wandb_image_list) < args.wandb_image_num else None
