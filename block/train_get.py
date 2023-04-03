@@ -40,7 +40,9 @@ def train_get(args, data_dict, model_dict, loss):
         print(f'\n-----------------------第{epoch + 1}轮-----------------------')
         model.train()
         train_loss = 0  # 记录训练损失
-        for item, (image_batch, true_batch) in enumerate(tqdm.tqdm(train_dataloader)):
+        tqdm_show = tqdm.tqdm(total=len(data_dict['train']) // args.batch, postfix=dict,
+                              mininterval=0.5) if args.local_rank == 0 else None  # tqdm
+        for item, (image_batch, true_batch) in enumerate(train_dataloader):
             wandb_image_batch = image_batch.cpu().numpy().astype(np.uint8) \
                 if args.wandb and len(wandb_image_list) < args.wandb_image_num else None
             image_batch = image_batch.to(args.device, non_blocking=args.latch)
@@ -63,6 +65,10 @@ def train_get(args, data_dict, model_dict, loss):
             ema.update(model) if args.ema else None
             # 记录损失
             train_loss += loss_batch.item()
+            # tqdm
+            if args.local_rank == 0:
+                tqdm_show.set_postfix({'当前loss': loss_batch.item()})
+                tqdm_show.update(1)
             # wandb
             if args.wandb and epoch == 0 and len(wandb_image_list) < args.wandb_image_num and args.local_rank == 0:
                 cls = true_batch.cpu().numpy().tolist()
@@ -75,6 +81,7 @@ def train_get(args, data_dict, model_dict, loss):
                     wandb_image_list.append(wandb_image)
                     if len(wandb_image_list) == args.wandb_image_num:
                         break
+        tqdm_show.close() if args.local_rank == 0 else None  # tqdm
         train_loss = train_loss / (item + 1)
         print('\n| train_loss:{:.4f} |\n'.format(train_loss))
         # 清理显存空间
