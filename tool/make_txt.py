@@ -11,6 +11,12 @@ args = parser.parse_args()
 
 # -------------------------------------------------------------------------------------------------------------------- #
 # 程序
+if not os.path.exists('train.txt'):
+    with open('train.txt', 'w')as f:
+        pass
+if not os.path.exists('val.txt'):
+    with open('val.txt', 'w')as f:
+        pass
 if __name__ == '__main__':
     image_dir = sorted(os.listdir(args.data_path))
     args.divide = list(map(int, args.divide.split(',')))

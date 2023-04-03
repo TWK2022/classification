@@ -24,24 +24,26 @@ def train_get(args, data_dict, model_dict, loss):
     # 数据集
     train_dataset = torch_dataset(args, 'train', data_dict['train'], data_dict['class'])
     train_sampler = torch.utils.data.distributed.DistributedSampler(train_dataset) if args.distributed else None
-    train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size=args.batch, shuffle=True, drop_last=True,
-                                                   pin_memory=args.latch, num_workers=args.num_worker,
+    train_shuffle = False if args.distributed else True  # 分布式设置sampler后shuffle要为False
+    train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size=args.batch, shuffle=train_shuffle,
+                                                   drop_last=True, pin_memory=args.latch, num_workers=args.num_worker,
                                                    sampler=train_sampler)
     val_dataset = torch_dataset(args, 'val', data_dict['val'], data_dict['class'])
     val_sampler = None  # 分布式时数据合在主GPU上进行验证
-    val_dataloader = torch.utils.data.DataLoader(val_dataset, batch_size=args.batch, shuffle=False, drop_last=False,
-                                                 pin_memory=args.latch, num_workers=args.num_worker,
+    val_batch = args.batch // args.gpu_number  # 分布式验证时batch要减少为一个GPU的量
+    val_dataloader = torch.utils.data.DataLoader(val_dataset, batch_size=val_batch, shuffle=False,
+                                                 drop_last=False, pin_memory=args.latch, num_workers=args.num_worker,
                                                  sampler=val_sampler)
     # wandb
     if args.wandb and args.local_rank == 0:
         wandb_image_list = []  # 记录所有的wandb_image最后一起添加(最多添加args.wandb_image_num张)
     for epoch in range(args.epoch):
         # 训练
-        print(f'\n-----------------------第{epoch + 1}轮-----------------------')
+        print(f'\n-----------------------第{epoch + 1}轮-----------------------') if args.local_rank == 0 else None
         model.train()
         train_loss = 0  # 记录训练损失
-        tqdm_show = tqdm.tqdm(total=len(data_dict['train']) // args.batch, postfix=dict,
-                              mininterval=0.5) if args.local_rank == 0 else None  # tqdm
+        tqdm_show = tqdm.tqdm(total=len(data_dict['train']) // args.batch // args.gpu_number * args.gpu_number,
+                              postfix=dict, mininterval=0.5) if args.local_rank == 0 else None  # tqdm
         for item, (image_batch, true_batch) in enumerate(train_dataloader):
             wandb_image_batch = image_batch.cpu().numpy().astype(np.uint8) \
                 if args.wandb and len(wandb_image_list) < args.wandb_image_num else None
@@ -67,8 +69,8 @@ def train_get(args, data_dict, model_dict, loss):
             train_loss += loss_batch.item()
             # tqdm
             if args.local_rank == 0:
-                tqdm_show.set_postfix({'当前loss': loss_batch.item()})
-                tqdm_show.update(1)
+                tqdm_show.set_postfix({'当前loss': loss_batch.item()})  # 添加loss显示
+                tqdm_show.update(args.gpu_number)  # 更新进度条
             # wandb
             if args.wandb and epoch == 0 and len(wandb_image_list) < args.wandb_image_num and args.local_rank == 0:
                 cls = true_batch.cpu().numpy().tolist()

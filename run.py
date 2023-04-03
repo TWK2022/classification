@@ -49,9 +49,10 @@ parser.add_argument('--ema', default=True, type=bool, help='|使用平均指数�
 parser.add_argument('--scaler', default=True, type=bool, help='|混合float16精度训练|')
 parser.add_argument('--noise', default=0.2, type=float, help='|训练数据加噪概率|')
 parser.add_argument('--class_threshold', default=0.5, type=float, help='|计算指标时，大于阈值判定为图片有该类别|')
-parser.add_argument('--distributed', default=False, type=bool, help='|单机多卡分布式训练|')
+parser.add_argument('--distributed', default=False, type=bool, help='|单机多卡分布式训练，分布式训练时batch为总batch|')
 parser.add_argument('--local_rank', default=0, type=int, help='|分布式训练使用命令后会自动传入的参数|')
 args = parser.parse_args()
+args.gpu_number = torch.cuda.device_count()  # 使用的GPU数
 # 为CPU设置随机种子
 torch.manual_seed(999)
 # 为所有GPU设置随机种子
@@ -70,25 +71,26 @@ if args.scaler:
     args.scaler = torch.cuda.amp.GradScaler()
 # 分布式训练
 if args.distributed:
-    torch.distributed.init_process_group(backend="nccl")
+    torch.distributed.init_process_group(backend="nccl")  # 分布式训练初始化
     args.device = torch.device("cuda", args.local_rank)
 # -------------------------------------------------------------------------------------------------------------------- #
 # 初步检查
-assert os.path.exists(args.data_path + '/' + 'image'), 'data_path中缺少image'
-assert os.path.exists(args.data_path + '/' + 'train.txt'), 'data_path中缺少train.txt'
-assert os.path.exists(args.data_path + '/' + 'val.txt'), 'data_path中缺少val.txt'
-assert os.path.exists(args.data_path + '/' + 'class.txt'), 'data_path中缺少class.txt'
-if os.path.exists(args.weight):  # 优先加载已有模型args.weight继续训练
-    print('| 加载已有模型:{} |'.format(args.weight))
-elif args.timm:  # 创建timm库中模型args.timm
-    import timm
+if args.local_rank == 0:
+    print('| args:{} |'.format(args))
+    assert os.path.exists(args.data_path + '/' + 'image'), 'data_path中缺少image'
+    assert os.path.exists(args.data_path + '/' + 'train.txt'), 'data_path中缺少train.txt'
+    assert os.path.exists(args.data_path + '/' + 'val.txt'), 'data_path中缺少val.txt'
+    assert os.path.exists(args.data_path + '/' + 'class.txt'), 'data_path中缺少class.txt'
+    if os.path.exists(args.weight):  # 优先加载已有模型args.weight继续训练
+        print('| 加载已有模型:{} |'.format(args.weight))
+    elif args.timm:  # 创建timm库中模型args.timm
+        import timm
 
-    assert timm.list_models(args.model), f'timm中没有此模型{args.model}，使用timm.list_models()查看所有模型'
-    print('| 创建timm库中模型:{} |'.format(args.model))
-else:  # 创建自定义模型args.model
-    assert os.path.exists('model/' + args.model + '.py'), f'没有此自定义模型{args.model}'
-    print('| 创建自定义模型:{} | 型号:{} |'.format(args.model, args.model_type))
-print('| args:{} |'.format(args))
+        assert timm.list_models(args.model), f'timm中没有此模型{args.model}，使用timm.list_models()查看所有模型'
+        print('| 创建timm库中模型:{} |'.format(args.model))
+    else:  # 创建自定义模型args.model
+        assert os.path.exists('model/' + args.model + '.py'), f'没有此自定义模型{args.model}'
+        print('| 创建自定义模型:{} | 型号:{} |'.format(args.model, args.model_type))
 # -------------------------------------------------------------------------------------------------------------------- #
 # 程序
 if __name__ == '__main__':
@@ -100,6 +102,7 @@ if __name__ == '__main__':
     loss = loss_get(args)
     # 摘要
     print('| 训练集:{} | 验证集:{} | 模型:{} | 输入尺寸:{} | 损失函数:{} | 初始学习率:{} |'
-          .format(len(data_dict['train']), len(data_dict['val']), args.model, args.input_size, args.loss, args.lr))
+          .format(len(data_dict['train']), len(data_dict['val']), args.model, args.input_size, args.loss,
+                  args.lr)) if args.local_rank == 0 else None
     # 训练(包括图片读取和预处理、训练、验证、保存模型)
     train_get(args, data_dict, model_dict, loss)
