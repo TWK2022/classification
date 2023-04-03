@@ -46,7 +46,7 @@ def train_get(args, data_dict, model_dict, loss):
                               postfix=dict, mininterval=0.2) if args.local_rank == 0 else None  # tqdm
         for item, (image_batch, true_batch) in enumerate(train_dataloader):
             wandb_image_batch = image_batch.cpu().numpy().astype(np.uint8) \
-                if args.wandb and len(wandb_image_list) < args.wandb_image_num else None
+                if args.wandb and len(wandb_image_list) < args.wandb_image_num and args.local_rank == 0 else None
             image_batch = image_batch.to(args.device, non_blocking=args.latch)
             true_batch = true_batch.to(args.device, non_blocking=args.latch)
             if args.scaler:
