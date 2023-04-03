@@ -104,5 +104,5 @@ if __name__ == '__main__':
     print('| 训练集:{} | 验证集:{} | 批量{} | 模型:{} | 输入尺寸:{} | 损失函数:{} | 初始学习率:{} |'
           .format(len(data_dict['train']), len(data_dict['val']), args.batch, args.model, args.input_size, args.loss,
                   args.lr)) if args.local_rank == 0 else None
-    # 训练(包括图片读取和预处理、训练、验证、保存模型)
+    # 训练
     train_get(args, data_dict, model_dict, loss)
