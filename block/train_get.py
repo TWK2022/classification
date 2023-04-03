@@ -45,7 +45,7 @@ def train_get(args, data_dict, model_dict, loss):
         tqdm_show = tqdm.tqdm(total=len(data_dict['train']) // args.batch // args.gpu_number * args.gpu_number,
                               postfix=dict, mininterval=0.2) if args.local_rank == 0 else None  # tqdm
         for item, (image_batch, true_batch) in enumerate(train_dataloader):
-            if args.wandb and len(wandb_image_list) < args.wandb_image_num and args.local_rank == 0:
+            if args.wandb and args.local_rank == 0 and len(wandb_image_list) < args.wandb_image_num:
                 wandb_image_batch = (image_batch * 255).cpu().numpy().astype(np.uint8).transpose(0, 2, 3, 1)
             image_batch = image_batch.to(args.device, non_blocking=args.latch)
             true_batch = true_batch.to(args.device, non_blocking=args.latch)
@@ -72,11 +72,11 @@ def train_get(args, data_dict, model_dict, loss):
                 tqdm_show.set_postfix({'当前loss': loss_batch.item()})  # 添加loss显示
                 tqdm_show.update(args.gpu_number)  # 更新进度条
             # wandb
-            if args.wandb and epoch == 0 and len(wandb_image_list) < args.wandb_image_num and args.local_rank == 0:
+            if args.wandb and args.local_rank == 0 and epoch == 0 and len(wandb_image_list) < args.wandb_image_num:
                 cls = true_batch.cpu().numpy().tolist()
                 for i in range(len(wandb_image_batch)):  # 遍历每一张图片
                     image = wandb_image_batch[i]
-                    text = ['{:.2f}'.format(_) for _ in cls[i]]
+                    text = ['{:.0f}'.format(_) for _ in cls[i]]
                     text = text[0] if len(text) == 1 else '--'.join(text)
                     image = np.ascontiguousarray(image)  # 将数组的内存变为连续存储(cv2画图的要求)
                     cv2.putText(image, text, (30, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
