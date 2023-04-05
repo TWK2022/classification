@@ -46,7 +46,7 @@ parser.add_argument('--device', default='cuda', type=str, help='|训练设备|')
 parser.add_argument('--latch', default=True, type=bool, help='|模型和数据是否为锁存，True为锁存|')
 parser.add_argument('--num_worker', default=0, type=int, help='|CPU在处理数据时使用的进程数，0表示只有一个主进程，一般为0、2、4、8|')
 parser.add_argument('--ema', default=True, type=bool, help='|使用平均指数移动(EMA)调整参数|')
-parser.add_argument('--scaler', default=True, type=bool, help='|混合float16精度训练|')
+parser.add_argument('--amp', default=True, type=bool, help='|混合float16精度训练|')
 parser.add_argument('--noise', default=0.2, type=float, help='|训练数据加噪概率|')
 parser.add_argument('--class_threshold', default=0.5, type=float, help='|计算指标时，大于阈值判定为图片有该类别|')
 parser.add_argument('--distributed', default=False, type=bool, help='|单机多卡分布式训练，分布式训练时batch为总batch|')
@@ -67,8 +67,8 @@ torch.backends.cudnn.benchmark = False
 if args.wandb and args.local_rank == 0:  # 分布式时只记录一次wandb
     args.wandb_run = wandb.init(project=args.wandb_project, name=args.wandb_name, config=args)
 # 混合float16精度训练
-if args.scaler:
-    args.scaler = torch.cuda.amp.GradScaler()
+if args.amp:
+    args.amp = torch.cuda.amp.GradScaler()
 # 分布式训练
 if args.distributed:
     torch.distributed.init_process_group(backend="nccl")  # 分布式训练初始化

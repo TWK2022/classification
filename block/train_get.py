@@ -49,14 +49,14 @@ def train_get(args, data_dict, model_dict, loss):
                 wandb_image_batch = (image_batch * 255).cpu().numpy().astype(np.uint8).transpose(0, 2, 3, 1)
             image_batch = image_batch.to(args.device, non_blocking=args.latch)
             true_batch = true_batch.to(args.device, non_blocking=args.latch)
-            if args.scaler:
+            if args.amp:
                 with torch.cuda.amp.autocast():
                     pred_batch = model(image_batch)
                     loss_batch = loss(pred_batch, true_batch)
                 optimizer.zero_grad()
-                args.scaler.scale(loss_batch).backward()
-                args.scaler.step(optimizer)
-                args.scaler.update()
+                args.amp.scale(loss_batch).backward()
+                args.amp.step(optimizer)
+                args.amp.update()
             else:
                 pred_batch = model(image_batch)
                 loss_batch = loss(pred_batch, true_batch)
