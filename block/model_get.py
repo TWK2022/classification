@@ -13,10 +13,11 @@ def model_get(args):
             model = eval(choice_dict[args.model])
         model_dict = {}
         model_dict['model'] = model
-        model_dict['epoch'] = 0
-        model_dict['optimizer_state_dict'] = None
-        model_dict['ema_updates'] = 0
-        model_dict['standard'] = 0
+        model_dict['epoch'] = -1  # 已训练的轮次
+        model_dict['optimizer_state_dict'] = None  # 学习率参数
+        model_dict['lr_adjust_item'] = 0  # 学习率调整参数
+        model_dict['ema_updates'] = 0  # ema参数
+        model_dict['standard'] = 0  # 评价指标
     return model_dict
 
 
