@@ -8,6 +8,7 @@ from block.val_get import val_get
 from block.ModelEMA import ModelEMA
 from block.lr_adjust import lr_adjust
 
+
 def train_get(args, data_dict, model_dict, loss):
     # 加载模型
     model = model_dict['model'].to(args.device, non_blocking=args.latch)
@@ -19,10 +20,10 @@ def train_get(args, data_dict, model_dict, loss):
     if args.ema:
         ema.updates = model_dict['ema_updates']
     # 学习率
-    optimizer = torch.optim.Adam(model.parameters(), lr=args.lr, betas=(0.937, 0.999), weight_decay=0.0005)
+    optimizer = torch.optim.Adam(model.parameters(), lr=args.lr_start, betas=(0.937, 0.999), weight_decay=0.0005)
     optimizer.load_state_dict(model_dict['optimizer_state_dict']) if model_dict['optimizer_state_dict'] else None
-    optimizer_adjust = lr_adjust(model_dict['lr_adjust_item'])
-    optimizer = optimizer_adjust(optimizer, args.lr, model_dict['epoch'] + 1, 0)  # 初始化学习率
+    optimizer_adjust = lr_adjust(args, model_dict['lr_adjust_item'])
+    optimizer = optimizer_adjust(optimizer, model_dict['epoch'] + 1, 0)  # 初始化学习率
     # 数据集
     train_dataset = torch_dataset(args, 'train', data_dict['train'], data_dict['class'])
     train_sampler = torch.utils.data.distributed.DistributedSampler(train_dataset) if args.distributed else None
@@ -39,7 +40,7 @@ def train_get(args, data_dict, model_dict, loss):
     # wandb
     if args.wandb and args.local_rank == 0:
         wandb_image_list = []  # 记录所有的wandb_image最后一起添加(最多添加args.wandb_image_num张)
-    epoch_base = model_dict['epoch'] + 1
+    epoch_base = model_dict['epoch'] + 1  # 新的一轮要+1
     for epoch in range(epoch_base, epoch_base + args.epoch):
         # 训练
         print(f'\n-----------------------第{epoch}轮-----------------------') if args.local_rank == 0 else None
@@ -93,7 +94,7 @@ def train_get(args, data_dict, model_dict, loss):
         train_loss = train_loss / (item + 1)
         print('\n| train_loss:{:.4f} | lr:{:.6f} |\n'.format(train_loss, optimizer.param_groups[0]['lr']))
         # 调整学习率
-        optimizer = optimizer_adjust(optimizer, args.lr, epoch + 1, train_loss)
+        optimizer = optimizer_adjust(optimizer, epoch + 1, train_loss)
         # 清理显存空间
         del image_batch, true_batch, pred_batch, loss_batch
         torch.cuda.empty_cache()
@@ -103,7 +104,7 @@ def train_get(args, data_dict, model_dict, loss):
         # 保存
         if args.local_rank == 0:  # 分布式时只保存一次
             model_dict['model'] = model.eval()
-            model_dict['epoch'] += 1
+            model_dict['epoch'] = epoch
             model_dict['optimizer_state_dict'] = optimizer.state_dict()
             model_dict['lr_adjust_item'] = optimizer_adjust.lr_adjust_item
             model_dict['ema_updates'] = ema.updates if args.ema else model_dict['ema_updates']
