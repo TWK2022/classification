@@ -12,9 +12,9 @@ class lr_adjust:
         return x
 
     def __call__(self, optimizer, lr_base, epoch, loss_now):
-        if epoch < 3:  # 预热阶段学习率减少为0.2,0.5,0.8
-            lr = lr_base * (0.2 + 0.3 * epoch)
-        elif epoch < 5:  # 前5-warmup轮学习率不变
+        if epoch < 3:  # 预热阶段学习率减少为0.1,0.3,0.5
+            lr = lr_base * (0.1 + 0.2 * epoch)
+        elif epoch == 3:  # 正式训练第1轮学习率不变
             lr = lr_base
         elif loss_now > 0.9 * self.loss_last and self.lr_adjust_item < len(self.lr_adjust_range) - 1:  # 调整学习率
             self.lr_adjust_item += 1
