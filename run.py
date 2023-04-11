@@ -84,7 +84,7 @@ if args.local_rank == 0:
     assert os.path.exists(f'{args.data_path}/val.txt'), 'data_path中缺少val.txt'
     assert os.path.exists(f'{args.data_path}/class.txt'), 'data_path中缺少class.txt'
     if os.path.exists(args.weight):  # 优先加载已有模型args.weight继续训练
-        print('| 加载已有模型:{} |'.format(args.weight))
+        print(f'| 加载已有模型:{args.weight} |')
     elif args.timm:  # 创建timm库中模型args.timm
         import timm
 
