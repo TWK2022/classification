@@ -79,19 +79,19 @@ if args.distributed:
 # 初步检查
 if args.local_rank == 0:
     print(f'| args:{args} |')
-    assert os.path.exists(f'{args.data_path}/image'), 'data_path中缺少image'
-    assert os.path.exists(f'{args.data_path}/train.txt'), 'data_path中缺少train.txt'
-    assert os.path.exists(f'{args.data_path}/val.txt'), 'data_path中缺少val.txt'
-    assert os.path.exists(f'{args.data_path}/class.txt'), 'data_path中缺少class.txt'
+    assert os.path.exists(f'{args.data_path}/image'), 'data_path中缺少:image'
+    assert os.path.exists(f'{args.data_path}/train.txt'), 'data_path中缺少:train.txt'
+    assert os.path.exists(f'{args.data_path}/val.txt'), 'data_path中缺少:val.txt'
+    assert os.path.exists(f'{args.data_path}/class.txt'), 'data_path中缺少:class.txt'
     if os.path.exists(args.weight):  # 优先加载已有模型args.weight继续训练
         print(f'| 加载已有模型:{args.weight} |')
     elif args.timm:  # 创建timm库中模型args.timm
         import timm
 
-        assert timm.list_models(args.model), f'timm中没有此模型{args.model}，使用timm.list_models()查看所有模型'
+        assert timm.list_models(args.model), f'timm中没有此模型:{args.model}，使用timm.list_models()查看所有模型'
         print(f'| 创建timm库中模型:{args.model} |')
     else:  # 创建自定义模型args.model
-        assert os.path.exists(f'model/{args.model}.py'), f'没有此自定义模型{args.model}'
+        assert os.path.exists(f'model/{args.model}.py'), f'没有此自定义模型:{args.model}'
         print(f'| 创建自定义模型:{args.model} | 型号:{args.model_type} |')
 # -------------------------------------------------------------------------------------------------------------------- #
 # 程序
