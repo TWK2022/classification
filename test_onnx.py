@@ -55,17 +55,17 @@ def test_onnx():
         for i in range(n):
             batch = image_all[i * args.batch:(i + 1) * args.batch]
             pred_batch = session.run([output_name], {input_name: batch})
-            result.extend(pred_batch)
+            result.extend(pred_batch[0].tolist())
         if len(image_all) % args.batch > 0:  # 如果图片数量没有刚好满足批量
             batch = image_all[(i + 1) * args.batch:]
             pred_batch = session.run([output_name], {input_name: batch})
-            result.extend(pred_batch)
+            result.extend(pred_batch[0].tolist())
     else:  # 如果图片数量<批量(直接预测)
         batch = image_all
         pred_batch = session.run([output_name], {input_name: batch})
-        result.extend(pred_batch)
+        result.extend(pred_batch[0].tolist())
     for i in range(len(result)):
-        result[i] = [round(_.item(), 2) for _ in result[i]]
+        result[i] = [round(result[i][_], 2) for _ in range(len(result[i]))]
         print(f'| {image_dir[i]}:{result[i]} |')
     end_time = time.time()
     print('| 数据:{} 批量:{} 每张耗时:{:.4f} |'.format(len(image_all), args.batch, (end_time - start_time) / len(image_all)))

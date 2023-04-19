@@ -47,7 +47,7 @@ def test_pt():
             pred_batch = model(batch).detach().cpu()
             result.extend(pred_batch.tolist())
         for i in range(len(result)):
-            result[i] = [round(_, 4) for _ in result[i]]
+            result[i] = [round(result[i][_], 2) for _ in range(len(result[i]))]
             print(f'| {image_dir[i]}:{result[i]} |')
     end_time = time.time()
     print('| 数据:{} 批量:{} 每张耗时:{:.4f} |'.format(len(image_dir), args.batch, (end_time - start_time) / len(image_dir)))
