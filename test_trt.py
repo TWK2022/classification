@@ -12,7 +12,7 @@ import pycuda.driver as cuda
 # 设置
 parser = argparse.ArgumentParser(description='tensorrt推理')
 parser.add_argument('--model_path', default='best.trt', type=str, help='|trt模型位置|')
-parser.add_argument('--image_path', default='image', type=str, help='|图片文件夹位置|')
+parser.add_argument('--data_path', default='image', type=str, help='|图片文件夹位置|')
 parser.add_argument('--input_size', default=320, type=int, help='|输入图片大小，要与导出的模型对应|')
 parser.add_argument('--batch', default=1, type=int, help='|输入图片批量，要与导出的模型对应，一般为1|')
 parser.add_argument('--float16', default=True, type=bool, help='|推理数据类型，要与导出的模型对应，False时为float32|')
@@ -20,7 +20,7 @@ args = parser.parse_args()
 # -------------------------------------------------------------------------------------------------------------------- #
 # 初步检查
 assert os.path.exists(args.model_path), f'没有找到模型{args.model_path}'
-assert os.path.exists(args.image_path), f'没有找到图片文件夹{args.image_path}'
+assert os.path.exists(args.data_path), f'没有找到图片文件夹{args.data_path}'
 
 
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -45,10 +45,10 @@ def test_tensorrt():
         albumentations.LongestMaxSize(args.input_size),
         albumentations.PadIfNeeded(min_height=args.input_size, min_width=args.input_size,
                                    border_mode=cv2.BORDER_CONSTANT, value=(127, 127, 127))])
-    image_dir = sorted(os.listdir(args.image_path))
+    image_dir = sorted(os.listdir(args.data_path))
     image_list = [0 for _ in range(len(image_dir))]
     for i in range(len(image_dir)):
-        image = cv2.imread(args.image_path + '/' + image_dir[i])
+        image = cv2.imread(args.data_path + '/' + image_dir[i])
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)  # 转为RGB通道
         image = transform(image=image)['image'].reshape(-1).astype(
             np.float16 if args.float16 else np.float32)  # 缩放和填充图片(归一化、减均值、除以方差、调维度等在模型中完成)
