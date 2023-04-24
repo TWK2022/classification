@@ -130,11 +130,14 @@ class image_deal(torch.nn.Module):  # 归一化
 
 
 class deploy(torch.nn.Module):
-    def __init__(self, model):
+    def __init__(self, model, normalization):
         super().__init__()
         self.image_deal = image_deal()
         self.model = model
-        self.normalization = torch.nn.Sigmoid()
+        if normalization == 'softmax':
+            self.normalization = torch.nn.Softmax(dim=1)
+        else:
+            self.normalization = torch.nn.Sigmoid()
 
     def forward(self, x):
         x = self.image_deal(x)

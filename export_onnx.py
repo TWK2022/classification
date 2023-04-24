@@ -8,6 +8,7 @@ from model.layer import deploy
 parser = argparse.ArgumentParser(description='将pt模型字典中的模型转为onnx，同时导出类别信息')
 parser.add_argument('--weight', default='best.pt', type=str, help='|模型位置|')
 parser.add_argument('--input_size', default=320, type=int, help='|输入图片大小|')
+parser.add_argument('--normalization', default='sigmoid', type=str, help='|选择sigmoid或softmax归一化，单类别一定要选sigmoid|')
 parser.add_argument('--batch', default=0, type=int, help='|输入图片批量，0为动态|')
 parser.add_argument('--sim', default=True, type=bool, help='|使用onnxsim压缩简化模型|')
 parser.add_argument('--device', default='cuda', type=str, help='|在哪个设备上加载模型|')
@@ -27,7 +28,7 @@ if args.float16:
 def export_onnx():
     model_dict = torch.load(args.weight, map_location='cpu')
     model = model_dict['model']
-    model = deploy(model)
+    model = deploy(model, args.normalization)
     model = model.eval().half().to(args.device) if args.float16 else model.eval().float().to(args.device)
     input_shape = torch.rand(1, args.input_size, args.input_size, 3,
                              dtype=torch.float16 if args.float16 else torch.float32).to(args.device)
