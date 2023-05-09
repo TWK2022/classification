@@ -27,9 +27,9 @@ assert os.path.exists(args.data_path), f'没有找到图片文件夹{args.data_p
 def test_onnx():
     # 加载模型
     provider = 'CUDAExecutionProvider' if args.device.lower() in ['gpu', 'cuda'] else 'CPUExecutionProvider'
-    session = onnxruntime.InferenceSession(args.model_path, providers=[provider])  # 加载模型和框架
-    input_name = session.get_inputs()[0].name  # 获取输入名称
-    output_name = session.get_outputs()[0].name  # 获取输出名称
+    model = onnxruntime.InferenceSession(args.model_path, providers=[provider])  # 加载模型和框架
+    input_name = model.get_inputs()[0].name  # 获取输入名称
+    output_name = model.get_outputs()[0].name  # 获取输出名称
     print(f'| 模型加载成功:{args.model_path} |')
     # 加载数据
     start_time = time.time()
@@ -54,15 +54,15 @@ def test_onnx():
     if n > 0:  # 如果图片数量>=批量(分批预测)
         for i in range(n):
             batch = image_all[i * args.batch:(i + 1) * args.batch]
-            pred_batch = session.run([output_name], {input_name: batch})
+            pred_batch = model.run([output_name], {input_name: batch})
             result.extend(pred_batch[0].tolist())
         if len(image_all) % args.batch > 0:  # 如果图片数量没有刚好满足批量
             batch = image_all[(i + 1) * args.batch:]
-            pred_batch = session.run([output_name], {input_name: batch})
+            pred_batch = model.run([output_name], {input_name: batch})
             result.extend(pred_batch[0].tolist())
     else:  # 如果图片数量<批量(直接预测)
         batch = image_all
-        pred_batch = session.run([output_name], {input_name: batch})
+        pred_batch = model.run([output_name], {input_name: batch})
         result.extend(pred_batch[0].tolist())
     for i in range(len(result)):
         result[i] = [round(result[i][_], 2) for _ in range(len(result[i]))]
