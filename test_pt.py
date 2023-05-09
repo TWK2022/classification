@@ -8,7 +8,7 @@ from model.layer import deploy
 
 # -------------------------------------------------------------------------------------------------------------------- #
 # 设置
-parser = argparse.ArgumentParser(description='pt模型推理')
+parser = argparse.ArgumentParser(description='|pt模型推理|')
 parser.add_argument('--model_path', default='best.pt', type=str, help='|pt模型位置|')
 parser.add_argument('--data_path', default='image', type=str, help='|图片文件夹位置|')
 parser.add_argument('--input_size', default=320, type=int, help='|模型输入图片大小|')
