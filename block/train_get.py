@@ -12,18 +12,15 @@ from block.lr_adjust import lr_adjust
 def train_get(args, data_dict, model_dict, loss):
     # 加载模型
     model = model_dict['model'].to(args.device, non_blocking=args.latch)
-    # 分布式初始化
-    torch.nn.parallel.DistributedDataParallel(model, device_ids=[args.local_rank],
-                                              output_device=args.local_rank) if args.distributed else None
+    # 学习率
+    optimizer = torch.optim.Adam(model.parameters(), lr=args.lr_start, betas=(0.937, 0.999), weight_decay=0.0005)
+    optimizer.load_state_dict(model_dict['optimizer_state_dict']) if model_dict['optimizer_state_dict'] else None
+    optimizer_adjust = lr_adjust(args, model_dict['lr_adjust_item'])  # 学习率调整函数
+    optimizer = optimizer_adjust(optimizer, model_dict['epoch'] + 1, 0)  # 初始化学习率
     # 使用平均指数移动(EMA)调整参数(不能将ema放到args中，否则会导致模型保存出错)
     ema = ModelEMA(model) if args.ema else None
     if args.ema:
         ema.updates = model_dict['ema_updates']
-    # 学习率
-    optimizer = torch.optim.Adam(model.parameters(), lr=args.lr_start, betas=(0.937, 0.999), weight_decay=0.0005)
-    optimizer.load_state_dict(model_dict['optimizer_state_dict']) if model_dict['optimizer_state_dict'] else None
-    optimizer_adjust = lr_adjust(args, model_dict['lr_adjust_item'])
-    optimizer = optimizer_adjust(optimizer, model_dict['epoch'] + 1, 0)  # 初始化学习率
     # 数据集
     train_dataset = torch_dataset(args, 'train', data_dict['train'], data_dict['class'])
     train_sampler = torch.utils.data.distributed.DistributedSampler(train_dataset) if args.distributed else None
@@ -37,6 +34,9 @@ def train_get(args, data_dict, model_dict, loss):
     val_dataloader = torch.utils.data.DataLoader(val_dataset, batch_size=val_batch, shuffle=False,
                                                  drop_last=False, pin_memory=args.latch, num_workers=args.num_worker,
                                                  sampler=val_sampler)
+    # 分布式初始化
+    model = torch.nn.parallel.DistributedDataParallel(model, device_ids=[args.local_rank],
+                                                      output_device=args.local_rank) if args.distributed else model
     # wandb
     if args.wandb and args.local_rank == 0:
         wandb_image_list = []  # 记录所有的wandb_image最后一起添加(最多添加args.wandb_image_num张)
