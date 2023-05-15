@@ -38,7 +38,7 @@ parser.add_argument('--model', default='yolov7_cls', type=str, help='|模型选�
 parser.add_argument('--model_type', default='n', type=str, help='|自定义模型的型号参数，部分模型有|')
 parser.add_argument('--input_size', default=320, type=int, help='|输入图片大小|')
 parser.add_argument('--output_class', default=1, type=int, help='|输出的类别数|')
-parser.add_argument('--epoch', default=150, type=int, help='|训练轮数|')
+parser.add_argument('--epoch', default=120, type=int, help='|训练轮数|')
 parser.add_argument('--batch', default=8, type=int, help='|训练批量大小|')
 parser.add_argument('--loss', default='bce', type=str, help='|损失函数|')
 parser.add_argument('--lr_start', default=0.001, type=float, help='|初始学习率，训练中采用adam算法，前3轮有预热训练|')
