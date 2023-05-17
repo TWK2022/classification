@@ -14,7 +14,7 @@ class lr_adjust:
             lr = self.lr_start * (0.1 + 0.2 * epoch)
         elif epoch == 3:  # 正式训练时第1轮学习率不变
             lr = self.lr_start
-        elif loss_now > 0.9 * self.loss_last and self.lr_adjust_item < self.lr_adjust_num:  # 调整学习率
+        elif loss_now > 0.95 * self.loss_last and self.lr_adjust_item < self.lr_adjust_num:  # 调整学习率
             self.lr_adjust_item += 1
             decay = self.lr_adjust_item / self.lr_adjust_num  # 0-1
             lr = self.lr_end + (self.lr_start - self.lr_end) * math.cos(math.pi / 2 * decay)
