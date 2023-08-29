@@ -12,6 +12,7 @@ parser = argparse.ArgumentParser(description='|pt模型推理|')
 parser.add_argument('--model_path', default='best.pt', type=str, help='|pt模型位置|')
 parser.add_argument('--data_path', default='image', type=str, help='|图片文件夹位置|')
 parser.add_argument('--input_size', default=320, type=int, help='|模型输入图片大小|')
+parser.add_argument('--normalization', default='sigmoid', type=str, help='|选择sigmoid或softmax归一化，单类别一定要选sigmoid|')
 parser.add_argument('--batch', default=1, type=int, help='|输入图片批量|')
 parser.add_argument('--device', default='cuda', type=str, help='|用CPU/GPU推理|')
 parser.add_argument('--num_worker', default=0, type=int, help='|CPU在处理数据时使用的进程数，0表示只有一个主进程，一般为0、2、4、8|')
@@ -31,7 +32,7 @@ def test_pt():
     # 加载模型
     model_dict = torch.load(args.model_path, map_location='cpu')
     model = model_dict['model']
-    model = deploy(model)
+    model = deploy(model, args.normalization)
     model.half().eval().to(args.device) if args.float16 else model.float().eval().to(args.device)
     print('| 模型加载成功:{} |'.format(args.model_path))
     # 推理
