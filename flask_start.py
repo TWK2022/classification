@@ -1,4 +1,4 @@
-# 使用flask在服务器上创建一个可以调用的服务
+# 用flask将程序包装成一个服务，并在服务器上启动
 import cv2
 import json
 import flask

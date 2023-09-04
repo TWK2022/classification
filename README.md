@@ -2,7 +2,7 @@
 >代码兼容性较强，使用的是一些基本的库、基础的函数  
 >包含分布式训练、混合精度训练、EMA平均指数移动调参、float16精度onnx/trt导出及预测   
 >测试/导出模型时，图片归一化、结果归一化会包含在模型中  
->在argparse中可以选择使用wandb，能在wandb网站中生成可视化的训练过程
+>在argparse中可以选择使用wandb，能在wandb网站中生成可视化的训练过程  
 ### 数据格式如下  
 >├── 数据集路径：data_path  
 >&emsp; &emsp; └── image：存放所有图片  
@@ -22,7 +22,11 @@
 >文档中有onnx模型导出为tensort模型的详细说明
 ### 6，test_trt.py
 >使用导出的trt模型预测
+### 7，flask_start.py
+>用flask将程序包装成一个服务，并在服务器上启动
+### 8，flask_request.py
+>传输数据以调用服务
 ### 其他
->github链接：https://github.com/TWK2022/classification  
->学习笔记：https://github.com/TWK2022/notebook  
->邮箱：1024565378@qq.com
+>github链接: https://github.com/TWK2022/classification  
+>学习笔记: https://github.com/TWK2022/notebook  
+>邮箱: 1024565378@qq.com
