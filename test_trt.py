@@ -25,7 +25,7 @@ assert os.path.exists(args.data_path), f'没有找到图片文件夹{args.data_p
 
 # -------------------------------------------------------------------------------------------------------------------- #
 # 程序
-def test_tensorrt():
+def test_tensorrt(args):
     # 加载模型
     logger = tensorrt.Logger(tensorrt.Logger.WARNING)  # 创建日志记录信息
     with tensorrt.Runtime(logger) as runtime, open(args.model_path, "rb") as f:
@@ -70,4 +70,4 @@ def test_tensorrt():
 
 
 if __name__ == '__main__':
-    test_tensorrt()
+    test_tensorrt(args)

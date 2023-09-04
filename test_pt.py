@@ -28,7 +28,7 @@ if args.float16:
 
 # -------------------------------------------------------------------------------------------------------------------- #
 # 程序
-def test_pt():
+def test_pt(args):
     # 加载模型
     model_dict = torch.load(args.model_path, map_location='cpu')
     model = model_dict['model']
@@ -74,4 +74,4 @@ class torch_dataset(torch.utils.data.Dataset):
 
 
 if __name__ == '__main__':
-    test_pt()
+    test_pt(args)

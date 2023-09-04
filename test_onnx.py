@@ -24,7 +24,7 @@ assert os.path.exists(args.data_path), f'没有找到图片文件夹{args.data_p
 
 # -------------------------------------------------------------------------------------------------------------------- #
 # 程序
-def test_onnx():
+def test_onnx(args):
     # 加载模型
     provider = 'CUDAExecutionProvider' if args.device.lower() in ['gpu', 'cuda'] else 'CPUExecutionProvider'
     model = onnxruntime.InferenceSession(args.model_path, providers=[provider])  # 加载模型和框架
@@ -72,4 +72,4 @@ def test_onnx():
 
 
 if __name__ == '__main__':
-    test_onnx()
+    test_onnx(args)
