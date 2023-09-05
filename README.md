@@ -27,6 +27,6 @@
 ### 8，flask_request.py
 >传输数据以调用服务
 ### 其他
->github链接: https://github.com/TWK2022/classification  
->学习笔记: https://github.com/TWK2022/notebook  
->邮箱: 1024565378@qq.com
+>github链接：https://github.com/TWK2022/classification  
+>学习笔记：https://github.com/TWK2022/notebook  
+>邮箱：1024565378@qq.com
