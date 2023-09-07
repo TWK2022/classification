@@ -5,12 +5,12 @@ import base64
 import requests
 
 
-def encode(image_path):
+def image_encode(image_path):
     with open(image_path, 'rb')as f:
         image_byte = f.read()
     image_base64 = base64.b64encode(image_byte)
-    image_json = json.dumps(image_base64.decode())
-    return image_json
+    image = image_base64.decode()
+    return image
 
 
 if __name__ == '__main__':
@@ -19,7 +19,9 @@ if __name__ == '__main__':
     path_list = os.listdir(path_dir)
     for image_path in path_list:
         image_path = f'{path_dir}/{image_path}'
-        image_json = encode(image_path)
-        response = requests.post(url, data=image_json)
+        image = image_encode(image_path)
+        request_dict = {'image': image}
+        request = json.dumps(request_dict)
+        response = requests.post(url, data=request)
         result = response.json()
         print(result)

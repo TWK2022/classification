@@ -5,19 +5,23 @@ import flask
 import base64
 import argparse
 import numpy as np
+from inference import detection_class
 
 # -------------------------------------------------------------------------------------------------------------------- #
 # 设置
 parser = argparse.ArgumentParser('|在服务器上启动flask服务|')
-# ...
+parser.add_argument('--model_path', default='model', type=str, help='|模型位置|')
+parser.add_argument('--device', default='cuda', type=str, help='|设备|')
+parser.add_argument('--threshold', default=0.8, type=float, help='|阈值|')
 args = parser.parse_args()
+args.device = 'cuda' if args.device.lower() in ['gpu', 'cuda'] else 'cpu'
 app = flask.Flask(__name__)  # 创建一个服务框架
 
 
 # -------------------------------------------------------------------------------------------------------------------- #
 # 程序
-def image_decode(image_json):
-    image_base64 = json.loads(image_json).encode()  # json->base64
+def image_decode(image):
+    image_base64 = image.encode()
     image_byte = base64.b64decode(image_base64)  # base64->字节类型
     array = np.frombuffer(image_byte, dtype=np.uint8)  # 字节类型->一行数组
     image = cv2.imdecode(array, cv2.IMREAD_COLOR)  # 一行数组->BGR图片
@@ -26,10 +30,10 @@ def image_decode(image_json):
 
 @app.route('/test/', methods=['POST'])  # 每当调用服务时会执行一次flask_app函数
 def flask_app():
-    image_json = flask.request.get_data()
-    image = image_decode(image_json)
-    # ...
-    result = image.shape
+    request = flask.request.get_data()
+    request_dict = json.loads(request)
+    image = image_decode(request_dict['image'])
+    result = ''
     return result
 
 
