@@ -6,12 +6,16 @@ import base64
 import argparse
 import numpy as np
 
+# -------------------------------------------------------------------------------------------------------------------- #
+# 设置
 parser = argparse.ArgumentParser('|在服务器上启动flask服务|')
 # ...
 args = parser.parse_args()
 app = flask.Flask(__name__)  # 创建一个服务框架
 
 
+# -------------------------------------------------------------------------------------------------------------------- #
+# 程序
 def image_decode(image_json):
     image_base64 = json.loads(image_json).encode()  # json->base64
     image_byte = base64.b64decode(image_base64)  # base64->字节类型
