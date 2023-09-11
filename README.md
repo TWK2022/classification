@@ -26,6 +26,8 @@
 >用flask将程序包装成一个服务，并在服务器上启动
 ### 8，flask_request.py
 >以post请求传输数据调用服务
+### 9，gunicorn_config.py
+>用gunicorn多进程启动flask服务：gunicorn -c gunicorn_config.py flask_start:app
 ### 其他
 >github链接：https://github.com/TWK2022/classification  
 >学习笔记：https://github.com/TWK2022/notebook  

@@ -1,5 +1,5 @@
+# pip install flask -i https://pypi.tuna.tsinghua.edu.cn/simple
 # 启用flask_start的服务后，将数据以post的方式调用服务得到结果
-import os
 import json
 import base64
 import requests

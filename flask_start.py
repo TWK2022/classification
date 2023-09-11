@@ -1,3 +1,4 @@
+# pip install flask -i https://pypi.tuna.tsinghua.edu.cn/simple
 # 用flask将程序包装成一个服务，并在服务器上启动
 import cv2
 import json
