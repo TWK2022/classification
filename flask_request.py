@@ -15,13 +15,10 @@ def image_encode(image_path):
 
 if __name__ == '__main__':
     url = 'http://0.0.0.0:9999/test/'  # 根据flask_start中的设置: http://host:port/name/
-    path_dir = 'image'
-    path_list = os.listdir(path_dir)
-    for image_path in path_list:
-        image_path = f'{path_dir}/{image_path}'
-        image = image_encode(image_path)
-        request_dict = {'image': image}
-        request = json.dumps(request_dict)
-        response = requests.post(url, data=request)
-        result = response.json()
-        print(result)
+    image_path = 'demo.jpg'
+    image = image_encode(image_path)
+    request_dict = {'image': image}
+    request = json.dumps(request_dict)
+    response = requests.post(url, data=request)
+    result = response.json()
+    print(result)
