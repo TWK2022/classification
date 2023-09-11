@@ -10,7 +10,7 @@ import numpy as np
 # 设置
 parser = argparse.ArgumentParser('|在服务器上启动flask服务|')
 # ...
-args, _ = parser.parse_known_args()  # 替代args = parser.parse_args()
+args, _ = parser.parse_known_args()  # 防止传入参数冲突，替代args = parser.parse_args()
 app = flask.Flask(__name__)  # 创建一个服务框架
 
 

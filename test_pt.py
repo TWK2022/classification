@@ -17,7 +17,7 @@ parser.add_argument('--batch', default=1, type=int, help='|输入图片批量|')
 parser.add_argument('--device', default='cuda', type=str, help='|用CPU/GPU推理|')
 parser.add_argument('--num_worker', default=0, type=int, help='|CPU在处理数据时使用的进程数，0表示只有一个主进程，一般为0、2、4、8|')
 parser.add_argument('--float16', default=True, type=bool, help='|推理数据类型，要支持float16的GPU，False时为float32|')
-args = parser.parse_args()
+args, _ = parser.parse_known_args()  # 防止传入参数冲突，替代args = parser.parse_args()
 # -------------------------------------------------------------------------------------------------------------------- #
 # 初步检查
 assert os.path.exists(args.model_path), f'没有找到模型{args.model_path}'
