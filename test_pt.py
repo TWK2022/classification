@@ -34,7 +34,8 @@ def test_pt(args):
     model = model_dict['model']
     model = deploy(model, args.normalization)
     model.half().eval().to(args.device) if args.float16 else model.float().eval().to(args.device)
-    print('| 模型加载成功:{} |'.format(args.model_path))
+    m_ap = round(model_dict['standard'], 3)
+    print(f'| 模型加载成功:{args.model_path} | mse:{m_ap}|')
     # 推理
     image_dir = sorted(os.listdir(args.data_path))
     start_time = time.time()
