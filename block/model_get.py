@@ -1,6 +1,5 @@
 import os
 import torch
-from model.layer import elan
 
 choice_dict = {'yolov7_cls': 'model_prepare(args)._yolov7_cls()'}
 
