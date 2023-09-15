@@ -31,11 +31,15 @@ parser.add_argument('--wandb', default=False, type=bool, help='|是否使用wand
 parser.add_argument('--wandb_project', default='test', type=str, help='|wandb项目名称|')
 parser.add_argument('--wandb_name', default='train', type=str, help='|wandb项目中的训练名称|')
 parser.add_argument('--wandb_image_num', default=16, type=int, help='|wandb保存图片的数量|')
-parser.add_argument('--save_name', default='best.pt', type=str, help='|最佳模型的保存位置，除此之外每轮结束都会保存last.pt|')
 parser.add_argument('--weight', default='last.pt', type=str, help='|已有模型的位置，如果没找到模型则会创建新模型|')
-parser.add_argument('--timm', default=False, type=bool, help='|是否使用timm模型|')
+parser.add_argument('--save_path', default='bestp.pt', type=str, help='|最佳模型的保存位置，除此之外每轮结束都会保存last.pt|')
+parser.add_argument('--prune', default=False, type=bool, help='|模型剪枝后再训练(部分模型有)，需要提供已经训练好的weight|')
+parser.add_argument('--prune_ratio', default=0.5, type=float, help='|m模型剪枝时的保留比例|')
+parser.add_argument('--prune_weight', default='best.pt', type=str, help='|模型剪枝时使用的模型|')
+parser.add_argument('--prune_save', default='prune_best.pt', type=str, help='|最佳模型的保存位置，除此之外每轮结束都会保存prune_last.pt|')
+parser.add_argument('--timm', default=False, type=bool, help='|是否使用timm库创建模型|')
 parser.add_argument('--model', default='yolov7_cls', type=str, help='|模型选择，timm为True时为其中的模型，否则为自定义模型|')
-parser.add_argument('--model_type', default='n', type=str, help='|自定义模型的型号参数，部分模型有|')
+parser.add_argument('--model_type', default='s', type=str, help='|自定义模型的型号参数(部分模型有)|')
 parser.add_argument('--input_size', default=320, type=int, help='|输入图片大小|')
 parser.add_argument('--output_class', default=1, type=int, help='|输出的类别数|')
 parser.add_argument('--epoch', default=100, type=int, help='|训练轮数|')
@@ -52,7 +56,7 @@ parser.add_argument('--latch', default=True, type=bool, help='|模型和数据�
 parser.add_argument('--num_worker', default=0, type=int, help='|CPU在处理数据时使用的进程数，0表示只有一个主进程，一般为0、2、4、8|')
 parser.add_argument('--ema', default=True, type=bool, help='|使用平均指数移动(EMA)调整参数|')
 parser.add_argument('--amp', default=True, type=bool, help='|混合float16精度训练|')
-parser.add_argument('--noise', default=0.2, type=float, help='|训练数据加噪概率|')
+parser.add_argument('--noise', default=0.5, type=float, help='|训练数据加噪概率|')
 parser.add_argument('--class_threshold', default=0.5, type=float, help='|计算指标时，大于阈值判定为图片有该类别|')
 parser.add_argument('--distributed', default=False, type=bool, help='|单机多卡分布式训练，分布式训练时batch为总batch|')
 parser.add_argument('--local_rank', default=0, type=int, help='|分布式训练使用命令后会自动传入的参数|')
@@ -86,7 +90,9 @@ if args.local_rank == 0:
     assert os.path.exists(f'{args.data_path}/train.txt'), 'data_path中缺少:train.txt'
     assert os.path.exists(f'{args.data_path}/val.txt'), 'data_path中缺少:val.txt'
     assert os.path.exists(f'{args.data_path}/class.txt'), 'data_path中缺少:class.txt'
-    if os.path.exists(args.weight):  # 优先加载已有模型args.weight继续训练
+    if args.prune:
+        print(f'| 加模型模型并剪枝训练:{args.prune_weight} |')
+    elif os.path.exists(args.weight):  # 优先加载已有模型args.weight继续训练
         print(f'| 加载已有模型:{args.weight} |')
     elif args.timm:  # 创建timm库中模型args.timm
         import timm

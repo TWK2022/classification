@@ -115,14 +115,12 @@ def train_get(args, data_dict, model_dict, loss):
             model_dict['val_precision'] = precision
             model_dict['val_recall'] = recall
             model_dict['val_m_ap'] = m_ap
-            torch.save(model_dict, 'last.pt')  # 保存最后一次训练的模型
+            torch.save(model_dict, 'last.pt' if not args.prune else 'prune_last.pt')  # 保存最后一次训练的模型
             if m_ap > 0.5 and m_ap > model_dict['standard']:
                 model_dict['standard'] = m_ap
-                torch.save(model_dict, args.save_name)  # 保存最佳模型
-                print('\n| 保存最佳模型:{} | val_m_ap:{:.4f} |\n'.format(args.save_name, m_ap))
-            if m_ap == 1:
-                print('| 模型m_ap已达100%，暂停训练 |')
-                break
+                save_path = args.save_path if not args.prune else args.prune_save
+                torch.save(model_dict, save_path)  # 保存最佳模型
+                print('\n| 保存最佳模型:{} | val_m_ap:{:.4f} |\n'.format(save_path, m_ap))
             # wandb
             if args.wandb:
                 wandb_log = {}
