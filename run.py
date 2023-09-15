@@ -33,7 +33,7 @@ parser.add_argument('--wandb_name', default='train', type=str, help='|wandb项�
 parser.add_argument('--wandb_image_num', default=16, type=int, help='|wandb保存图片的数量|')
 parser.add_argument('--weight', default='last.pt', type=str, help='|已有模型的位置，如果没找到模型则会创建新模型|')
 parser.add_argument('--save_path', default='bestp.pt', type=str, help='|最佳模型的保存位置，除此之外每轮结束都会保存last.pt|')
-parser.add_argument('--prune', default=False, type=bool, help='|模型剪枝后再训练(部分模型有)，需要提供已经训练好的weight|')
+parser.add_argument('--prune', default=False, type=bool, help='|模型剪枝后再训练(部分模型有)，需要提供已经训练好的prune_weight|')
 parser.add_argument('--prune_ratio', default=0.5, type=float, help='|m模型剪枝时的保留比例|')
 parser.add_argument('--prune_weight', default='best.pt', type=str, help='|模型剪枝时使用的模型|')
 parser.add_argument('--prune_save', default='prune_best.pt', type=str, help='|最佳模型的保存位置，除此之外每轮结束都会保存prune_last.pt|')
