@@ -32,7 +32,7 @@ def model_get(args):
     return model_dict
 
 
-def prune(args, model):  # 默认都是conv+BN的组合，最后可能还会有一层不变的conv
+def prune(args, model):
     # 记录BN层权重
     BatchNorm2d_weight = []
     for module in model.modules():
@@ -66,16 +66,9 @@ def prune(args, model):  # 默认都是conv+BN的组合，最后可能还会有�
     args.prune_num = [len(_) for _ in index_list]
     prune_model = eval(choice_dict[args.model])
     # 权重赋值
-    index = 0
     for module, prune_module in zip(model.modules(), prune_model.modules()):
-        if isinstance(module, torch.nn.Conv2d):  # 更新Conv2d层权重
-            if index == len(index_list):  # 最后可能还会有一层不变的conv
-                prune_module.weight.data = module.weight.data.clone()
-            else:
-                prune_module.weight.data = module.weight.data.clone()[index_list[index]]
         if isinstance(module, torch.nn.BatchNorm2d):  # 更新BatchNorm2d层权重
             prune_module.weight.data = module.weight.data.clone()[index_list[index]]
-            index += 1
     return prune_model
 
 
