@@ -1,5 +1,6 @@
 import os
 import torch
+from model.layer import elan
 
 choice_dict = {'yolov7_cls': 'model_prepare(args)._yolov7_cls()'}
 
@@ -33,9 +34,10 @@ def prune(args, model):
         if isinstance(module, torch.nn.BatchNorm2d):
             BatchNorm2d_weight.append(module.weight.data.clone())
     BatchNorm2d_weight_abs = torch.concat(BatchNorm2d_weight, dim=0).abs()
+    weight_len = len(BatchNorm2d_weight)
     # 记录权重与BN层编号的关系
     BatchNorm2d_id = []
-    for i in range(len(BatchNorm2d_weight)):
+    for i in range(weight_len):
         BatchNorm2d_id.extend([i for _ in range(len(BatchNorm2d_weight[i]))])
     id_all = torch.tensor(BatchNorm2d_id)
     # 筛选
@@ -45,12 +47,12 @@ def prune(args, model):
     prune_index, _ = torch.sort(prune_index, dim=0, descending=False)
     prune_id = id_all[prune_index]
     # 将保留参数的下标放到每层中
-    index_list = [[] for _ in range(len(BatchNorm2d_weight))]
+    index_list = [[] for _ in range(weight_len)]
     for i in range(len(prune_index)):
         index_list[prune_id[i]].append(prune_index[i])
     # 将每层保留参数的下标换算成相对下标
     record_len = 0
-    for i in range(len(BatchNorm2d_weight)):
+    for i in range(weight_len):
         index_list[i] = torch.tensor(index_list[i])
         index_list[i] -= record_len
         if len(index_list[i]) == 0:  # 存在整层都被减去的情况，至少保留一层
@@ -59,11 +61,25 @@ def prune(args, model):
     # 创建剪枝后的模型
     args.prune_num = [len(_) for _ in index_list]
     prune_model = eval(choice_dict[args.model])
-    # BN层权重赋值
+    # BN层权重赋值和部分conv权重赋值
     index = 0
     for module, prune_module in zip(model.modules(), prune_model.modules()):
+        if isinstance(module, torch.nn.Conv2d):  # 更新部分Conv2d层权重
+            if index == 0:
+                weight = module.weight.data.clone()[index_list[index]]
+            elif index == weight_len:
+                weight = module.weight.data.clone()
+                weight = weight[:, index_list[index - 1], :, :]
+            else:
+                weight = module.weight.data.clone()[index_list[index]]
+                weight = weight[:, index_list[index - 1], :, :]
+            if prune_module.weight.data.shape == weight.shape:
+                prune_module.weight.data = weight
         if isinstance(module, torch.nn.BatchNorm2d):  # 更新BatchNorm2d层权重
             prune_module.weight.data = module.weight.data.clone()[index_list[index]]
+            prune_module.bias.data = module.bias.data.clone()[index_list[index]]
+            prune_module.running_mean = module.running_mean.clone()[index_list[index]]
+            prune_module.running_var = module.running_var.clone()[index_list[index]]
             index += 1
     return prune_model
 
