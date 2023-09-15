@@ -25,17 +25,18 @@ from block.train_get import train_get
 
 # -------------------------------------------------------------------------------------------------------------------- #
 # 设置
+# 模型加载/创建的优先级为：加载已有模型>创建剪枝模型>创建timm库模型>创建自定义模型
 parser = argparse.ArgumentParser(description='|图片分类|')
 parser.add_argument('--data_path', default=r'D:\dataset\classification\mask', type=str, help='|数据根目录路径|')
 parser.add_argument('--wandb', default=False, type=bool, help='|是否使用wandb可视化|')
 parser.add_argument('--wandb_project', default='test', type=str, help='|wandb项目名称|')
 parser.add_argument('--wandb_name', default='train', type=str, help='|wandb项目中的训练名称|')
 parser.add_argument('--wandb_image_num', default=16, type=int, help='|wandb保存图片的数量|')
-parser.add_argument('--weight', default='last.pt', type=str, help='|已有模型的位置，如果没找到模型则会创建新模型|')
-parser.add_argument('--save_path', default='bestp.pt', type=str, help='|最佳模型的保存位置，除此之外每轮结束都会保存last.pt|')
+parser.add_argument('--weight', default='last.pt', type=str, help='|已有模型的位置，如果没找到模型才会创建剪枝模型/新模型|')
+parser.add_argument('--save_path', default='best.pt', type=str, help='|最佳模型的保存位置，除此之外每轮结束都会保存last.pt|')
 parser.add_argument('--prune', default=False, type=bool, help='|模型剪枝后再训练(部分模型有)，需要提供已经训练好的prune_weight|')
 parser.add_argument('--prune_ratio', default=0.5, type=float, help='|m模型剪枝时的保留比例|')
-parser.add_argument('--prune_weight', default='best.pt', type=str, help='|模型剪枝时使用的模型|')
+parser.add_argument('--prune_weight', default='best.pt', type=str, help='|模型剪枝时使用的模型，会创建剪枝模型和训练模型|')
 parser.add_argument('--prune_save', default='prune_best.pt', type=str, help='|最佳模型的保存位置，除此之外每轮结束都会保存prune_last.pt|')
 parser.add_argument('--timm', default=False, type=bool, help='|是否使用timm库创建模型|')
 parser.add_argument('--model', default='yolov7_cls', type=str, help='|模型选择，timm为True时为其中的模型，否则为自定义模型|')
@@ -90,10 +91,10 @@ if args.local_rank == 0:
     assert os.path.exists(f'{args.data_path}/train.txt'), 'data_path中缺少:train.txt'
     assert os.path.exists(f'{args.data_path}/val.txt'), 'data_path中缺少:val.txt'
     assert os.path.exists(f'{args.data_path}/class.txt'), 'data_path中缺少:class.txt'
-    if args.prune:
-        print(f'| 加模型模型并剪枝训练:{args.prune_weight} |')
-    elif os.path.exists(args.weight):  # 优先加载已有模型args.weight继续训练
+    if os.path.exists(args.weight):  # 优先加载已有模型args.weight继续训练
         print(f'| 加载已有模型:{args.weight} |')
+    elif args.prune:
+        print(f'| 加模型并剪枝训练:{args.prune_weight} |')
     elif args.timm:  # 创建timm库中模型args.timm
         import timm
 
