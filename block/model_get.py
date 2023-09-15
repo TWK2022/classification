@@ -65,7 +65,7 @@ def prune(args, model):
     # 创建剪枝后的模型
     args.prune_num = [len(_) for _ in index_list]
     prune_model = eval(choice_dict[args.model])
-    # 权重赋值
+    # BN层权重赋值
     for module, prune_module in zip(model.modules(), prune_model.modules()):
         if isinstance(module, torch.nn.BatchNorm2d):  # 更新BatchNorm2d层权重
             prune_module.weight.data = module.weight.data.clone()[index_list[index]]
