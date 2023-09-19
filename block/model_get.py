@@ -66,6 +66,8 @@ def prune(args, model):
         if isinstance(module, torch.nn.Conv2d):  # 更新部分Conv2d层权重
             if index == 0:
                 weight = module.weight.data.clone()[index_list[index]]
+            elif index == weight_len:
+                weight = module.weight.data.clone()
             else:
                 weight = module.weight.data.clone()[index_list[index]]
                 weight = weight[:, index_list[index - 1], :, :]
