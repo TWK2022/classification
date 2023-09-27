@@ -73,7 +73,7 @@ def train_get(args, data_dict, model_dict, loss):
             train_loss += loss_batch.item()
             # tqdm
             if args.local_rank == 0:
-                tqdm_show.set_postfix({'当前平局loss': train_loss / (item + 1)})  # 添加loss显示
+                tqdm_show.set_postfix({'当前loss': loss_batch.item()})  # 添加loss显示
                 tqdm_show.update(args.gpu_number)  # 更新进度条
             # wandb
             if args.wandb and args.local_rank == 0 and epoch == 0 and len(wandb_image_list) < args.wandb_image_num:
