@@ -43,13 +43,13 @@ parser.add_argument('--model', default='yolov7_cls', type=str, help='|模型选�
 parser.add_argument('--model_type', default='s', type=str, help='|自定义模型的型号参数(部分模型有)|')
 parser.add_argument('--input_size', default=320, type=int, help='|输入图片大小|')
 parser.add_argument('--output_class', default=1, type=int, help='|输出的类别数|')
-parser.add_argument('--epoch', default=100, type=int, help='|训练轮数|')
+parser.add_argument('--epoch', default=120, type=int, help='|训练轮数|')
 parser.add_argument('--batch', default=8, type=int, help='|训练批量大小|')
 parser.add_argument('--loss', default='bce', type=str, help='|损失函数|')
-parser.add_argument('--lr_start', default=0.001, type=float, help='|初始学习率，训练中采用adam算法，前3轮有预热训练|')
-parser.add_argument('--lr_end', default=0.00001, type=float, help='|最终学习率|')
+parser.add_argument('--lr_start', default=0.001, type=float, help='|初始学习率，训练中采用adam算法，前3轮有预热训练，基准为0.001|')
+parser.add_argument('--lr_end', default=0.00005, type=float, help='|最终学习率，基准为0.00005|')
 parser.add_argument('--lr_adjust_num', default=50, type=int, help='|从初始学习率到最终学习率经过的调整次数，余玄下降法|')
-parser.add_argument('--lr_adjust_threshold', default=0.97, type=float, help='|本轮训练损失大于上一轮损失的比例时才调整|')
+parser.add_argument('--lr_adjust_threshold', default=0.97, type=float, help='|本轮训练损失大于上一轮损失的比例时才调整，基准为0.97|')
 parser.add_argument('--regularization', default='L2', type=str, help='|正则化，有L2、None|')
 parser.add_argument('--r_value', default=0.0005, type=float, help='|正则化的权重系数|')
 parser.add_argument('--device', default='cuda', type=str, help='|训练设备|')
@@ -94,7 +94,7 @@ if args.local_rank == 0:
     if os.path.exists(args.weight):  # 优先加载已有模型args.weight继续训练
         print(f'| 加载已有模型:{args.weight} |')
     elif args.prune:
-        print(f'| 加模型并剪枝训练:{args.prune_weight} |')
+        print(f'| 加载模型+剪枝训练:{args.prune_weight} |')
     elif args.timm:  # 创建timm库中模型args.timm
         import timm
 
