@@ -62,7 +62,7 @@ parser.add_argument('--class_threshold', default=0.5, type=float, help='|计算�
 parser.add_argument('--distributed', default=False, type=bool, help='|单机多卡分布式训练，分布式训练时batch为总batch|')
 parser.add_argument('--local_rank', default=0, type=int, help='|分布式训练使用命令后会自动传入的参数|')
 args = parser.parse_args()
-args.device_number = torch.cuda.device_count()  # 使用的GPU数，可能为CPU
+args.device_number = max(torch.cuda.device_count(), 1)  # 使用的GPU数，可能为CPU
 # 为CPU设置随机种子
 torch.manual_seed(999)
 # 为所有GPU设置随机种子
