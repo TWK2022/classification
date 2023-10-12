@@ -56,13 +56,13 @@ parser.add_argument('--device', default='cuda', type=str, help='|训练设备|')
 parser.add_argument('--latch', default=True, type=bool, help='|模型和数据是否为锁存，True为锁存|')
 parser.add_argument('--num_worker', default=0, type=int, help='|CPU在处理数据时使用的进程数，0表示只有一个主进程，一般为0、2、4、8|')
 parser.add_argument('--ema', default=True, type=bool, help='|使用平均指数移动(EMA)调整参数|')
-parser.add_argument('--amp', default=True, type=bool, help='|混合float16精度训练|')
+parser.add_argument('--amp', default=True, type=bool, help='|混合float16精度训练，CPU时不可用|')
 parser.add_argument('--noise', default=0.5, type=float, help='|训练数据加噪概率|')
 parser.add_argument('--class_threshold', default=0.5, type=float, help='|计算指标时，大于阈值判定为图片有该类别|')
 parser.add_argument('--distributed', default=False, type=bool, help='|单机多卡分布式训练，分布式训练时batch为总batch|')
 parser.add_argument('--local_rank', default=0, type=int, help='|分布式训练使用命令后会自动传入的参数|')
 args = parser.parse_args()
-args.gpu_number = torch.cuda.device_count()  # 使用的GPU数
+args.device_number = torch.cuda.device_count()  # 使用的GPU数，可能为CPU
 # 为CPU设置随机种子
 torch.manual_seed(999)
 # 为所有GPU设置随机种子
