@@ -22,11 +22,13 @@
 >文档中有onnx模型导出为tensort模型的详细说明
 ### 6，test_trt.py
 >使用导出的trt模型预测
-### 7，flask_start.py
+### 7，gradio_start.py
+>用gradio将程序包装成一个可视化的界面，可以在网页可视化的展示
+### 8，flask_start.py
 >用flask将程序包装成一个服务，并在服务器上启动
-### 8，flask_request.py
+### 9，flask_request.py
 >以post请求传输数据调用服务
-### 9，gunicorn_config.py
+### 10，gunicorn_config.py
 >用gunicorn多进程启动flask服务：gunicorn -c gunicorn_config.py flask_start:app
 ### 其他
 >github链接：https://github.com/TWK2022/classification  
