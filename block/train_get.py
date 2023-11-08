@@ -148,7 +148,7 @@ class torch_dataset(torch.utils.data.Dataset):
         self.transform = albumentations.Compose([
             albumentations.LongestMaxSize(args.input_size),
             albumentations.PadIfNeeded(min_height=args.input_size, min_width=args.input_size,
-                                       border_mode=cv2.BORDER_CONSTANT, value=(127, 127, 127))])
+                                       border_mode=cv2.BORDER_CONSTANT, value=(128, 128, 128))])
         self.rgb_mean = (0.406, 0.456, 0.485)
         self.rgb_std = (0.225, 0.224, 0.229)
 

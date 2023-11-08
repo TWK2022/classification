@@ -36,7 +36,7 @@ def test_onnx(args):
     transform = albumentations.Compose([
         albumentations.LongestMaxSize(args.input_size),
         albumentations.PadIfNeeded(min_height=args.input_size, min_width=args.input_size,
-                                   border_mode=cv2.BORDER_CONSTANT, value=(127, 127, 127))])
+                                   border_mode=cv2.BORDER_CONSTANT, value=(128, 128, 128))])
     image_dir = sorted(os.listdir(args.data_path))
     image_all = np.zeros((len(image_dir), args.input_size, args.input_size, 3)).astype(
         np.float16 if args.float16 else np.float32)

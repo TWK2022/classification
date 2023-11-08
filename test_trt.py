@@ -44,7 +44,7 @@ def test_tensorrt(args):
     transform = albumentations.Compose([
         albumentations.LongestMaxSize(args.input_size),
         albumentations.PadIfNeeded(min_height=args.input_size, min_width=args.input_size,
-                                   border_mode=cv2.BORDER_CONSTANT, value=(127, 127, 127))])
+                                   border_mode=cv2.BORDER_CONSTANT, value=(128, 128, 128))])
     image_dir = sorted(os.listdir(args.data_path))
     image_list = [0 for _ in range(len(image_dir))]
     for i in range(len(image_dir)):
