@@ -2,7 +2,7 @@ import numpy as np
 
 
 def data_get(args):
-    data_dict = data_prepare(args)._load()
+    data_dict = data_prepare(args).load()
     return data_dict
 
 
@@ -10,7 +10,7 @@ class data_prepare(object):
     def __init__(self, args):
         self.args = args
 
-    def _load(self):
+    def load(self):
         data_dict = {}
         data_dict['train'] = self._load_label('train.txt')
         data_dict['val'] = self._load_label('val.txt')

@@ -1,15 +1,15 @@
 # 数据需准备成以下格式
-# ├── 数据集路径:data_path
-#     └── image:存放所有图片
-#     └── train.txt:训练图片的绝对路径(或相对data_path下路径)和类别号，(image/mask/0.jpg 0 2\n)表示该图片类别为0和2，空类别图片无类别号
-#     └── val.txt:验证图片的绝对路径(或相对data_path下路径)和类别
-#     └── class.txt: 所有的类别名称
-# class.csv内容如下:
+# ├── 数据集路径：data_path
+#     └── image：存放所有图片
+#     └── train.txt：训练图片的绝对路径(或相对data_path下路径)和类别号，(image/mask/0.jpg 0 2\n)表示该图片类别为0和2，空类别图片无类别号
+#     └── val.txt：验证图片的绝对路径(或相对data_path下路径)和类别
+#     └── class.txt：所有的类别名称
+# class.csv内容如下：
 # 类别1
 # 类别2
 # ...
 # -------------------------------------------------------------------------------------------------------------------- #
-# 分布式训练:
+# 分布式训练：
 # python -m torch.distributed.launch --master_port 9999 --nproc_per_node n run.py --distributed True
 # master_port为GPU之间的通讯端口，空闲的即可
 # n为GPU数量
@@ -19,8 +19,8 @@ import wandb
 import torch
 import argparse
 from block.data_get import data_get
-from block.model_get import model_get
 from block.loss_get import loss_get
+from block.model_get import model_get
 from block.train_get import train_get
 
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -87,10 +87,10 @@ if args.distributed:
 # 初步检查
 if args.local_rank == 0:
     print(f'| args:{args} |')
-    assert os.path.exists(f'{args.data_path}/image'), 'data_path中缺少:image'
-    assert os.path.exists(f'{args.data_path}/train.txt'), 'data_path中缺少:train.txt'
-    assert os.path.exists(f'{args.data_path}/val.txt'), 'data_path中缺少:val.txt'
-    assert os.path.exists(f'{args.data_path}/class.txt'), 'data_path中缺少:class.txt'
+    assert os.path.exists(f'{args.data_path}/image'), '! data_path中缺少:image !'
+    assert os.path.exists(f'{args.data_path}/train.txt'), '! data_path中缺少:train.txt !'
+    assert os.path.exists(f'{args.data_path}/val.txt'), '! data_path中缺少:val.txt !'
+    assert os.path.exists(f'{args.data_path}/class.txt'), '! data_path中缺少:class.txt !'
     if os.path.exists(args.weight):  # 优先加载已有模型args.weight继续训练
         print(f'| 加载已有模型:{args.weight} |')
     elif args.prune:
@@ -98,10 +98,10 @@ if args.local_rank == 0:
     elif args.timm:  # 创建timm库中模型args.timm
         import timm
 
-        assert timm.list_models(args.model), f'timm中没有此模型:{args.model}，使用timm.list_models()查看所有模型'
+        assert timm.list_models(args.model), f'! timm中没有此模型:{args.model}，使用timm.list_models()查看所有模型 !'
         print(f'| 创建timm库中模型:{args.model} |')
     else:  # 创建自定义模型args.model
-        assert os.path.exists(f'model/{args.model}.py'), f'没有此自定义模型:{args.model}'
+        assert os.path.exists(f'model/{args.model}.py'), f'! 没有此自定义模型:{args.model} !'
         print(f'| 创建自定义模型:{args.model} | 型号:{args.model_type} |')
 # -------------------------------------------------------------------------------------------------------------------- #
 # 程序
