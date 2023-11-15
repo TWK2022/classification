@@ -35,7 +35,7 @@ parser.add_argument('--wandb_image_num', default=16, type=int, help='|wandb保�
 parser.add_argument('--weight', default='last.pt', type=str, help='|已有模型的位置，如果没找到模型才会创建剪枝模型/新模型|')
 parser.add_argument('--save_path', default='best.pt', type=str, help='|最佳模型的保存位置，除此之外每轮结束都会保存last.pt|')
 parser.add_argument('--prune', default=False, type=bool, help='|模型剪枝后再训练(部分模型有)，需要提供已经训练好的prune_weight|')
-parser.add_argument('--prune_weight', default='last.pt', type=str, help='|模型剪枝时使用的模型，会创建剪枝模型和训练模型|')
+parser.add_argument('--prune_weight', default='best.pt', type=str, help='|模型剪枝时使用的模型，会创建剪枝模型和训练模型|')
 parser.add_argument('--prune_ratio', default=0.5, type=float, help='|模型剪枝时的保留比例|')
 parser.add_argument('--prune_save', default='prune_best.pt', type=str, help='|最佳模型的保存位置，除此之外每轮结束都会保存prune_last.pt|')
 parser.add_argument('--timm', default=False, type=bool, help='|是否使用timm库创建模型|')
