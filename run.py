@@ -32,29 +32,29 @@ parser.add_argument('--wandb', default=False, type=bool, help='|是否使用wand
 parser.add_argument('--wandb_project', default='classification', type=str, help='|wandb项目名称|')
 parser.add_argument('--wandb_name', default='train', type=str, help='|wandb项目中的训练名称|')
 parser.add_argument('--wandb_image_num', default=16, type=int, help='|wandb保存图片的数量|')
-parser.add_argument('--weight', default='last.pt', type=str, help='|已有模型的位置，如果没找到模型才会创建剪枝模型/新模型|')
-parser.add_argument('--save_path', default='best.pt', type=str, help='|最佳模型的保存位置，除此之外每轮结束都会保存last.pt|')
-parser.add_argument('--prune', default=False, type=bool, help='|模型剪枝后再训练(部分模型有)，需要提供已经训练好的prune_weight|')
-parser.add_argument('--prune_weight', default='best.pt', type=str, help='|模型剪枝时使用的模型，会创建剪枝模型和训练模型|')
+parser.add_argument('--weight', default='last.pt', type=str, help='|已有模型的位置，没找到模型会创建剪枝/新模型|')
+parser.add_argument('--save_path', default='best.pt', type=str, help='|保存最佳模型，除此之外每轮还会保存last.pt|')
+parser.add_argument('--prune', default=False, type=bool, help='|模型剪枝后再训练(部分模型有)，需要提供prune_weight|')
+parser.add_argument('--prune_weight', default='best.pt', type=str, help='|模型剪枝的参考模型，会创建剪枝模型和训练模型|')
 parser.add_argument('--prune_ratio', default=0.5, type=float, help='|模型剪枝时的保留比例|')
-parser.add_argument('--prune_save', default='prune_best.pt', type=str, help='|最佳模型的保存位置，除此之外每轮结束都会保存prune_last.pt|')
+parser.add_argument('--prune_save', default='prune_best.pt', type=str, help='|保存最佳模型，每轮还会保存prune_last.pt|')
 parser.add_argument('--timm', default=False, type=bool, help='|是否使用timm库创建模型|')
-parser.add_argument('--model', default='yolov7_cls', type=str, help='|模型选择，timm为True时为其中的模型，否则为自定义模型|')
+parser.add_argument('--model', default='yolov7_cls', type=str, help='|模型选择，timm为True时为timm库中模型|')
 parser.add_argument('--model_type', default='s', type=str, help='|自定义模型的型号参数(部分模型有)|')
 parser.add_argument('--input_size', default=320, type=int, help='|输入图片大小|')
 parser.add_argument('--output_class', default=1, type=int, help='|输出的类别数|')
 parser.add_argument('--epoch', default=120, type=int, help='|训练轮数|')
 parser.add_argument('--batch', default=8, type=int, help='|训练批量大小|')
 parser.add_argument('--loss', default='bce', type=str, help='|损失函数|')
-parser.add_argument('--lr_start', default=0.001, type=float, help='|初始学习率，训练中采用adam算法，前3轮有预热训练，基准为0.001|')
+parser.add_argument('--lr_start', default=0.001, type=float, help='|初始学习率，adam算法，3轮预热训练，基准为0.001|')
 parser.add_argument('--lr_end_ratio', default=0.2, type=float, help='|最终学习率=lr_end_ratio*lr_start，基准为0.2|')
-parser.add_argument('--lr_adjust_num', default=50, type=int, help='|从初始学习率到最终学习率经过的调整次数，余玄下降法|')
-parser.add_argument('--lr_adjust_threshold', default=0.97, type=float, help='|本轮训练损失大于上一轮损失的比例时才调整，基准为0.97|')
+parser.add_argument('--lr_adjust_num', default=50, type=int, help='|学习率下降调整次数，余玄下降法，要小于总轮次|')
+parser.add_argument('--lr_adjust_threshold', default=0.97, type=float, help='|本轮损失下降一定比例时才调整，基准为0.97|')
 parser.add_argument('--regularization', default='L2', type=str, help='|正则化，有L2、None|')
 parser.add_argument('--r_value', default=0.0005, type=float, help='|正则化的权重系数|')
 parser.add_argument('--device', default='cuda', type=str, help='|训练设备|')
 parser.add_argument('--latch', default=True, type=bool, help='|模型和数据是否为锁存，True为锁存|')
-parser.add_argument('--num_worker', default=0, type=int, help='|CPU在处理数据时使用的进程数，0表示只有一个主进程，一般为0、2、4、8|')
+parser.add_argument('--num_worker', default=0, type=int, help='|CPU处理数据的进程数，0表示只有一个主进程，一般为0、2、4、8|')
 parser.add_argument('--ema', default=True, type=bool, help='|使用平均指数移动(EMA)调整参数|')
 parser.add_argument('--amp', default=False, type=bool, help='|混合float16精度训练，CPU时不可用|')
 parser.add_argument('--noise', default=0.5, type=float, help='|训练数据加噪概率|')
@@ -98,10 +98,10 @@ if args.local_rank == 0:
     elif args.timm:  # 创建timm库中模型args.timm
         import timm
 
-        assert timm.list_models(args.model), f'! timm中没有此模型:{args.model}，使用timm.list_models()查看所有模型 !'
+        assert timm.list_models(args.model), f'! timm中没有模型:{args.model}，使用timm.list_models()查看所有模型 !'
         print(f'| 创建timm库中模型:{args.model} |')
     else:  # 创建自定义模型args.model
-        assert os.path.exists(f'model/{args.model}.py'), f'! 没有此自定义模型:{args.model} !'
+        assert os.path.exists(f'model/{args.model}.py'), f'! 没有自定义模型:{args.model} !'
         print(f'| 创建自定义模型:{args.model} | 型号:{args.model_type} |')
 # -------------------------------------------------------------------------------------------------------------------- #
 # 程序
