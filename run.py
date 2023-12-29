@@ -27,7 +27,7 @@ from block.train_get import train_get
 # 设置
 # 模型加载/创建的优先级为：加载已有模型>创建剪枝模型>创建timm库模型>创建自定义模型
 parser = argparse.ArgumentParser(description='|图片分类|')
-parser.add_argument('--data_path', default=r'D:\dataset\classification\mask', type=str, help='|数据根目录路径|')
+parser.add_argument('--data_path', default=r'D:\dataset\classification\mask', type=str, help='|数据目录|')
 parser.add_argument('--wandb', default=False, type=bool, help='|是否使用wandb可视化|')
 parser.add_argument('--wandb_project', default='classification', type=str, help='|wandb项目名称|')
 parser.add_argument('--wandb_name', default='train', type=str, help='|wandb项目中的训练名称|')
