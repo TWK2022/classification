@@ -92,9 +92,9 @@ def train_get(args, data_dict, model_dict, loss):
         if args.local_rank == 0:
             tqdm_show.close()
         # 计算平均损失
-        train_loss = train_loss / (index + 1)
+        train_loss /= index + 1
         if args.local_rank == 0:
-            print('\n| train_loss:{:.4f} | lr:{:.6f} |\n'.format(train_loss, optimizer.param_groups[0]['lr']))
+            print(f'\n| train_loss:{train_loss:.4f} | lr:{optimizer.param_groups[0]["lr"]:.6f} |\n')
         # 调整学习率
         optimizer = optimizer_adjust(optimizer, epoch + 1, train_loss)
         # 清理显存空间
@@ -122,7 +122,7 @@ def train_get(args, data_dict, model_dict, loss):
                 model_dict['standard'] = m_ap
                 save_path = args.save_path if not args.prune else args.prune_save
                 torch.save(model_dict, save_path)  # 保存最佳模型
-                print('\n| 保存最佳模型:{} | val_m_ap:{:.4f} |\n'.format(save_path, m_ap))
+                print(f'\n| 保存最佳模型:{save_path} | val_m_ap:{m_ap:.4f} |\n')
             # wandb
             if args.wandb:
                 wandb_log = {}
