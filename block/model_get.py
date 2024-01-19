@@ -82,7 +82,7 @@ def prune(args, model):
     return prune_model
 
 
-class model_prepare(object):
+class model_prepare:
     def __init__(self, args):
         self.args = args
 
