@@ -6,7 +6,7 @@ def data_get(args):
     return data_dict
 
 
-class data_prepare(object):
+class data_prepare:
     def __init__(self, args):
         self.args = args
 
