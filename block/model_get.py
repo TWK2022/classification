@@ -94,12 +94,3 @@ class model_prepare:
         from model.yolov7_cls import yolov7_cls
         model = yolov7_cls(self.args)
         return model
-
-
-if __name__ == '__main__':
-    import argparse
-
-    parser = argparse.ArgumentParser(description='分类任务')
-    parser.add_argument('--model', default='', type=str, help='|模型选择|')
-    parser.add_argument('--weight', default='', type=str, help='|模型位置，如果没找到模型则创建新模型|')
-    args = parser.parse_args()
