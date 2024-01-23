@@ -18,6 +18,6 @@ def val_get(args, val_dataloader, model, loss, ema):
         true_all = torch.stack(true_all, dim=0)
         loss_all = loss(pred_all, true_all).item()
         accuracy, precision, recall, m_ap = metric(pred_all, true_all, args.class_threshold)
-        print(f'\n| val_loss:{loss_all:.4f} | 阈值:{args.class_threshold:.2f} | val_accuracy:{accuracy:.4f} |'
+        print(f'\n| 验证 | val_loss:{loss_all:.4f} | 阈值:{args.class_threshold:.2f} | val_accuracy:{accuracy:.4f} |'
               f' val_precision:{precision:.4f} | val_recall:{recall:.4f} | val_m_ap:{m_ap:.4f} |')
     return loss_all, accuracy, precision, recall, m_ap
