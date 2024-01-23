@@ -46,10 +46,10 @@ parser.add_argument('--save_path', default='best.pt', type=str, help='|保存最
 parser.add_argument('--epoch', default=120, type=int, help='|训练轮数|')
 parser.add_argument('--batch', default=8, type=int, help='|训练批量大小，分布式时为总批量|')
 parser.add_argument('--loss', default='bce', type=str, help='|损失函数|')
-parser.add_argument('--lr_start', default=0.001, type=float, help='|初始学习率，adam算法，3轮预热训练，基准为0.001|')
+parser.add_argument('--warmup_ratio', default=0.01, type=float, help='|预热训练步数占总步数比例，最少5步，基准为0.01|')
+parser.add_argument('--lr_start', default=0.001, type=float, help='|初始学习率，adam算法，有预热训练，基准为0.001|')
 parser.add_argument('--lr_end_ratio', default=0.1, type=float, help='|最终学习率=lr_end_ratio*lr_start，基准为0.1|')
-parser.add_argument('--lr_adjust_num', default=50, type=int, help='|学习率下降调整次数，余玄下降法，要小于总轮次|')
-parser.add_argument('--lr_adjust_threshold', default=0.9, type=float, help='|损失下降比较快时不调整学习率，基准为0.9|')
+parser.add_argument('--lr_end_epoch', default=100, type=int, help='|最终学习率达到的轮数，每一步都调整，余玄下降法|')
 parser.add_argument('--regularization', default='L2', type=str, help='|正则化，有L2、None|')
 parser.add_argument('--r_value', default=0.0005, type=float, help='|正则化权重系数，基准为0.0005|')
 parser.add_argument('--device', default='cuda', type=str, help='|训练设备|')
@@ -113,8 +113,6 @@ if __name__ == '__main__':
     # 损失
     loss = loss_get(args)
     # 摘要
-    print('| 训练集:{} | 验证集:{} | 批量{} | 模型:{} | 输入尺寸:{} | 损失函数:{} | 初始学习率:{} |'
-          .format(len(data_dict['train']), len(data_dict['val']), args.batch, args.model, args.input_size, args.loss,
-                  args.lr_start)) if args.local_rank == 0 else None
+    print(f'| args:{args} |') if args.local_rank == 0 else None
     # 训练
     train_get(args, data_dict, model_dict, loss)
