@@ -43,7 +43,7 @@ parser.add_argument('--timm', default=False, type=bool, help='|是否使用timm�
 parser.add_argument('--model', default='yolov7_cls', type=str, help='|自定义模型选择，timm为True时为timm库中模型|')
 parser.add_argument('--model_type', default='s', type=str, help='|自定义模型型号|')
 parser.add_argument('--save_path', default='best.pt', type=str, help='|保存最佳模型，除此之外每轮还会保存last.pt|')
-parser.add_argument('--epoch', default=120, type=int, help='|训练轮数|')
+parser.add_argument('--epoch', default=120, type=int, help='|训练总轮数(包含之前已训练轮数)|')
 parser.add_argument('--batch', default=8, type=int, help='|训练批量大小，分布式时为总批量|')
 parser.add_argument('--loss', default='bce', type=str, help='|损失函数|')
 parser.add_argument('--warmup_ratio', default=0.01, type=float, help='|预热训练步数占总步数比例，最少5步，基准为0.01|')
