@@ -6,11 +6,11 @@ from model.layer import cbs, elan, mp, sppcspc, linear_head
 class yolov7_cls(torch.nn.Module):
     def __init__(self, args):
         super().__init__()
-        output_class = args.output_class
         dim_dict = {'n': 8, 's': 16, 'm': 32, 'l': 64}
         n_dict = {'n': 1, 's': 1, 'm': 2, 'l': 3}
         dim = dim_dict[args.model_type]
         n = n_dict[args.model_type]
+        output_class = args.output_class
         # 网络结构
         if not args.prune:  # 正常版本
             self.l0 = cbs(3, dim, 1, 1)
