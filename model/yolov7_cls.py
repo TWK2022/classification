@@ -6,7 +6,7 @@ from model.layer import cbs, elan, mp, sppcspc, linear_head
 class yolov7_cls(torch.nn.Module):
     def __init__(self, args):
         super().__init__()
-        self.output_class = args.output_class
+        output_class = args.output_class
         dim_dict = {'n': 8, 's': 16, 'm': 32, 'l': 64}
         n_dict = {'n': 1, 's': 1, 'm': 2, 'l': 3}
         dim = dim_dict[args.model_type]
@@ -26,7 +26,7 @@ class yolov7_cls(torch.nn.Module):
             self.l10 = elan(32 * dim, 32 * dim, n)
             self.l11 = sppcspc(32 * dim, 16 * dim)
             self.l12 = cbs(16 * dim, 8 * dim, 1, 1)
-            self.linear_head = linear_head(8 * dim, self.output_class)
+            self.linear_head = linear_head(8 * dim, output_class)
         else:  # 剪枝版本
             config = args.prune_num
             self.l0 = cbs(3, config[0], 1, 1)
@@ -42,7 +42,7 @@ class yolov7_cls(torch.nn.Module):
             self.l10 = elan(config[19 + 6 * n] + config[21 + 6 * n], None, n, config[22 + 6 * n:25 + 8 * n])
             self.l11 = sppcspc(config[24 + 8 * n], None, config[25 + 8 * n:32 + 8 * n])
             self.l12 = cbs(config[31 + 8 * n], config[32 + 8 * n], 1, 1)
-            self.linear_head = linear_head(config[32 + 8 * n], self.output_class)
+            self.linear_head = linear_head(config[32 + 8 * n], output_class)
 
     def forward(self, x):
         x = self.l0(x)
@@ -64,15 +64,15 @@ class yolov7_cls(torch.nn.Module):
 
 if __name__ == '__main__':
     import argparse
-    from layer import cbs, elan, mp, linear_head
 
     parser = argparse.ArgumentParser(description='')
+    parser.add_argument('--prune', default=False, type=bool)
     parser.add_argument('--model_type', default='n', type=str)
-    parser.add_argument('--input_size', default=640, type=int)
-    parser.add_argument('--output_class', default=2, type=int)
+    parser.add_argument('--input_size', default=320, type=int)
+    parser.add_argument('--output_class', default=1, type=int)
     args = parser.parse_args()
     model = yolov7_cls(args)
-    print(model)
     tensor = torch.rand(2, 3, args.input_size, args.input_size, dtype=torch.float32)
     pred = model(tensor)
+    print(model)
     print(pred.shape)
