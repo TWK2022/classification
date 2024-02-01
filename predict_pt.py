@@ -34,8 +34,8 @@ def test_pt(args):
     model = model_dict['model']
     model = deploy(model, args.normalization)
     model.half().eval().to(args.device) if args.float16 else model.float().eval().to(args.device)
-    epoch = model_dict['epoch']
-    m_ap = round(model_dict['standard'], 3)
+    epoch = model_dict['epoch_finished']
+    m_ap = round(model_dict['standard'], 4)
     print(f'| 模型加载成功:{args.model_path} | epoch:{epoch} | m_ap:{m_ap}|')
     # 推理
     image_dir = sorted(os.listdir(args.data_path))
