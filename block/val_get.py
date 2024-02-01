@@ -8,7 +8,7 @@ def val_get(args, val_dataloader, model, loss, ema):
         model = ema.ema if args.ema else model.eval()
         pred_all = []  # 记录所有预测
         true_all = []  # 记录所有标签
-        for item, (image_batch, true_batch) in enumerate(tqdm.tqdm(val_dataloader)):
+        for index, (image_batch, true_batch) in enumerate(tqdm.tqdm(val_dataloader)):
             image_batch = image_batch.to(args.device, non_blocking=args.latch)
             pred_batch = model(image_batch).detach().cpu()
             pred_all.extend(pred_batch)
