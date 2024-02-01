@@ -47,7 +47,7 @@ def train_get(args, data_dict, model_dict, loss):
         model.train()
         train_loss = 0  # 记录损失
         if args.local_rank == 0:  # tqdm
-            tqdm_show = tqdm.tqdm(total=step_epoch, mininterval=0.2)
+            tqdm_show = tqdm.tqdm(total=step_epoch)
         for index, (image_batch, true_batch) in enumerate(train_dataloader):
             if args.wandb and args.local_rank == 0 and len(wandb_image_list) < args.wandb_image_num:
                 wandb_image_batch = (image_batch * 255).cpu().numpy().astype(np.uint8).transpose(0, 2, 3, 1)
@@ -103,7 +103,8 @@ def train_get(args, data_dict, model_dict, loss):
         torch.cuda.empty_cache()
         # 验证
         if args.local_rank == 0:  # 分布式时只验证一次
-            val_loss, accuracy, precision, recall, m_ap = val_get(args, val_dataloader, model, loss, ema)
+            val_loss, accuracy, precision, recall, m_ap = val_get(args, val_dataloader, model, loss, ema,
+                                                                  len(data_dict['val']))
         # 保存
         if args.local_rank == 0:  # 分布式时只保存一次
             model_dict['model'] = model.module if args.distributed else model
