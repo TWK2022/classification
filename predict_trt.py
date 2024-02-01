@@ -25,7 +25,7 @@ assert os.path.exists(args.data_path), f'! data_path不存在:{args.data_path} !
 
 # -------------------------------------------------------------------------------------------------------------------- #
 # 程序
-def test_tensorrt(args):
+def predict_trt(args):
     # 加载模型
     logger = tensorrt.Logger(tensorrt.Logger.WARNING)  # 创建日志记录信息
     with tensorrt.Runtime(logger) as runtime, open(args.model_path, "rb") as f:
@@ -70,4 +70,4 @@ def test_tensorrt(args):
 
 
 if __name__ == '__main__':
-    test_tensorrt(args)
+    predict_trt(args)
