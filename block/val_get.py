@@ -4,7 +4,7 @@ from block.metric_get import metric
 
 
 def val_get(args, val_dataloader, model, loss, ema, data_len):
-    tqdm_len = data_len // args.batch
+    tqdm_len = data_len // args.batch * args.device_number
     tqdm_show = tqdm.tqdm(total=tqdm_len)
     with torch.no_grad():
         model = ema.ema if args.ema else model.eval()
