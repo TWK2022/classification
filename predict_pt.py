@@ -7,7 +7,6 @@ import albumentations
 from model.layer import deploy
 
 # -------------------------------------------------------------------------------------------------------------------- #
-# 设置
 parser = argparse.ArgumentParser(description='|pt模型推理|')
 parser.add_argument('--model_path', default='best.pt', type=str, help='|pt模型位置|')
 parser.add_argument('--data_path', default='image', type=str, help='|图片文件夹位置|')
@@ -19,7 +18,6 @@ parser.add_argument('--num_worker', default=0, type=int, help='|CPU处理数据�
 parser.add_argument('--float16', default=True, type=bool, help='|推理数据类型，要支持float16的GPU，False时为float32|')
 args, _ = parser.parse_known_args()  # 防止传入参数冲突，替代args = parser.parse_args()
 # -------------------------------------------------------------------------------------------------------------------- #
-# 初步检查
 assert os.path.exists(args.model_path), f'! model_path不存在:{args.model_path} !'
 assert os.path.exists(args.data_path), f'! data_path不存在:{args.data_path} !'
 if args.float16:
@@ -27,7 +25,6 @@ if args.float16:
 
 
 # -------------------------------------------------------------------------------------------------------------------- #
-# 程序
 def predict_pt(args):
     # 加载模型
     model_dict = torch.load(args.model_path, map_location='cpu')
