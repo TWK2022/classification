@@ -1,5 +1,5 @@
 # pip install gradio -i https://pypi.tuna.tsinghua.edu.cn/simple
-# 用gradio将程序包装成一个可视化的界面，可以在网页可视化的展示
+# 用gradio将程序包装成一个可视化的页面，可以在网页可视化的展示
 import gradio
 import argparse
 

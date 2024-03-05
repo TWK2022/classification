@@ -9,7 +9,7 @@
 # 类别2
 # ...
 # -------------------------------------------------------------------------------------------------------------------- #
-# 分布式训练：
+# 分布式数据并行训练：
 # python -m torch.distributed.launch --master_port 9999 --nproc_per_node n run.py --distributed True
 # master_port为GPU之间的通讯端口，空闲的即可
 # n为GPU数量
@@ -24,7 +24,6 @@ from block.model_get import model_get
 from block.train_get import train_get
 
 # -------------------------------------------------------------------------------------------------------------------- #
-# 设置
 # 模型加载/创建的优先级为：加载已有模型>创建剪枝模型>创建timm库模型>创建自定义模型
 parser = argparse.ArgumentParser(description='|图片分类|')
 parser.add_argument('--wandb', default=False, type=bool, help='|是否使用wandb可视化|')
@@ -84,7 +83,6 @@ if args.distributed:
     torch.distributed.init_process_group(backend="nccl")  # 分布式训练初始化
     args.device = torch.device("cuda", args.local_rank)
 # -------------------------------------------------------------------------------------------------------------------- #
-# 初步检查
 if args.local_rank == 0:
     print(f'| args:{args} |')
     assert os.path.exists(f'{args.data_path}/image'), '! data_path中缺少:image !'
@@ -104,7 +102,6 @@ if args.local_rank == 0:
         assert os.path.exists(f'model/{args.model}.py'), f'! 没有自定义模型:{args.model} !'
         print(f'| 创建自定义模型:{args.model} | 型号:{args.model_type} |')
 # -------------------------------------------------------------------------------------------------------------------- #
-# 程序
 if __name__ == '__main__':
     # 摘要
     print(f'| args:{args} |') if args.local_rank == 0 else None

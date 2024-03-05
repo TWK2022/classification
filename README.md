@@ -26,7 +26,7 @@
 ### 8，predict_trt.py
 >使用导出的trt模型预测
 ### 9，gradio_start.py
->用gradio将程序包装成一个可视化的界面，可以在网页可视化的展示
+>用gradio将程序包装成一个可视化的页面，可以在网页可视化的展示
 ### 10，flask_start.py
 >用flask将程序包装成一个服务，并在服务器上启动
 ### 11，flask_request.py

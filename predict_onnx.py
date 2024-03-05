@@ -7,7 +7,6 @@ import numpy as np
 import albumentations
 
 # -------------------------------------------------------------------------------------------------------------------- #
-# 设置
 parser = argparse.ArgumentParser(description='|onnx模型推理|')
 parser.add_argument('--model_path', default='best.onnx', type=str, help='|onnx模型位置|')
 parser.add_argument('--data_path', default='image', type=str, help='|图片文件夹位置|')
@@ -17,13 +16,11 @@ parser.add_argument('--device', default='cuda', type=str, help='|推理设备|')
 parser.add_argument('--float16', default=True, type=bool, help='|推理数据类型，要与导出的模型对应，False时为float32|')
 args, _ = parser.parse_known_args()  # 防止传入参数冲突，替代args = parser.parse_args()
 # -------------------------------------------------------------------------------------------------------------------- #
-# 初步检查
 assert os.path.exists(args.model_path), f'! model_path不存在:{args.model_path} !'
 assert os.path.exists(args.data_path), f'! data_path不存在:{args.data_path} !'
 
 
 # -------------------------------------------------------------------------------------------------------------------- #
-# 程序
 def predict_onnx(args):
     # 加载模型
     provider = 'CUDAExecutionProvider' if args.device.lower() in ['gpu', 'cuda'] else 'CPUExecutionProvider'
