@@ -80,7 +80,7 @@ if args.amp:
     args.amp = torch.cuda.amp.GradScaler()
 # 分布式训练
 if args.distributed:
-    torch.distributed.init_process_group(backend="nccl")  # 分布式训练初始化
+    torch.distributed.init_process_group(backend='nccl')  # 分布式训练初始化
     args.device = torch.device("cuda", args.local_rank)
 # -------------------------------------------------------------------------------------------------------------------- #
 if args.local_rank == 0:
