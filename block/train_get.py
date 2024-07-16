@@ -123,7 +123,7 @@ def train_get(args, data_dict, model_dict, loss):
                 model_dict['standard'] = m_ap
                 save_path = args.save_path if not args.prune else args.prune_save
                 torch.save(model_dict, save_path)  # 保存最佳模型
-                print(f'\n| 保存最佳模型:{save_path} | val_m_ap:{m_ap:.4f} |\n')
+                print(f'| 保存最佳模型:{save_path} | val_m_ap:{m_ap:.4f} |')
             # wandb
             if args.wandb:
                 wandb_log = {}
