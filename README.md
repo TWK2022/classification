@@ -12,9 +12,9 @@
 >&emsp; &emsp; └── val.txt: 验证图片的标签  
 >&emsp; &emsp; └── class.txt: 类别名称
 ### 3，run.py
->模型训练时运行该文件，argparse中有对每个参数的说明
+>模型训练，argparse中有每个参数的说明
 ### 4，predict.py
->pt模型预测
+>模型预测
 ### 5，export_onnx.py
 >onnx模型导出
 ### 6，predict_onnx.py
