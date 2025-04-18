@@ -5,17 +5,17 @@ from train_class import train_class
 
 # -------------------------------------------------------------------------------------------------------------------- #
 # 数据格式
-# ├── 数据集路径：data_path
-#     └── image：存放所有图片
-#     └── train.txt：训练图片的标签。相对路径和类别号(如:image/0.jpg 0 2)，类别号可以为空
-#     └── val.txt：验证图片的标签
-#     └── class.txt：类别名称
-# class.csv内容如下：
+# ├── 数据集路径: data_path
+#     └── image: 存放所有图片
+#     └── train.txt: 训练图片的标签。相对路径和类别号(如:image/0.jpg 0 2)，类别号可以为空
+#     └── val.txt: 验证图片的标签
+#     └── class.txt: 类别名称
+# class.csv内容如下:
 # 类别1
 # 类别2
 # ...
 # -------------------------------------------------------------------------------------------------------------------- #
-# 分布式数据并行训练：
+# 分布式数据并行训练:
 # python -m torch.distributed.launch --master_port 9999 --nproc_per_node n run.py --distributed True
 # master_port为gpu之间的通讯端口，空闲的即可
 # n为gpu数量
@@ -28,7 +28,7 @@ parser.add_argument('--wandb', default=False, type=bool, help='|wandb可视化|'
 parser.add_argument('--wandb_project', default='classification', type=str, help='|wandb项目名称|')
 parser.add_argument('--wandb_image_num', default=16, type=int, help='|wandb保存图片的数量|')
 parser.add_argument('--data_path', default='dataset', type=str, help='|数据位置|')
-parser.add_argument('--weight_path', default='last.pt', type=str, help='|加载模型，优先级：加载模型>剪枝训练>创建新模型|')
+parser.add_argument('--weight_path', default='last.pt', type=str, help='|加载模型，优先级:加载模型>剪枝训练>创建新模型|')
 parser.add_argument('--weight_again', default=True, type=bool, help='|重置学习率等状态，在weight_path上重新训练|')
 parser.add_argument('--prune_weight_path', default='best.pt', type=str, help='|剪枝参考模型|')
 parser.add_argument('--prune_ratio', default=0.8, type=float, help='|剪枝保留比例|')
