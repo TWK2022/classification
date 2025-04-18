@@ -8,7 +8,7 @@
 ### 2，数据格式
 >├── 数据集路径: data_path  
 >&emsp; &emsp; └── image: 存放所有图片  
->&emsp; &emsp; └── train.txt: 训练图片的标签。相对路径和类别号(如:image/0.jpg 0 2)，类别号可以为空  
+>&emsp; &emsp; └── train.txt: 训练图片的标签。相对路径和类别号(如: image/0.jpg 0 2)，类别号可以为空  
 >&emsp; &emsp; └── val.txt: 验证图片的标签  
 >&emsp; &emsp; └── class.txt: 类别名称
 ### 3，run.py
