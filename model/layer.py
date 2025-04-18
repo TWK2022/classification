@@ -153,28 +153,11 @@ class linear_head(torch.nn.Module):
         return x
 
 
-class image_deal(torch.nn.Module):  # 归一化
-    def __init__(self):
-        super().__init__()
-
-    def forward(self, x):
-        x = x / 255
-        x = x.permute(0, 3, 1, 2)
-        return x
-
-
 class deploy(torch.nn.Module):
-    def __init__(self, model, normalization):
+    def __init__(self, model):
         super().__init__()
-        self.image_deal = image_deal()
         self.model = model
-        if normalization == 'softmax':
-            self.normalization = torch.nn.Softmax(dim=1)
-        else:
-            self.normalization = torch.nn.Sigmoid()
 
     def forward(self, x):
-        x = self.image_deal(x)
         x = self.model(x)
-        x = self.normalization(x)
         return x
