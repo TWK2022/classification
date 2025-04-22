@@ -1,10 +1,10 @@
-# 根据yolov7改编:https://github.com/WongKinYiu/yolov7
+# 根据yolov7改编: https://github.com/WongKinYiu/yolov7
 import torch
 from model.layer import cbs, elan, mp, sppcspc, linear_head
 
 
 class yolov7_cls(torch.nn.Module):
-    def __init__(self, args):
+    def __init__(self, args, prune=False):
         super().__init__()
         dim_dict = {'n': 8, 's': 16, 'm': 32, 'l': 64}
         n_dict = {'n': 1, 's': 1, 'm': 2, 'l': 3}
@@ -12,7 +12,7 @@ class yolov7_cls(torch.nn.Module):
         n = n_dict[args.model_type]
         output_class = args.output_class
         # 网络结构
-        if not args.prune:  # 正常版本
+        if not prune:  # 正常版本
             self.l0 = cbs(3, dim, 1, 1)
             self.l1 = cbs(dim, 2 * dim, 3, 2)  # input_size/2
             self.l2 = cbs(2 * dim, 2 * dim, 1, 1)
@@ -66,12 +66,11 @@ if __name__ == '__main__':
     import argparse
 
     parser = argparse.ArgumentParser(description='')
-    parser.add_argument('--prune', default=False, type=bool)
     parser.add_argument('--model_type', default='n', type=str)
     parser.add_argument('--input_size', default=320, type=int)
     parser.add_argument('--output_class', default=1, type=int)
     args = parser.parse_args()
-    model = yolov7_cls(args)
+    model = yolov7_cls(args, False)
     tensor = torch.rand(2, 3, args.input_size, args.input_size, dtype=torch.float32)
     pred = model(tensor)
     print(model)
