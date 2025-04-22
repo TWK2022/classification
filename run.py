@@ -20,7 +20,6 @@ from train_class import train_class
 # master_port为gpu之间的通讯端口，空闲的即可
 # n为gpu数量
 # -------------------------------------------------------------------------------------------------------------------- #
-# 设置
 parser = argparse.ArgumentParser(description='|图片分类|')
 parser.add_argument('--log', default=True, type=bool, help='|日志|')
 parser.add_argument('--print_info', default=True, type=bool, help='|打印信息|')
