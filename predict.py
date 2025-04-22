@@ -7,10 +7,11 @@ import albumentations
 from model.layer import deploy
 
 # -------------------------------------------------------------------------------------------------------------------- #
-parser = argparse.ArgumentParser(description='|模型推理|')
+parser = argparse.ArgumentParser(description='|模型预测|')
 parser.add_argument('--model_path', default='best.pt', type=str, help='|模型位置|')
 parser.add_argument('--image_dir', default='image', type=str, help='|图片文件夹位置|')
 parser.add_argument('--input_size', default=320, type=int, help='|模型输入图片大小|')
+parser.add_argument('--batch', default=1, type=int, help='|输入图片批量|')
 parser.add_argument('--device', default='cuda', type=str, help='|设备|')
 parser.add_argument('--float16', default=True, type=bool, help='|数据类型|')
 args, _ = parser.parse_known_args()  # 防止传入参数冲突，替代args = parser.parse_args()
@@ -44,7 +45,7 @@ class predict_class:
                 output = self.model(tensor).detach().cpu().numpy()[0]
             result.append(output)
         result = np.round(result, 2)
-        return result
+        print(result)
 
     def image_process(self, image):
         image = self.transform(image=image)['image']  # 缩放和填充图片
@@ -57,5 +58,4 @@ class predict_class:
 # -------------------------------------------------------------------------------------------------------------------- #
 if __name__ == '__main__':
     model = predict_class()
-    result = model.predict()
-    print(result)
+    model.predict()
