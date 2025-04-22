@@ -5,7 +5,6 @@ import argparse
 from model.layer import deploy
 
 # -------------------------------------------------------------------------------------------------------------------- #
-# 设置
 parser = argparse.ArgumentParser(description='|模型转为onnx|')
 parser.add_argument('--weight', default='best.pt', type=str, help='|模型位置|')
 parser.add_argument('--input_size', default=320, type=int, help='|输入图片大小|')
@@ -36,5 +35,6 @@ def export_onnx(args=args):
         print(f'| onnxsim简化模型成功:{args.save_path} |')
 
 
+# -------------------------------------------------------------------------------------------------------------------- #
 if __name__ == '__main__':
     export_onnx()
