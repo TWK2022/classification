@@ -1,20 +1,18 @@
 import os
 import cv2
-import torch
 import argparse
 import onnxruntime
 import numpy as np
 import albumentations
 
 # -------------------------------------------------------------------------------------------------------------------- #
-parser = argparse.ArgumentParser(description='|模型推理|')
+parser = argparse.ArgumentParser(description='|模型预测|')
 parser.add_argument('--model_path', default='best.onnx', type=str, help='|模型位置|')
 parser.add_argument('--image_dir', default='image', type=str, help='|图片文件夹位置|')
 parser.add_argument('--input_size', default=320, type=int, help='|模型输入图片大小|')
-parser.add_argument('--device', default='cuda', type=str, help='|设备|')
+parser.add_argument('--device', default='cpu', type=str, help='|设备|')
 parser.add_argument('--float16', default=True, type=bool, help='|数据类型|')
 args, _ = parser.parse_known_args()  # 防止传入参数冲突，替代args = parser.parse_args()
-args.device = 'cpu' if not torch.cuda.is_available() else args.device
 
 
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -40,7 +38,7 @@ class predict_class:
             image = cv2.imdecode(np.fromfile(path, dtype=np.uint8), cv2.IMREAD_COLOR)  # 读取图片
             image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)  # 转为RGB通道
             array = self.image_process(image)
-            output = self.model.run([self.output_name], {self.input_name: array})[0]
+            output = self.model.run([self.output_name], {self.input_name: array})[0][0]
             result.append(output)
         result = np.round(result, 2)
         print(result)
