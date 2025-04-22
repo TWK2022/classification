@@ -78,7 +78,6 @@ torch.backends.cudnn.deterministic = True  # 固定每次返回的卷积算法
 torch.backends.cudnn.enabled = True  # cuDNN使用非确定性算法
 torch.backends.cudnn.benchmark = False  # 训练前cuDNN会先搜寻每个卷积层最适合实现它的卷积算法，加速运行；但对于复杂变化的输入数据，可能会有过长的搜寻时间，对于训练比较快的网络建议设为False
 # -------------------------------------------------------------------------------------------------------------------- #
-# 程
 if __name__ == '__main__':
     train = train_class(args)
     train.train()
