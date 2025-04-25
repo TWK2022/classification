@@ -4,7 +4,7 @@ from model.layer import cbs, elan, mp, sppcspc, linear_head
 
 
 class yolov7_cls(torch.nn.Module):
-    def __init__(self, args, prune=False):
+    def __init__(self, args, config=None):
         super().__init__()
         dim_dict = {'n': 8, 's': 16, 'm': 32, 'l': 64}
         n_dict = {'n': 1, 's': 1, 'm': 2, 'l': 3}
@@ -12,7 +12,7 @@ class yolov7_cls(torch.nn.Module):
         n = n_dict[args.model_type]
         output_class = args.output_class
         # 网络结构
-        if not prune:  # 正常版本
+        if config is None:  # 正常版本
             self.l0 = cbs(3, dim, 1, 1)
             self.l1 = cbs(dim, 2 * dim, 3, 2)  # input_size/2
             self.l2 = cbs(2 * dim, 2 * dim, 1, 1)
@@ -28,7 +28,6 @@ class yolov7_cls(torch.nn.Module):
             self.l12 = cbs(16 * dim, 8 * dim, 1, 1)
             self.linear_head = linear_head(8 * dim, output_class)
         else:  # 剪枝版本
-            config = args.prune_num
             self.l0 = cbs(3, config[0], 1, 1)
             self.l1 = cbs(config[0], config[1], 3, 2)  # input_size/2
             self.l2 = cbs(config[1], config[2], 1, 1)
