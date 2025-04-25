@@ -41,6 +41,34 @@ class train_class:
                                 format='%(asctime)s | %(levelname)s | %(message)s')
             logging.info('-------------------- log --------------------')
 
+    @staticmethod
+    def metric(pred, label, threshold):  # 指标
+        pred = torch.softmax(pred, dim=1)
+        P_index = (label == 1)  # 正类
+        N_index = (label == 0)  # 负类
+        TP = (pred[P_index] >= threshold).sum()
+        TN = (pred[N_index] < threshold).sum()
+        FP = (pred[N_index] >= threshold).sum()
+        FN = (pred[P_index] < threshold).sum()
+        accuracy = (TP + TN) / (TP + TN + FP + FN)
+        precision = TP / (TP + FP + 1e-6)
+        recall = TP / (TP + FN + 1e-6)
+        m_ap = precision * recall
+        return accuracy, precision, recall, m_ap
+
+    @staticmethod
+    def weight_assignment(model, prune_model):  # 剪枝模型权重赋值
+        for module, prune_module in zip(model.modules(), prune_model.modules()):
+            if not hasattr(module, 'weight'):  # 对权重层赋值
+                continue
+            weight = module.weight.data
+            prune_weight = prune_module.weight.data
+            if len(weight.shape) == 1:  # 单维权重(如bn层)
+                prune_module.weight.data = weight[:prune_weight.shape[0]]
+            else:  # 两维权重(如conv层)
+                prune_module.weight.data = weight[:prune_weight.shape[0], :prune_weight.shape[1]]
+        return prune_model
+
     def model_load(self):
         args = self.args
         if os.path.exists(args.weight_path):
@@ -56,7 +84,10 @@ class train_class:
             if os.path.exists(args.prune_weight_path):
                 model_dict = torch.load(args.prune_weight_path, map_location='cpu', weights_only=False)
                 model = model_dict['model']  # 原模型
-                model = self._prune(model)
+                exec(f'from model.{args.model} import {args.model}')
+                config = self._bn_prune(model)  # 剪枝参数
+                prune_model = eval(f'{args.model}(self.args, config=config)')  # 剪枝模型
+                model = self.weight_assignment(model, prune_model)  # 剪枝模型赋值
             else:
                 exec(f'from model.{args.model} import {args.model}')
                 model = eval(f'{args.model}(self.args)')
@@ -68,62 +99,6 @@ class train_class:
                 'standard': 0,  # 评价指标
             }
         return model_dict
-
-    def _prune(self, model):
-        args = self.args
-        # 记录BN层权重
-        BatchNorm2d_weight = []
-        for module in model.modules():
-            if isinstance(module, torch.nn.BatchNorm2d):
-                BatchNorm2d_weight.append(module.weight.data.clone())
-        BatchNorm2d_weight_abs = torch.concat(BatchNorm2d_weight, dim=0).abs()
-        weight_len = len(BatchNorm2d_weight)
-        # 记录权重与BN层编号的关系
-        BatchNorm2d_id = []
-        for i in range(weight_len):
-            BatchNorm2d_id.extend([i for _ in range(len(BatchNorm2d_weight[i]))])
-        id_all = torch.tensor(BatchNorm2d_id)
-        # 筛选
-        value, index = torch.sort(BatchNorm2d_weight_abs, dim=0, descending=True)
-        boundary = int(len(index) * args.prune_ratio)
-        prune_index = index[0:boundary]  # 保留参数的下标
-        prune_index, _ = torch.sort(prune_index, dim=0, descending=False)
-        prune_id = id_all[prune_index]
-        # 将保留参数的下标放到每层中
-        index_list = [[] for _ in range(weight_len)]
-        for i in range(len(prune_index)):
-            index_list[prune_id[i]].append(prune_index[i])
-        # 将每层保留参数的下标换算成相对下标
-        record_len = 0
-        for i in range(weight_len):
-            index_list[i] = torch.tensor(index_list[i])
-            index_list[i] -= record_len
-            if len(index_list[i]) == 0:  # 存在整层都被减去的情况，至少保留一层
-                index_list[i] = torch.argmax(BatchNorm2d_weight[i], dim=0).unsqueeze(0)
-            record_len += len(BatchNorm2d_weight[i])
-        # 创建要剪枝的新模型
-        exec(f'from model.{args.model} import {args.model}')
-        prune_model = eval(f'{args.model}(self.args)')
-        # BN层权重赋值和部分conv权重赋值
-        index = 0
-        for module, prune_module in zip(model.modules(), prune_model.modules()):
-            if isinstance(module, torch.nn.Conv2d):  # 更新部分Conv2d层权重
-                if index == 0:
-                    weight = module.weight.data.clone()[index_list[index]]
-                elif index == weight_len:
-                    weight = module.weight.data.clone()
-                else:
-                    weight = module.weight.data.clone()[index_list[index]]
-                    weight = weight[:, index_list[index - 1], :, :]
-                if prune_module.weight.data.shape == weight.shape:
-                    prune_module.weight.data = weight
-            if isinstance(module, torch.nn.BatchNorm2d):  # 更新BatchNorm2d层权重
-                prune_module.weight.data = module.weight.data.clone()[index_list[index]]
-                prune_module.bias.data = module.bias.data.clone()[index_list[index]]
-                prune_module.running_mean = module.running_mean.clone()[index_list[index]]
-                prune_module.running_var = module.running_var.clone()[index_list[index]]
-                index += 1
-        return prune_model
 
     def data_load(self):
         args = self.args
@@ -313,20 +288,26 @@ class train_class:
                 print(info)
         return val_loss, accuracy, precision, recall, m_ap
 
-    @staticmethod
-    def metric(pred, label, threshold):
-        pred = torch.softmax(pred, dim=1)
-        P_index = (label == 1)  # 正类
-        N_index = (label == 0)  # 负类
-        TP = (pred[P_index] >= threshold).sum()
-        TN = (pred[N_index] < threshold).sum()
-        FP = (pred[N_index] >= threshold).sum()
-        FN = (pred[P_index] < threshold).sum()
-        accuracy = (TP + TN) / (TP + TN + FP + FN)
-        precision = TP / (TP + FP + 1e-6)
-        recall = TP / (TP + FN + 1e-6)
-        m_ap = precision * recall
-        return accuracy, precision, recall, m_ap
+    def _bn_prune(self, model):  # 通过bn层裁剪模型
+        args = self.args
+        weight = []  # 权重
+        weight_layer = []  # 每个权重所在的层
+        layer = 0  # 层数记录
+        for module in model.modules():
+            if isinstance(module, torch.nn.BatchNorm2d):
+                weight.append(module.weight.data.clone())
+                weight_layer.append(np.full((len(module.weight.data),), layer))
+                layer += 1
+        weight_abs = torch.concatenate(weight, dim=0).abs()
+        weight_index = np.concatenate(weight_layer, axis=0)
+        # 剪枝
+        boundary = int(len(weight_abs) * args.prune_ratio)
+        weight_index_keep = weight_index[np.argsort(weight_abs)[-boundary:]]  # 保留的参数所在的层数
+        config = []  # 裁剪结果
+        for layer, weight_one in enumerate(weight):
+            layer_number = max(np.sum(weight_index_keep == layer).item(), 1)  # 剪枝后该层的参数个数，至少1个
+            config.append(layer_number)
+        return config
 
 
 class model_ema:
