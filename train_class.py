@@ -207,11 +207,12 @@ class train_class:
                         wandb_image_list.append(wandb_image)
                         if len(wandb_image_list) == 16:
                             break
+            # 计算平均损失
+            train_loss /= index + 1
             # 日志
-            if args.local_rank == 0:
-                train_loss /= index + 1  # 计算平均损失
+            if args.local_rank == 0 and args.print_info:
                 info = f'| train | train_loss:{train_loss:.4f} | lr:{self.optimizer.param_groups[0]["lr"]:.6f} |'
-                print(info) if args.print_info else None
+                print(info)
             # 清理显存空间
             del image_batch, label_batch, pred_batch, loss_batch
             torch.cuda.empty_cache()
