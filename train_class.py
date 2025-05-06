@@ -104,11 +104,11 @@ class train_class:
         args = self.args
         # 训练集
         with open(f'{args.data_path}/train.txt', encoding='utf-8') as f:
-            train_list = [_.strip().split(' ') for _ in f.readlines()]  # 读取数据[[图片路径,类别],...]
+            train_list = [_.strip().split(' ') for _ in f.readlines()]  # [[相对路径,类别号],...]
         train_list = [[f'{args.data_path}/image/{os.path.basename(_[0])}', list(map(int, _[1:]))] for _ in train_list]
         # 验证集
         with open(f'{args.data_path}/val.txt', encoding='utf-8') as f:
-            val_list = [_.strip().split(' ') for _ in f.readlines()]  # 读取数据[[图片路径,类别],...]
+            val_list = [_.strip().split(' ') for _ in f.readlines()]  # [[相对路径,类别号],...]
         val_list = [[f'{args.data_path}/image/{os.path.basename(_[0])}', list(map(int, _[1:]))] for _ in val_list]
         # 类别
         with open(f'{args.data_path}/class.txt', encoding='utf-8') as f:
