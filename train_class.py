@@ -196,17 +196,17 @@ class train_class:
                 train_loss += loss_batch.item()  # 记录损失
                 self.optimizer = self.optimizer_adjust(self.optimizer)  # 调整学习率
                 # wandb
-                if args.wandb and args.local_rank == 0 and epoch == 0 and len(wandb_image_list) < args.wandb_image_num:
+                if args.wandb and args.local_rank == 0 and epoch == 0 and len(wandb_image_list) < 16:
                     cls = label_batch.cpu().numpy().tolist()
                     for i in range(len(wandb_image_batch)):  # 遍历每一张图片
                         image = wandb_image_batch[i]
-                        text = ['{:.0f}'.format(_) for _ in cls[i]]
-                        text = text[0] if len(text) == 1 else '--'.join(text)
+                        text = [f'{_:.0f}' for _ in cls[i]]
+                        text = text[0] if len(text) == 1 else '---'.join(text)
                         image = np.ascontiguousarray(image)  # 将数组的内存变为连续存储(cv2画图的要求)
                         cv2.putText(image, text, (30, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
                         wandb_image = wandb.Image(image)
                         wandb_image_list.append(wandb_image)
-                        if len(wandb_image_list) == args.wandb_image_num:
+                        if len(wandb_image_list) == 16:
                             break
             # 日志
             if args.local_rank == 0:
