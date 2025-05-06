@@ -104,11 +104,11 @@ class train_class:
         args = self.args
         # 训练集
         with open(f'{args.data_path}/train.txt', encoding='utf-8') as f:
-            train_list = [_.strip().split(' ') for _ in f.readlines()]  # [[相对路径,类别号],...]
+            train_list = [_.strip().split(' ') for _ in f.readlines()]  # 读取数据[[图片路径,类别],...]
         train_list = [[f'{args.data_path}/image/{os.path.basename(_[0])}', list(map(int, _[1:]))] for _ in train_list]
         # 验证集
         with open(f'{args.data_path}/val.txt', encoding='utf-8') as f:
-            val_list = [_.strip().split(' ') for _ in f.readlines()]  # [[相对路径,类别号],...]
+            val_list = [_.strip().split(' ') for _ in f.readlines()]  # 读取数据[[图片路径,类别],...]
         val_list = [[f'{args.data_path}/image/{os.path.basename(_[0])}', list(map(int, _[1:]))] for _ in val_list]
         # 类别
         with open(f'{args.data_path}/class.txt', encoding='utf-8') as f:
@@ -164,17 +164,16 @@ class train_class:
         epoch_base = self.model_dict['epoch_finished'] + 1  # 新的一轮要+1
         # wandb
         if args.wandb and args.local_rank == 0:
-            wandb_image_list = []  # 记录所有的wandb_image最后一起添加
+            wandb_image_list = []  # 记录所有的wandb_image最后一起添加(最多添加args.wandb_image_num张)
         for epoch in range(epoch_base, args.epoch + 1):
-            if args.local_rank == 0:
+            if args.local_rank == 0 and args.print_info:
                 info = f'-----------------------epoch:{epoch}-----------------------'
-                if args.print_info:
-                    print(info)
+                print(info)
             model.train()
             train_loss = 0  # 记录损失
             self.train_dataset.epoch_update(epoch)
             for index, (image_batch, label_batch) in enumerate(self.train_dataloader):
-                if args.local_rank == 0 and args.wandb and len(wandb_image_list) < args.wandb_image_num:
+                if args.local_rank == 0 and args.wandb and len(wandb_image_list) < 16:
                     wandb_image_batch = (image_batch * 255).cpu().numpy().astype(np.uint8).transpose(0, 2, 3, 1)
                 image_batch = image_batch.to(args.device, non_blocking=args.latch)
                 label_batch = label_batch.to(args.device, non_blocking=args.latch)
@@ -212,8 +211,7 @@ class train_class:
             if args.local_rank == 0:
                 train_loss /= index + 1  # 计算平均损失
                 info = f'| train | train_loss:{train_loss:.4f} | lr:{self.optimizer.param_groups[0]["lr"]:.6f} |'
-                if args.print_info:
-                    print(info)
+                print(info) if args.print_info else None
             # 清理显存空间
             del image_batch, label_batch, pred_batch, loss_batch
             torch.cuda.empty_cache()
@@ -243,10 +241,8 @@ class train_class:
                         info = (f'| best_model | val_loss:{val_loss:.4f} | threshold:{args.class_threshold:.2f} |'
                                 f' val_accuracy:{accuracy:.4f} | val_precision:{precision:.4f} |'
                                 f' val_recall:{recall:.4f} | val_m_ap:{m_ap:.4f} |')
-                        if args.print_info:
-                            print(info)
-                        if args.log:
-                            logging.info(info)
+                        print(info) if args.print_info else None
+                        logging.info(info) if args.log else None
                 # wandb
                 if args.wandb:
                     wandb_log = {}
@@ -284,8 +280,7 @@ class train_class:
             info = (f'| val | val_loss:{val_loss:.4f} | threshold:{args.class_threshold:.2f} |'
                     f' val_accuracy:{accuracy:.4f} | val_precision:{precision:.4f} |'
                     f' val_recall:{recall:.4f} | val_m_ap:{m_ap:.4f} |')
-            if args.print_info:
-                print(info)
+            print(info) if args.print_info else None
         return val_loss, accuracy, precision, recall, m_ap
 
     def _bn_prune(self, model):  # 通过bn层裁剪模型
