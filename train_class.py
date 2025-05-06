@@ -164,7 +164,7 @@ class train_class:
         epoch_base = self.model_dict['epoch_finished'] + 1  # 新的一轮要+1
         # wandb
         if args.wandb and args.local_rank == 0:
-            wandb_image_list = []  # 记录所有的wandb_image最后一起添加(最多添加args.wandb_image_num张)
+            wandb_image_list = []  # 记录所有的wandb_image最后一起添加
         for epoch in range(epoch_base, args.epoch + 1):
             if args.local_rank == 0:
                 info = f'-----------------------epoch:{epoch}-----------------------'
