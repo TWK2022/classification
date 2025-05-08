@@ -22,7 +22,7 @@ parser.add_argument('--wandb', default=False, type=bool, help='|wandb可视化|'
 parser.add_argument('--data_path', default='dataset', type=str, help='|数据位置|')
 parser.add_argument('--weight_path', default='last.pt', type=str, help='|加载模型，优先级:加载模型>剪枝训练>创建新模型|')
 parser.add_argument('--weight_again', default=True, type=bool, help='|重置学习率等状态，在weight_path上重新训练|')
-parser.add_argument('--prune_weight_path', default='best.pt', type=str, help='|剪枝参考模型|')
+parser.add_argument('--prune_weight_path', default='prune_source.pt', type=str, help='|剪枝参考模型|')
 parser.add_argument('--prune_ratio', default=0.8, type=float, help='|剪枝保留比例|')
 parser.add_argument('--model', default='yolov7_cls', type=str, help='|模型选择|')
 parser.add_argument('--model_type', default='m', type=str, help='|模型型号|')
