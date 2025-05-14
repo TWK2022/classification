@@ -233,7 +233,7 @@ class train_class:
                 self.model_dict['val_m_ap'] = m_ap
                 if epoch % args.save_epoch == 0 or epoch == args.epoch:
                     torch.save(self.model_dict, args.save_path)  # 保存模型
-                if val_loss < 1 and m_ap >= self.model_dict['standard'] and m_ap >= 0.25:
+                if m_ap >= self.model_dict['standard'] and m_ap >= 0.25:
                     self.model_dict['standard'] = m_ap
                     torch.save(self.model_dict, args.save_best)  # 保存最佳模型
                     if args.local_rank == 0:  # 日志
