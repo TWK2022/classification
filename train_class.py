@@ -197,8 +197,8 @@ class train_class:
                 # wandb
                 if args.local_rank == 0 and args.wandb and len(self.wandb_image_list) < self.wandb_image_number:
                     cls = label_batch.cpu().numpy().tolist()
-                    for index, image in enumerate(wandb_image_batch):  # 遍历每一张图片
-                        text = [f'{_:.0f}' for _ in cls[index]]
+                    for image, cls_ in zip(wandb_image_batch, cls):  # 遍历每一张图片
+                        text = [f'{_:.0f}' for _ in cls_]
                         text = text[0] if len(text) == 1 else '---'.join(text)
                         image = np.ascontiguousarray(image)  # 将数组的内存变为连续存储(cv2画图的要求)
                         cv2.putText(image, text, (30, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
