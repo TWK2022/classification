@@ -158,7 +158,10 @@ class train_class:
         return optimizer, optimizer_adjust
 
     def loss_load(self):
-        loss = eval(f'torch.nn.{self.args.loss}()')
+        if self.args.output_class == 1:
+            loss = torch.nn.BCELoss()
+        else:
+            loss = torch.nn.CrossEntropyLoss()
         return loss
 
     def train(self):
