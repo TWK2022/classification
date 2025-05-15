@@ -47,38 +47,6 @@ class residual(torch.nn.Module):  # in_->in_，len->len
         return x + x0
 
 
-class c3(torch.nn.Module):  # in_->out_，len->len
-    config_len = '3 + 2 * n'  # 参数层数
-
-    def __init__(self, in_, out_=None, n=1, config=None):
-        super().__init__()
-        if config is None:  # 正常版本
-            self.cbs0 = cbs(in_, in_ // 2, kernel_size=1, stride=1)
-            self.sequential1 = torch.nn.Sequential(*(residual(in_ // 2) for _ in range(n)))
-            self.cbs2 = cbs(in_, in_ // 2, kernel_size=1, stride=1)
-            self.concat3 = concat(dim=1)
-            self.cbs4 = cbs(in_, out_, kernel_size=1, stride=1)
-        else:  # 剪枝版本: len(config) = 3 + 2 * n
-            self.cbs0 = cbs(in_, config[0], kernel_size=1, stride=1)
-            self.sequential1 = torch.nn.Sequential(
-                *(residual(config[0 + 2 * _] if _ == 0 else config[1 + 2 * _] + config[2 + 2 * _],
-                           config[1 + 2 * _:3 + 2 * _]) for _ in range(n)))
-            self.cbs2 = cbs(config[0], config[1 + 2 * n], kernel_size=1, stride=1)
-            self.concat3 = concat(dim=1)
-            self.cbs4 = cbs(config[0] + config[2 * n - 1] + config[2 * n] + config[1 + 2 * n], config[2 + 2 * n],
-                            kernel_size=1, stride=1)
-            self.last_layer = config[2 + 2 * n]  # 最后一层参数
-
-    def forward(self, x):
-        x0 = self.cbs0(x)
-        x1 = self.sequential1(x0)
-        x1 = x0 + x1
-        x2 = self.cbs2(x)
-        x = self.concat3([x1, x2])
-        x = self.cbs4(x)
-        return x
-
-
 class elan(torch.nn.Module):  # in_->out_，len->len
     config_len = '3 + 2 * n'  # 参数层数
 
