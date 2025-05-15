@@ -35,11 +35,14 @@ class train_class:
             self.model_dict['model'] = torch.nn.parallel.DistributedDataParallel(self.model_dict['model'],
                                                                                  device_ids=[args.local_rank],
                                                                                  output_device=args.local_rank)
-        if args.log:  # 日志
+        if args.local_rank == 0 and args.log:  # 日志
             log_path = os.path.dirname(__file__) + '/log.log'
             logging.basicConfig(filename=log_path, level=logging.INFO,
                                 format='%(asctime)s | %(levelname)s | %(message)s')
             logging.info('-------------------- log --------------------')
+        if args.local_rank == 0 and args.wandb:  # wandb
+            self.wandb_image_number = 16  # 记录图片数量
+            self.wandb_image_list = []  # 记录所有的wandb_image最后一起添加
 
     @staticmethod
     def metric(pred, label, threshold):  # 指标
@@ -104,12 +107,12 @@ class train_class:
         args = self.args
         # 训练集
         with open(f'{args.data_path}/train.txt', encoding='utf-8') as f:
-            train_list = [_.strip().split(' ') for _ in f.readlines()]  # 读取数据[[图片路径,类别],...]
-        train_list = [[f'{args.data_path}/image/{os.path.basename(_[0])}', list(map(int, _[1:]))] for _ in train_list]
+            train_list = [_.strip().split(' ') for _ in f.readlines()]  # [[图片路径,类别],...]
+        train_list = [[f'{args.data_path}/{_[0]}', list(map(int, _[1:]))] for _ in train_list]
         # 验证集
         with open(f'{args.data_path}/val.txt', encoding='utf-8') as f:
-            val_list = [_.strip().split(' ') for _ in f.readlines()]  # 读取数据[[图片路径,类别],...]
-        val_list = [[f'{args.data_path}/image/{os.path.basename(_[0])}', list(map(int, _[1:]))] for _ in val_list]
+            val_list = [_.strip().split(' ') for _ in f.readlines()]  # [[图片路径,类别],...]
+        val_list = [[f'{args.data_path}/{_[0]}', list(map(int, _[1:]))] for _ in val_list]
         # 类别
         with open(f'{args.data_path}/class.txt', encoding='utf-8') as f:
             class_list = [_.strip() for _ in f.readlines()]
@@ -155,26 +158,25 @@ class train_class:
         return optimizer, optimizer_adjust
 
     def loss_load(self):
-        loss = eval(f'torch.nn.{self.args.loss}()')
+        if self.args.output_class == 1:
+            loss = torch.nn.BCELoss()
+        else:
+            loss = torch.nn.CrossEntropyLoss()
         return loss
 
     def train(self):
         args = self.args
         model = self.model_dict['model']
         epoch_base = self.model_dict['epoch_finished'] + 1  # 新的一轮要+1
-        # wandb
-        if args.wandb and args.local_rank == 0:
-            wandb_image_list = []  # 记录所有的wandb_image最后一起添加(最多添加args.wandb_image_num张)
         for epoch in range(epoch_base, args.epoch + 1):
-            if args.local_rank == 0:
+            if args.local_rank == 0 and args.print_info:
                 info = f'-----------------------epoch:{epoch}-----------------------'
-                if args.print_info:
-                    print(info)
+                print(info)
             model.train()
             train_loss = 0  # 记录损失
             self.train_dataset.epoch_update(epoch)
             for index, (image_batch, label_batch) in enumerate(self.train_dataloader):
-                if args.local_rank == 0 and args.wandb and len(wandb_image_list) < args.wandb_image_num:
+                if args.local_rank == 0 and args.wandb and len(self.wandb_image_list) < self.wandb_image_number:
                     wandb_image_batch = (image_batch * 255).cpu().numpy().astype(np.uint8).transpose(0, 2, 3, 1)
                 image_batch = image_batch.to(args.device, non_blocking=args.latch)
                 label_batch = label_batch.to(args.device, non_blocking=args.latch)
@@ -196,24 +198,22 @@ class train_class:
                 train_loss += loss_batch.item()  # 记录损失
                 self.optimizer = self.optimizer_adjust(self.optimizer)  # 调整学习率
                 # wandb
-                if args.wandb and args.local_rank == 0 and epoch == 0 and len(wandb_image_list) < args.wandb_image_num:
+                if args.local_rank == 0 and args.wandb and len(self.wandb_image_list) < self.wandb_image_number:
                     cls = label_batch.cpu().numpy().tolist()
-                    for i in range(len(wandb_image_batch)):  # 遍历每一张图片
-                        image = wandb_image_batch[i]
-                        text = ['{:.0f}'.format(_) for _ in cls[i]]
-                        text = text[0] if len(text) == 1 else '--'.join(text)
+                    for image, cls_ in zip(wandb_image_batch, cls):  # 遍历每一张图片
+                        text = [f'{_:.0f}' for _ in cls_]
+                        text = text[0] if len(text) == 1 else '---'.join(text)
                         image = np.ascontiguousarray(image)  # 将数组的内存变为连续存储(cv2画图的要求)
                         cv2.putText(image, text, (30, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
                         wandb_image = wandb.Image(image)
-                        wandb_image_list.append(wandb_image)
-                        if len(wandb_image_list) == args.wandb_image_num:
-                            break
+                        self.wandb_image_list.append(wandb_image)
+                    self.wandb_image_list = self.wandb_image_list[:self.wandb_image_number]
+            # 计算平均损失
+            train_loss /= index + 1
             # 日志
-            if args.local_rank == 0:
-                train_loss /= index + 1  # 计算平均损失
+            if args.local_rank == 0 and args.print_info:
                 info = f'| train | train_loss:{train_loss:.4f} | lr:{self.optimizer.param_groups[0]["lr"]:.6f} |'
-                if args.print_info:
-                    print(info)
+                print(info)
             # 清理显存空间
             del image_batch, label_batch, pred_batch, loss_batch
             torch.cuda.empty_cache()
@@ -236,22 +236,20 @@ class train_class:
                 self.model_dict['val_m_ap'] = m_ap
                 if epoch % args.save_epoch == 0 or epoch == args.epoch:
                     torch.save(self.model_dict, args.save_path)  # 保存模型
-                if val_loss < 1 and m_ap >= self.model_dict['standard']:
+                if m_ap >= self.model_dict['standard'] and m_ap >= 0.25:
                     self.model_dict['standard'] = m_ap
                     torch.save(self.model_dict, args.save_best)  # 保存最佳模型
                     if args.local_rank == 0:  # 日志
                         info = (f'| best_model | val_loss:{val_loss:.4f} | threshold:{args.class_threshold:.2f} |'
                                 f' val_accuracy:{accuracy:.4f} | val_precision:{precision:.4f} |'
                                 f' val_recall:{recall:.4f} | val_m_ap:{m_ap:.4f} |')
-                        if args.print_info:
-                            print(info)
-                        if args.log:
-                            logging.info(info)
+                        print(info) if args.print_info else None
+                        logging.info(info) if args.log else None
                 # wandb
                 if args.wandb:
                     wandb_log = {}
                     if epoch == 0:
-                        wandb_log.update({f'image/train_image': wandb_image_list})
+                        wandb_log.update({f'image/train_image': self.wandb_image_list})
                     wandb_log.update({'metric/train_loss': train_loss,
                                       'metric/val_loss': val_loss,
                                       'metric/val_m_ap': m_ap,
@@ -284,8 +282,7 @@ class train_class:
             info = (f'| val | val_loss:{val_loss:.4f} | threshold:{args.class_threshold:.2f} |'
                     f' val_accuracy:{accuracy:.4f} | val_precision:{precision:.4f} |'
                     f' val_recall:{recall:.4f} | val_m_ap:{m_ap:.4f} |')
-            if args.print_info:
-                print(info)
+            print(info) if args.print_info else None
         return val_loss, accuracy, precision, recall, m_ap
 
     def _bn_prune(self, model):  # 通过bn层裁剪模型

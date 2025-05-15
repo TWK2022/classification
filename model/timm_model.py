@@ -1,6 +1,6 @@
 import timm
 import torch
-from model.layer import linear_head
+from model.layer import cls_head
 
 
 class timm_model(torch.nn.Module):
@@ -9,7 +9,7 @@ class timm_model(torch.nn.Module):
         default_model = 'efficientnetv2_m'
         self.backbone = timm.create_model(default_model, in_chans=3, features_only=True, exportable=True)
         output_dim = self.backbone.feature_info.channels()[-1]  # backbone输出有多个，接最后一个输出，并得到其通道数
-        self.linear_head = linear_head(output_dim, args.output_class)
+        self.linear_head = cls_head(output_dim, args.output_class)
 
     def forward(self, x):
         x = self.backbone(x)
