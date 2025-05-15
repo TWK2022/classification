@@ -282,25 +282,27 @@ class split_head(torch.nn.Module):  # in_->(batch, 3, output_size, output_size, 
         return x
 
 
-class linear_head(torch.nn.Module):
+class cls_head(torch.nn.Module):
     def __init__(self, in_, out_):
         super().__init__()
         self.avgpool0 = torch.nn.AdaptiveAvgPool2d(1)
         self.flatten1 = torch.nn.Flatten()
-        self.Dropout2 = torch.nn.Dropout(0.2)
+        self.dropout2 = torch.nn.Dropout(0.2)
         self.linear3 = torch.nn.Linear(in_, in_ // 2)
         self.silu4 = torch.nn.SiLU()
-        self.Dropout5 = torch.nn.Dropout(0.2)
+        self.dropout5 = torch.nn.Dropout(0.2)
         self.linear6 = torch.nn.Linear(in_ // 2, out_)
+        self.sigmoid7 = torch.nn.Sigmoid()
 
     def forward(self, x):
         x = self.avgpool0(x)
         x = self.flatten1(x)
-        x = self.Dropout2(x)
+        x = self.dropout2(x)
         x = self.linear3(x)
         x = self.silu4(x)
-        x = self.Dropout5(x)
+        x = self.dropout5(x)
         x = self.linear6(x)
+        x = self.sigmoid7(x)
         return x
 
 
