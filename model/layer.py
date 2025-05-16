@@ -88,7 +88,7 @@ class elan_h(torch.nn.Module):  # in_->out_，len->len
 
     def __init__(self, in_, out_=None, config=None):
         super().__init__()
-        if not config:  # 正常版本
+        if config is None:  # 正常版本
             self.cbs0 = cbs(in_, in_ // 2, kernel_size=1, stride=1)
             self.cbs1 = cbs(in_, in_ // 2, kernel_size=1, stride=1)
             self.cbs2 = cbs(in_ // 2, in_ // 4, kernel_size=3, stride=1)
