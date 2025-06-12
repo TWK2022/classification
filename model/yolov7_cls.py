@@ -33,22 +33,22 @@ class yolov7_cls(torch.nn.Module):
             self.cbs2 = cbs(config[1], config[2], 1, 1)
             self.cbs3 = cbs(config[2], config[3], 3, 2)  # input_size/4
             index = 4
-            self.elan4 = elan(config[index - 1], n=n, config=config[index:index + eval(elan.config_len)])
-            index += eval(elan.config_len)
-            self.mp5 = mp(self.elan4.last_layer, config=config[index:index + eval(mp.config_len)])
-            index += eval(mp.config_len)
-            self.elan6 = elan(self.mp5.last_layer, n=n, config=config[index:index + eval(elan.config_len)])
-            index += eval(elan.config_len)
-            self.mp7 = mp(self.elan6.last_layer, config=config[index:index + eval(mp.config_len)])
-            index += eval(mp.config_len)
-            self.elan8 = elan(self.mp7.last_layer, n=n, config=config[index:index + eval(elan.config_len)])
-            index += eval(elan.config_len)
-            self.mp9 = mp(self.elan8.last_layer, config=config[index:index + eval(mp.config_len)])
-            index += eval(mp.config_len)
-            self.elan10 = elan(self.mp9.last_layer, n=n, config=config[index:index + eval(elan.config_len)])
-            index += eval(elan.config_len)
-            self.sppcspc11 = sppcspc(self.elan10.last_layer, config=config[index:index + eval(sppcspc.config_len)])
-            index += eval(sppcspc.config_len)
+            self.elan4 = elan(config[index - 1], n=n, config=config[index:])
+            index += self.elan4.config_len
+            self.mp5 = mp(self.elan4.last_layer, config=config[index:])
+            index += self.mp5.config_len
+            self.elan6 = elan(self.mp5.last_layer, n=n, config=config[index:])
+            index += self.elan6.config_len
+            self.mp7 = mp(self.elan6.last_layer, config=config[index:])
+            index += self.mp7.config_len
+            self.elan8 = elan(self.mp7.last_layer, n=n, config=config[index:])
+            index += self.elan8.config_len
+            self.mp9 = mp(self.elan8.last_layer, config=config[index:])
+            index += self.mp9.config_len
+            self.elan10 = elan(self.mp9.last_layer, n=n, config=config[index:])
+            index += self.elan10.config_len
+            self.sppcspc11 = sppcspc(self.elan10.last_layer, config=config[index:])
+            index += self.sppcspc11.config_len
             self.cbs12 = cbs(config[index - 1], config[index], 1, 1)
             self.cls_head13 = cls_head(config[index], output_class)
 
