@@ -2,11 +2,11 @@ import os
 import cv2
 import math
 import copy
+import tqdm
 import wandb
 import torch
 import logging
 import numpy as np
-import albumentations
 
 
 class train_class:
@@ -113,13 +113,9 @@ class train_class:
         with open(f'{args.data_path}/val.txt', encoding='utf-8') as f:
             val_list = [_.strip().split(' ') for _ in f.readlines()]  # [[图片路径,类别],...]
         val_list = [[f'{args.data_path}/{_[0]}', list(map(int, _[1:]))] for _ in val_list]
-        # 类别
-        with open(f'{args.data_path}/class.txt', encoding='utf-8') as f:
-            class_list = [_.strip() for _ in f.readlines()]
         data_dict = {
             'train': train_list,
             'val': val_list,
-            'class': class_list,
         }
         return data_dict
 
@@ -175,6 +171,8 @@ class train_class:
             model.train()
             train_loss = 0  # 记录损失
             self.train_dataset.epoch_update(epoch)
+            if args.local_rank == 0 and args.tqdm:
+                tqdm_show = tqdm.tqdm(iterable=None, total=len(self.data_dict['train']), mininterval=0.1)
             for index, (image_batch, label_batch) in enumerate(self.train_dataloader):
                 if args.local_rank == 0 and args.wandb and len(self.wandb_image_list) < self.wandb_image_number:
                     wandb_image_batch = (image_batch * 255).cpu().numpy().astype(np.uint8).transpose(0, 2, 3, 1)
@@ -197,6 +195,10 @@ class train_class:
                 self.ema.update(model) if args.local_rank == 0 and args.ema else None  # 更新ema模型参数
                 train_loss += loss_batch.item()  # 记录损失
                 self.optimizer = self.optimizer_adjust(self.optimizer)  # 调整学习率
+                # tqdm
+                if args.local_rank == 0 and args.tqdm:
+                    tqdm_show.set_postfix({'loss': loss_batch.item()})
+                    tqdm_show.update(args.device_number * args.batch)
                 # wandb
                 if args.local_rank == 0 and args.wandb and len(self.wandb_image_list) < self.wandb_image_number:
                     cls = label_batch.cpu().numpy().tolist()
@@ -227,7 +229,6 @@ class train_class:
                 self.model_dict['epoch_finished'] = epoch
                 self.model_dict['optimizer_state_dict'] = self.optimizer.state_dict()
                 self.model_dict['ema_update'] = self.ema.update_total if args.ema else self.model_dict['ema_update']
-                self.model_dict['class'] = self.data_dict['class']
                 self.model_dict['train_loss'] = train_loss
                 self.model_dict['val_loss'] = val_loss
                 self.model_dict['val_accuracy'] = accuracy
@@ -266,6 +267,8 @@ class train_class:
             pred_all = []
             label_all = []
             val_loss = 0
+            if args.tqdm:
+                tqdm_show = tqdm.tqdm(iterable=None, total=len(self.data_dict['val']), mininterval=0.1)
             for index, (image_batch, label_batch) in enumerate(self.val_dataloader):
                 image_batch = image_batch.to(args.device, non_blocking=args.latch)
                 pred_batch = model(image_batch).detach().cpu()
@@ -273,6 +276,10 @@ class train_class:
                 val_loss += loss_batch.item()
                 pred_all.extend(pred_batch)
                 label_all.extend(label_batch)
+                # tqdm
+                if args.tqdm:
+                    tqdm_show.set_postfix({'loss': loss_batch.item()})
+                    tqdm_show.update(args.batch)
             # 计算指标
             val_loss /= (index + 1)
             pred_all = torch.stack(pred_all, dim=0)
@@ -358,17 +365,11 @@ class torch_dataset(torch.utils.data.Dataset):
     def __init__(self, args, tag, data):
         self.tag = tag
         self.data = data
+        self.input_size = args.input_size
         self.noise = args.noise
         self.noise_probability = 0
         self.epoch_total = args.epoch
         self.output_class = args.output_class
-        self.noise_function = albumentations.Compose([
-            albumentations.GaussianBlur(blur_limit=(5, 5), p=0.2),
-            albumentations.GaussNoise(var_limit=(10.0, 30.0), p=0.2)])
-        self.transform = albumentations.Compose([
-            albumentations.LongestMaxSize(args.input_size),
-            albumentations.PadIfNeeded(min_height=args.input_size, min_width=args.input_size,
-                                       border_mode=cv2.BORDER_CONSTANT, value=(128, 128, 128))])
 
     def __len__(self):
         return len(self.data)
@@ -377,9 +378,8 @@ class torch_dataset(torch.utils.data.Dataset):
         image = cv2.imdecode(np.fromfile(self.data[index][0], dtype=np.uint8), cv2.IMREAD_COLOR)  # 读取图片
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)  # 转为RGB通道
         if self.tag == 'train' and torch.rand(1) < self.noise_probability:  # 数据加噪
-            image = self.noise_function(image=image)['image']
-        image = self.transform(image=image)['image']  # 缩放、填充图片
-        image = torch.tensor(image / 255, dtype=torch.float32).permute(2, 0, 1)  # 归一化、转换为tensor、调维度
+            image = self._noise(image)
+        image = self.image_process(image)  # 图片处理
         label = torch.zeros(self.output_class, dtype=torch.float32)  # 标签
         label[self.data[index][1]] = 1
         return image, label
@@ -389,3 +389,11 @@ class torch_dataset(torch.utils.data.Dataset):
             self.noise_probability = self.noise
         else:
             self.noise_probability = 0
+
+    def image_process(self, image):
+        image = cv2.resize(image, (self.input_size, self.input_size))
+        image = torch.tensor(image / 255, dtype=torch.float32).permute(2, 0, 1)
+        return image
+
+    def _noise(self, image):
+        return image

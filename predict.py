@@ -3,7 +3,6 @@ import cv2
 import torch
 import argparse
 import numpy as np
-import albumentations
 from model.layer import deploy
 
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -25,13 +24,10 @@ class predict_class:
         self.args = args
         self.device = args.device
         self.float16 = args.float16
+        self.input_size = args.input_size
         model_dict = torch.load(args.model_path, map_location='cpu', weights_only=False)
         model = deploy(model_dict['model'])
         self.model = model.half().eval().to(args.device) if args.float16 else model.float().eval().to(args.device)
-        self.transform = albumentations.Compose([
-            albumentations.LongestMaxSize(args.input_size),
-            albumentations.PadIfNeeded(min_height=args.input_size, min_width=args.input_size,
-                                       border_mode=cv2.BORDER_CONSTANT, value=(128, 128, 128))])
 
     def predict(self, image_dir=args.image_dir):
         image_name_list = sorted(os.listdir(image_dir))
@@ -48,7 +44,7 @@ class predict_class:
         print(result)
 
     def image_process(self, image):
-        image = self.transform(image=image)['image']  # 缩放和填充图片
+        image = cv2.resize(image, (self.input_size, self.input_size))
         image = image.astype(dtype=np.float16 if self.float16 else np.float32)
         image = image / 255
         image = image[np.newaxis].transpose(0, 3, 1, 2)

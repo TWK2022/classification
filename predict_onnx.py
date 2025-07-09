@@ -3,7 +3,6 @@ import cv2
 import argparse
 import onnxruntime
 import numpy as np
-import albumentations
 
 # -------------------------------------------------------------------------------------------------------------------- #
 parser = argparse.ArgumentParser(description='|模型预测|')
@@ -21,14 +20,12 @@ class predict_class:
         self.args = args
         self.device = args.device
         self.float16 = args.float16
+        self.input_size = args.input_size
         provider = 'CUDAExecutionProvider' if args.device.lower() in ['gpu', 'cuda'] else 'CPUExecutionProvider'
         self.model = onnxruntime.InferenceSession(args.model_path, providers=[provider])  # 加载模型和框架
         self.input_name = self.model.get_inputs()[0].name  # 获取输入名称
         self.output_name = self.model.get_outputs()[0].name  # 获取输出名称
-        self.transform = albumentations.Compose([
-            albumentations.LongestMaxSize(args.input_size),
-            albumentations.PadIfNeeded(min_height=args.input_size, min_width=args.input_size,
-                                       border_mode=cv2.BORDER_CONSTANT, value=(128, 128, 128))])
+
 
     def predict(self, image_dir=args.image_dir):
         image_name_list = sorted(os.listdir(image_dir))
@@ -44,7 +41,7 @@ class predict_class:
         print(result)
 
     def image_process(self, image):
-        image = self.transform(image=image)['image']  # 缩放和填充图片
+        image = cv2.resize(image, (self.input_size, self.input_size))
         image = image.astype(dtype=np.float16 if self.float16 else np.float32)
         image = image / 255
         image = image[np.newaxis].transpose(0, 3, 1, 2)

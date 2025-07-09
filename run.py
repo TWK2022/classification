@@ -6,10 +6,9 @@ from train_class import train_class
 # -------------------------------------------------------------------------------------------------------------------- #
 # 数据格式
 # ├── 数据集路径: data_path
-#     └── image: 存放所有图片
+#     └── image: 存放图片(以标签中的图片路径为准)
 #     └── train.txt: 训练图片的标签。相对路径和类别号(如:image/000.jpg 0 2)，类别号可以为空
 #     └── val.txt: 验证图片的标签
-#     └── class.txt: 类别名称
 # -------------------------------------------------------------------------------------------------------------------- #
 # 分布式数据并行训练:
 # python -m torch.distributed.launch --master_port 9999 --nproc_per_node n run.py --distributed True
@@ -17,6 +16,7 @@ from train_class import train_class
 # -------------------------------------------------------------------------------------------------------------------- #
 parser = argparse.ArgumentParser(description='|图片分类|')
 parser.add_argument('--log', default=True, type=bool, help='|日志|')
+parser.add_argument('--tqdm', default=True, type=bool, help='|每轮进度条|')
 parser.add_argument('--print_info', default=True, type=bool, help='|打印信息|')
 parser.add_argument('--wandb', default=False, type=bool, help='|wandb可视化|')
 parser.add_argument('--data_path', default='dataset', type=str, help='|数据位置|')
@@ -25,8 +25,8 @@ parser.add_argument('--weight_again', default=True, type=bool, help='|重置学�
 parser.add_argument('--prune_weight_path', default='prune_weight.pt', type=str, help='|剪枝参考模型|')
 parser.add_argument('--prune_ratio', default=0.8, type=float, help='|剪枝保留比例|')
 parser.add_argument('--model', default='yolov7_cls', type=str, help='|模型选择|')
-parser.add_argument('--model_type', default='m', type=str, help='|模型型号|')
-parser.add_argument('--save_epoch', default=10, type=int, help='|每x轮和最后一轮保存模型|')
+parser.add_argument('--model_type', default='s', type=str, help='|模型型号|')
+parser.add_argument('--save_epoch', default=5, type=int, help='|每x轮和最后一轮保存模型|')
 parser.add_argument('--save_path', default='last.pt', type=str, help='|保存模型|')
 parser.add_argument('--save_best', default='best.pt', type=str, help='|保存最佳模型|')
 parser.add_argument('--input_size', default=320, type=int, help='|输入图片大小|')
@@ -41,7 +41,7 @@ parser.add_argument('--regularization', default='L2', type=str, help='|正则化
 parser.add_argument('--r_value', default=0.0005, type=float, help='|正则化权重系数，基准为0.0005|')
 parser.add_argument('--device', default='cuda', type=str, help='|设备|')
 parser.add_argument('--latch', default=True, type=bool, help='|模型和数据是否为锁存|')
-parser.add_argument('--num_worker', default=0, type=int, help='|cpu处理数据进程数，0为一个主进程，一般为0、2、4、8|')
+parser.add_argument('--num_worker', default=0, type=int, help='|cpu处理数据进程数，0为一个主进程，一般为0、8、16|')
 parser.add_argument('--ema', default=True, type=bool, help='|平均指数移动(EMA)调整参数|')
 parser.add_argument('--amp', default=True, type=bool, help='|混合float16精度训练，cpu时不可用，出现nan可能与gpu有关|')
 parser.add_argument('--noise', default=0.5, type=float, help='|训练数据加噪概率|')
