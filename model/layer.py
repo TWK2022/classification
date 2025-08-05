@@ -246,7 +246,6 @@ class cls_head(torch.nn.Module):
         self.silu4 = torch.nn.SiLU()
         self.dropout5 = torch.nn.Dropout(0.2)
         self.linear6 = torch.nn.Linear(in_ // 2, out_)
-        self.sigmoid7 = torch.nn.Sigmoid()
 
     def forward(self, x):
         x = self.avgpool0(x)
@@ -256,7 +255,6 @@ class cls_head(torch.nn.Module):
         x = self.silu4(x)
         x = self.dropout5(x)
         x = self.linear6(x)
-        x = self.sigmoid7(x)
         return x
 
 
@@ -297,7 +295,9 @@ class deploy(torch.nn.Module):
     def __init__(self, model):
         super().__init__()
         self.model = model
+        self.sigmoid = torch.nn.Sigmoid()
 
     def forward(self, x):
         x = self.model(x)
+        x = self.sigmoid(x)
         return x

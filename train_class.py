@@ -1,4 +1,5 @@
 import os
+import re
 import cv2
 import math
 import copy
@@ -105,14 +106,22 @@ class train_class:
 
     def data_load(self):
         args = self.args
+        regex = re.compile(r'(.*\..{3,4}) ?(\d.*)?$')
         # 训练集
+        train_list = []
         with open(f'{args.data_path}/train.txt', encoding='utf-8') as f:
-            train_list = [_.strip().split(' ') for _ in f.readlines()]  # [[图片路径,类别],...]
-        train_list = [[f'{args.data_path}/{_[0]}', list(map(int, _[1:]))] for _ in train_list]
+            for line in f.readlines():
+                search = regex.search(line.strip())
+                label = search.group(2).split(' ') if search.group(2) is not None else []
+                train_list.append([search.group(1), list(map(int, label))])  # [[图片路径,类别],...]
         # 验证集
+        val_list = []
         with open(f'{args.data_path}/val.txt', encoding='utf-8') as f:
-            val_list = [_.strip().split(' ') for _ in f.readlines()]  # [[图片路径,类别],...]
-        val_list = [[f'{args.data_path}/{_[0]}', list(map(int, _[1:]))] for _ in val_list]
+            for line in f.readlines():
+                search = regex.search(line.strip())
+                label = search.group(2).split(' ') if search.group(2) is not None else []
+                val_list.append([search.group(1), list(map(int, label))])  # [[图片路径,类别],...]
+        # 记录
         data_dict = {
             'train': train_list,
             'val': val_list,
@@ -155,7 +164,7 @@ class train_class:
 
     def loss_load(self):
         if self.args.output_class == 1:
-            loss = torch.nn.BCELoss()
+            loss = torch.nn.BCEWithLogitsLoss()
         else:
             loss = torch.nn.CrossEntropyLoss()
         return loss
@@ -375,8 +384,7 @@ class torch_dataset(torch.utils.data.Dataset):
         return len(self.data)
 
     def __getitem__(self, index):
-        image = cv2.imdecode(np.fromfile(self.data[index][0], dtype=np.uint8), cv2.IMREAD_COLOR)  # 读取图片
-        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)  # 转为RGB通道
+        image = cv2.imdecode(np.fromfile(self.data[index][0], dtype=np.uint8), cv2.IMREAD_COLOR)  # 读取图片        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)  # 转为RGB通道
         if self.tag == 'train' and torch.rand(1) < self.noise_probability:  # 数据加噪
             image = self._noise(image)
         image = self.image_process(image)  # 图片处理
@@ -396,4 +404,8 @@ class torch_dataset(torch.utils.data.Dataset):
         return image
 
     def _noise(self, image):
+        # 二值化
+        image = np.min(image, axis=2)
+        image = np.stack([image, image, image], axis=2)
+        _, image = cv2.threshold(image, 200, 255, type=cv2.THRESH_BINARY)
         return image

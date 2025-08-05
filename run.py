@@ -6,7 +6,6 @@ from train_class import train_class
 # -------------------------------------------------------------------------------------------------------------------- #
 # 数据格式
 # ├── 数据集路径: data_path
-#     └── image: 存放图片(以标签中的图片路径为准)
 #     └── train.txt: 训练图片的标签。相对路径和类别号(如:image/000.jpg 0 2)，类别号可以为空
 #     └── val.txt: 验证图片的标签
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -16,7 +15,7 @@ from train_class import train_class
 # -------------------------------------------------------------------------------------------------------------------- #
 parser = argparse.ArgumentParser(description='|图片分类|')
 parser.add_argument('--log', default=True, type=bool, help='|日志|')
-parser.add_argument('--tqdm', default=False, type=bool, help='|每轮进度条|')
+parser.add_argument('--tqdm', default=True, type=bool, help='|每轮进度条|')
 parser.add_argument('--print_info', default=True, type=bool, help='|打印信息|')
 parser.add_argument('--wandb', default=False, type=bool, help='|wandb可视化|')
 parser.add_argument('--data_path', default='dataset', type=str, help='|数据位置|')
@@ -30,7 +29,7 @@ parser.add_argument('--save_epoch', default=5, type=int, help='|每x轮和最后
 parser.add_argument('--save_path', default='last.pt', type=str, help='|保存模型|')
 parser.add_argument('--save_best', default='best.pt', type=str, help='|保存最佳模型|')
 parser.add_argument('--input_size', default=224, type=int, help='|输入图片大小|')
-parser.add_argument('--output_class', default=2, type=int, help='|输出类别数|')
+parser.add_argument('--output_class', default=1, type=int, help='|输出类别数|')
 parser.add_argument('--epoch', default=100, type=int, help='|训练总轮数(包含之前已训练轮数)|')
 parser.add_argument('--batch', default=32, type=int, help='|训练批量大小，分布式时为总批量|')
 parser.add_argument('--warmup_ratio', default=0.01, type=float, help='|预热训练步数占总步数比例，最少5步，基准为0.01|')
