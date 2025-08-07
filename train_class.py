@@ -384,7 +384,8 @@ class torch_dataset(torch.utils.data.Dataset):
         return len(self.data)
 
     def __getitem__(self, index):
-        image = cv2.imdecode(np.fromfile(self.data[index][0], dtype=np.uint8), cv2.IMREAD_COLOR)  # 读取图片        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)  # 转为RGB通道
+        image = cv2.imdecode(np.fromfile(self.data[index][0], dtype=np.uint8), cv2.IMREAD_COLOR)  # 读取图片
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)  # 转为RGB通道
         if self.tag == 'train' and torch.rand(1) < self.noise_probability:  # 数据加噪
             image = self._noise(image)
         image = self.image_process(image)  # 图片处理
@@ -404,8 +405,7 @@ class torch_dataset(torch.utils.data.Dataset):
         return image
 
     def _noise(self, image):
-        # 二值化
+        # 灰度图
         image = np.min(image, axis=2)
         image = np.stack([image, image, image], axis=2)
-        _, image = cv2.threshold(image, 200, 255, type=cv2.THRESH_BINARY)
         return image
