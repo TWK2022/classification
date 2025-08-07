@@ -6,7 +6,7 @@ import numpy as np
 
 # -------------------------------------------------------------------------------------------------------------------- #
 parser = argparse.ArgumentParser(description='|模型预测|')
-parser.add_argument('--input_size', default=64, type=int, help='|模型输入图片大小|')
+parser.add_argument('--input_size', default=224, type=int, help='|模型输入图片大小|')
 parser.add_argument('--device', default='cpu', type=str, help='|设备|')
 parser.add_argument('--float16', default=True, type=bool, help='|数据类型|')
 args, _ = parser.parse_known_args()  # 防止传入参数冲突，替代args = parser.parse_args()
