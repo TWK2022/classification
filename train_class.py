@@ -1,6 +1,7 @@
 import os
 import re
 import cv2
+import fitz
 import math
 import copy
 import tqdm
@@ -106,7 +107,7 @@ class train_class:
 
     def data_load(self):
         args = self.args
-        regex = re.compile(r'(.*\..{3,4}) ?(\d.*)?$')
+        regex = re.compile(r'(.*\.\w{3,4}) ?(\d.*)?$')
         # 训练集
         train_list = []
         with open(f'{args.data_path}/train.txt', encoding='utf-8') as f:
@@ -122,10 +123,7 @@ class train_class:
                 label = search.group(2).split(' ') if search.group(2) is not None else []
                 val_list.append([search.group(1), list(map(int, label))])  # [[图片路径,类别],...]
         # 记录
-        data_dict = {
-            'train': train_list,
-            'val': val_list,
-        }
+        data_dict = {'train': train_list, 'val': val_list}
         return data_dict
 
     def dataloader_load(self):
@@ -352,7 +350,7 @@ class lr_adjust:
     def __init__(self, args, step_epoch, epoch_finished):
         self.lr_start = args.lr_start  # 初始学习率
         self.lr_end = args.lr_end_ratio * args.lr_start  # 最终学习率
-        self.lr_end_epoch = args.lr_end_epoch  # 最终学习率达到的轮数
+        self.lr_end_epoch = args.epoch  # 最终学习率达到的轮数
         self.step_all = self.lr_end_epoch * step_epoch  # 总调整步数
         self.step_finished = epoch_finished * step_epoch  # 已调整步数
         self.warmup_step = max(5, int(args.warmup_ratio * self.step_all))  # 预热训练步数
@@ -384,8 +382,16 @@ class torch_dataset(torch.utils.data.Dataset):
         return len(self.data)
 
     def __getitem__(self, index):
-        image = cv2.imdecode(np.fromfile(self.data[index][0], dtype=np.uint8), cv2.IMREAD_COLOR)  # 读取图片
-        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)  # 转为RGB通道
+        if os.path.splitext(self.data[index][0])[1].lower() == '.pdf':  # pdf
+            document = fitz.open(self.data[index][0])
+            page = document.load_page(0)
+            max_size = max(page.rect.width, page.rect.height)
+            scale = min(640, 2 * max_size) / max_size
+            image = page.get_pixmap(matrix=fitz.Matrix(scale, scale))
+            image = np.frombuffer(image.samples, dtype=np.uint8).reshape(image.height, image.width, image.n)
+        else:
+            image = cv2.imdecode(np.fromfile(self.data[index][0], dtype=np.uint8), cv2.IMREAD_COLOR)  # 读取图片
+            image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)  # 转为RGB通道
         if self.tag == 'train' and torch.rand(1) < self.noise_probability:  # 数据加噪
             image = self._noise(image)
         image = self.image_process(image)  # 图片处理
@@ -408,4 +414,11 @@ class torch_dataset(torch.utils.data.Dataset):
         # 灰度图
         image = np.min(image, axis=2)
         image = np.stack([image, image, image], axis=2)
+        # random_choice = np.random.choice([0, 1, 2, 3, 0])
+        # if random_choice == 1:
+        #     image = cv2.rotate(image, cv2.ROTATE_90_CLOCKWISE)
+        # elif random_choice == 2:
+        #     image = cv2.rotate(image, cv2.ROTATE_180)
+        # elif random_choice == 3:
+        #     image = cv2.rotate(image, cv2.ROTATE_90_COUNTERCLOCKWISE)
         return image
