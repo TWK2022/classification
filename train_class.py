@@ -179,7 +179,8 @@ class train_class:
             train_loss = 0  # 记录损失
             self.train_dataset.epoch_update(epoch)
             if args.local_rank == 0 and args.tqdm:
-                tqdm_show = tqdm.tqdm(iterable=None, total=len(self.data_dict['train']), mininterval=0.2)
+                tqdm_show = tqdm.tqdm(iterable=None, total=len(self.data_dict['train']) // args.device_number,
+                                      mininterval=0.2)
             for index, (image_batch, label_batch) in enumerate(self.train_dataloader):
                 if args.local_rank == 0 and args.wandb and len(self.wandb_image_list) < self.wandb_image_number:
                     wandb_image_batch = (image_batch * 255).cpu().numpy().astype(np.uint8).transpose(0, 2, 3, 1)
