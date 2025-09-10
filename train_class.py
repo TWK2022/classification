@@ -179,8 +179,7 @@ class train_class:
             train_loss = 0  # 记录损失
             self.train_dataset.epoch_update(epoch)
             if args.local_rank == 0 and args.tqdm:
-                tqdm_show = tqdm.tqdm(iterable=None, total=len(self.data_dict['train']) // args.device_number,
-                                      mininterval=0.2)
+                tqdm_show = tqdm.tqdm(iterable=None, total=len(self.data_dict['train']), mininterval=0.2)
             for index, (image_batch, label_batch) in enumerate(self.train_dataloader):
                 if args.local_rank == 0 and args.wandb and len(self.wandb_image_list) < self.wandb_image_number:
                     wandb_image_batch = (image_batch * 255).cpu().numpy().astype(np.uint8).transpose(0, 2, 3, 1)
@@ -395,9 +394,26 @@ class torch_dataset(torch.utils.data.Dataset):
             image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)  # 转为RGB通道
         if self.tag == 'train' and torch.rand(1) < self.noise_probability:  # 数据加噪
             image = self._noise(image)
-        image = self.image_process(image)  # 图片处理
-        label = torch.zeros(self.output_class, dtype=torch.float32)  # 标签
-        label[self.data[index][1]] = 1
+        if 0 in self.data[index][1]:
+            random_choice = np.random.choice([0, 1, 2, 3, 0])
+            if random_choice == 1:
+                image = cv2.rotate(image, cv2.ROTATE_90_CLOCKWISE)
+                class_ = 1
+            elif random_choice == 2:
+                image = cv2.rotate(image, cv2.ROTATE_180)
+                class_ = 2
+            elif random_choice == 3:
+                image = cv2.rotate(image, cv2.ROTATE_90_COUNTERCLOCKWISE)
+                class_ = 3
+            else:
+                class_ = 0
+            image = self.image_process(image)  # 图片处理
+            label = torch.zeros(self.output_class, dtype=torch.float32)  # 标签
+            label[class_] = 1
+        else:
+            image = self.image_process(image)  # 图片处理
+            label = torch.zeros(self.output_class, dtype=torch.float32)  # 标签
+            label[self.data[index][1]] = 1
         return image, label
 
     def epoch_update(self, epoch_now):  # 根据轮数进行调整

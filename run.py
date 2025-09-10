@@ -43,7 +43,7 @@ parser.add_argument('--num_worker', default=0, type=int, help='|cpu处理数据�
 parser.add_argument('--ema', default=True, type=bool, help='|平均指数移动(EMA)调整参数|')
 parser.add_argument('--amp', default=True, type=bool, help='|混合float16精度训练，cpu时不可用，出现nan可能与gpu有关|')
 parser.add_argument('--noise', default=0.8, type=float, help='|训练数据加噪概率|')
-parser.add_argument('--class_threshold', default=0.5, type=float, help='|计算指标时，大于阈值判定为图片有该类别|')
+parser.add_argument('--class_threshold', default=0.5, type=float, help='|计算指标时，大于阈值判定为有该类别|')
 parser.add_argument('--distributed', default=False, type=bool, help='|单机多卡分布式训练，分布式训练时batch为总batch|')
 parser.add_argument('--local_rank', default=0, type=int, help='|分布式训练使用命令后会自动传入的参数|')
 args = parser.parse_args()
